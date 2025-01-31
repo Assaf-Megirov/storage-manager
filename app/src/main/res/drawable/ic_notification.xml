@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Shelf 1 -->
+    <item>
+        <shape>
+            <solid android:color="#8B5E3C"/> <!-- Shelf color -->
+        </shape>
+    </item>
+
+    <!-- Items on Shelf 1 -->
+    <item android:left="20dp" android:right="20dp" android:top="20dp" android:bottom="80dp">
+        <shape>
+            <solid android:color="#4CAF50"/>
+            <size android:width="40dp" android:height="30dp"/>
+        </shape>
+    </item>
+    <item android:left="80dp" android:right="20dp" android:top="20dp" android:bottom="80dp">
+        <shape>
+            <solid android:color="#FF5722"/>
+            <size android:width="30dp" android:height="40dp"/>
+        </shape>
+    </item>
+    <item android:left="120dp" android:right="20dp" android:top="20dp" android:bottom="80dp">
+        <shape>
+            <solid android:color="#FFC107"/>
+            <size android:width="30dp" android:height="35dp"/>
+        </shape>
+    </item>
+
+    <!-- Shelf 2 -->
+    <item android:top="100dp">
+        <shape>
+            <solid android:color="#8B5E3C"/>
+        </shape>
+    </item>
+
+    <!-- Items on Shelf 2 -->
+    <item android:left="20dp" android:right="20dp" android:top="120dp" android:bottom="160dp">
+        <shape>
+            <solid android:color="#2196F3"/>
+            <size android:width="50dp" android:height="30dp"/>
+        </shape>
+    </item>
+    <item android:left="80dp" android:right="20dp" android:top="120dp" android:bottom="170dp">
+        <shape>
+            <solid android:color="#9C27B0"/>
+            <size android:width="40dp" android:height="50dp"/>
+        </shape>
+    </item>
+
+    <!-- Shelf 3 -->
+    <item android:top="150dp">
+        <shape>
+            <solid android:color="#8B5E3C"/>
+        </shape>
+    </item>
+
+    <!-- Items on Shelf 3 -->
+    <item android:left="20dp" android:right="20dp" android:top="170dp" android:bottom="210dp">
+        <shape>
+            <solid android:color="#FF9800"/>
+            <size android:width="60dp" android:height="40dp"/>
+        </shape>
+    </item>
+    <item android:left="80dp" android:right="20dp" android:top="170dp" android:bottom="220dp">
+        <shape>
+            <solid android:color="#673AB7"/>
+            <size android:width="40dp" android:height="50dp"/>
+        </shape>
+    </item>
+
+    <!-- Shelf 4 -->
+    <item android:top="200dp">
+        <shape>
+            <solid android:color="#8B5E3C"/>
+        </shape>
+    </item>
+
+    <!-- Items on Shelf 4 -->
+    <item android:left="20dp" android:right="20dp" android:top="220dp" android:bottom="260dp">
+        <shape>
+            <solid android:color="#3F51B5"/>
+            <size android:width="40dp" android:height="35dp"/>
+        </shape>
+    </item>
+    <item android:left="80dp" android:right="20dp" android:top="220dp" android:bottom="270dp">
+        <shape>
+            <solid android:color="#8BC34A"/>
+            <size android:width="60dp" android:height="45dp"/>
+        </shape>
+    </item>
+
+    <!-- Shelf 5 -->
+    <item android:top="250dp">
+        <shape>
+            <solid android:color="#8B5E3C"/>
+        </shape>
+    </item>
+
+    <!-- Items on Shelf 5 -->
+    <item android:left="20dp" android:right="20dp" android:top="270dp" android:bottom="300dp">
+        <shape>
+            <solid android:color="#E91E63"/>
+            <size android:width="50dp" android:height="30dp"/>
+        </shape>
+    </item>
+    <item android:left="80dp" android:right="20dp" android:top="270dp" android:bottom="310dp">
+        <shape>
+            <solid android:color="#FFEB3B"/>
+            <size android:width="40dp" android:height="40dp"/>
+        </shape>
+    </item>
+</layer-list>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">מנהל אחסון</string>
+    <string name="settings">הגדרות</string>
+    <string name="back">חזור</string>
+    <string name="search">חיפוש</string>
+    <string name="edit_mode">מצב עריכה</string>
+    <string name="add_shelf">הוסף מדף</string>
+    <string name="add_item">הוסף פריט</string>
+    <string name="item_name">שם פריט</string>
+    <string name="client_name">שם לקוח</string>
+    <string name="note">הערה</string>
+    <string name="has_alarm">יש התראה?</string>
+    <string name="entry_date">תאריך כניסה</string>
+    <string name="return_date">תאריך החזרה</string>
+    <string name="add">הוסף</string>
+    <string name="cancel">בטל</string>
+    <string name="language">שפה</string>
+    <string name="section_date_display">תצוגת תאריך במדור</string>
+    <string name="date_display_format">פורמט תצוגת תאריך</string>
+    <string name="default_return_date">תאריך החזרה ברירת מחדל</string>
+    <string name="days_after_entry">ימים אחרי תאריך כניסה</string>
+    <string name="unknown_client">לקוח לא ידוע</string>
+    <string name="shelf">מדף</string>
+    <string name="section">מדור</string>
+    <string name="system_language">מערכת</string>
+    <string name="english_language">English</string>
+    <string name="hebrew_language">עברית</string>
+    <string name="russian_language">Русский</string>
+    <string name="numeric_date">מספרי (01/15)</string>
+    <string name="day_of_week">יום (שני)</string>
+    <string name="section_details">פרטי מדור</string>
+</resources> 

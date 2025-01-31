@@ -1,0 +1,342 @@
+package com.example.storage_manager.ui.screens
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.storage_manager.model.Item
+import com.example.storage_manager.services.toDisplayFormat
+import com.example.storage_manager.viewmodel.StorageTrackerViewModel
+import com.example.storage_manager.viewmodel.SettingsViewModel
+import androidx.compose.runtime.collectAsState
+
+// Add this enum at the top level with SortOrder
+enum class SearchType {
+    ITEM_NAME,
+    CLIENT_NAME
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchScreen(
+    viewModel: StorageTrackerViewModel,
+    settingsViewModel: SettingsViewModel,
+    onBack: () -> Unit,
+    onItemClick: (String, String) -> Unit
+) {
+    val settings by settingsViewModel.settings.collectAsState()
+    var searchQuery by remember { mutableStateOf<String>("") }
+    var sortOrder by remember { mutableStateOf<SortOrder>(SortOrder.NAME_ASC) }
+    var searchType by remember { mutableStateOf<SearchType>(SearchType.ITEM_NAME) }
+
+    val allItems = remember { mutableStateOf<List<SearchItem>>(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        viewModel.shelves.collect { shelves ->
+            val items = mutableListOf<SearchItem>()
+            shelves.forEach { shelf ->
+                shelf.sections.forEach { section ->
+                    section.items.forEach { item ->
+                        items.add(
+                            SearchItem(
+                                item = item,
+                                shelfId = shelf.id,
+                                sectionId = section.id,
+                                shelfName = shelf.name,
+                                sectionNumber = shelf.sections.indexOf(section) + 1
+                            )
+                        )
+                    }
+                }
+            }
+            allItems.value = items
+        }
+    }
+
+    val filteredAndSortedItems = remember(searchQuery, sortOrder, allItems.value, searchType) {
+        allItems.value
+            .filter { searchItem ->
+                when (searchType) {
+                    SearchType.ITEM_NAME -> 
+                        searchQuery.isEmpty() || searchItem.item.name.contains(searchQuery, ignoreCase = true)
+                    SearchType.CLIENT_NAME -> 
+                        searchQuery.isEmpty() || searchItem.item.clientName?.contains(searchQuery, ignoreCase = true) == true
+                }
+            }
+            .sortedWith(when (sortOrder) {
+                SortOrder.NAME_ASC -> compareBy { it.item.name }
+                SortOrder.NAME_DESC -> compareByDescending { it.item.name }
+                SortOrder.ENTRY_DATE_ASC -> compareBy { it.item.entryDate }
+                SortOrder.ENTRY_DATE_DESC -> compareByDescending { it.item.entryDate }
+                SortOrder.RETURN_DATE_ASC -> compareBy { it.item.returnDate }
+                SortOrder.RETURN_DATE_DESC -> compareByDescending { it.item.returnDate }
+            })
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Search Items") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = searchType == SearchType.ITEM_NAME,
+                        onClick = { searchType = SearchType.ITEM_NAME },
+                        label = { Text("Item Name") }
+                    )
+                    FilterChip(
+                        selected = searchType == SearchType.CLIENT_NAME,
+                        onClick = { searchType = SearchType.CLIENT_NAME },
+                        label = { Text("Client Name") }
+                    )
+                }
+
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text(if (searchType == SearchType.ITEM_NAME) "Search items" else "Search clients") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Sort by:", style = MaterialTheme.typography.bodyMedium)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        SortChip(
+                            text = "Name",
+                            isAscending = sortOrder == SortOrder.NAME_ASC,
+                            isSelected = sortOrder in listOf(SortOrder.NAME_ASC, SortOrder.NAME_DESC),
+                            onClick = {
+                                sortOrder = if (sortOrder == SortOrder.NAME_ASC)
+                                    SortOrder.NAME_DESC else SortOrder.NAME_ASC
+                            }
+                        )
+                        SortChip(
+                            text = "Entry",
+                            isAscending = sortOrder == SortOrder.ENTRY_DATE_ASC,
+                            isSelected = sortOrder in listOf(SortOrder.ENTRY_DATE_ASC, SortOrder.ENTRY_DATE_DESC),
+                            onClick = {
+                                sortOrder = if (sortOrder == SortOrder.ENTRY_DATE_ASC)
+                                    SortOrder.ENTRY_DATE_DESC else SortOrder.ENTRY_DATE_ASC
+                            }
+                        )
+                        SortChip(
+                            text = "Return",
+                            isAscending = sortOrder == SortOrder.RETURN_DATE_ASC,
+                            isSelected = sortOrder in listOf(SortOrder.RETURN_DATE_ASC, SortOrder.RETURN_DATE_DESC),
+                            onClick = {
+                                sortOrder = if (sortOrder == SortOrder.RETURN_DATE_ASC)
+                                    SortOrder.RETURN_DATE_DESC else SortOrder.RETURN_DATE_ASC
+                            }
+                        )
+                    }
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp)
+            ) {
+                items(filteredAndSortedItems) { searchItem ->
+                    SearchItemCard(
+                        searchItem = searchItem,
+                        onClick = { onItemClick(searchItem.shelfId, searchItem.sectionId) },
+                        settings = settings
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SortChip(
+    text: String,
+    isAscending: Boolean,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    FilterChip(
+        selected = isSelected,
+        onClick = onClick,
+        label = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text)
+                if (isSelected) {
+                    Icon(
+                        imageVector = if (isAscending) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (isAscending) "Ascending" else "Descending",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun SearchItemCard(
+    searchItem: SearchItem,
+    onClick: () -> Unit,
+    settings: com.example.storage_manager.model.Settings
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = searchItem.item.name,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = searchItem.item.clientName ?: "Unknown Client",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Text(
+                    text = "Shelf ${searchItem.shelfName} - Section ${searchItem.sectionNumber}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ExitToApp,
+                        contentDescription = "Entry Date",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = searchItem.item.entryDate?.toDisplayFormat(settings) ?: "N/A",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Return Date",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = searchItem.item.returnDate?.toDisplayFormat(settings) ?: "N/A",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        }
+    }
+}
+
+// Data class to hold search item information
+data class SearchItem(
+    val item: Item,
+    val shelfId: String,
+    val sectionId: String,
+    val shelfName: String,
+    val sectionNumber: Int
+)
+
+// Enum for sort orders
+enum class SortOrder {
+    NAME_ASC,
+    NAME_DESC,
+    ENTRY_DATE_ASC,
+    ENTRY_DATE_DESC,
+    RETURN_DATE_ASC,
+    RETURN_DATE_DESC
+}

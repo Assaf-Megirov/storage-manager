@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Менеджер хранения</string>
+    <string name="settings">Настройки</string>
+    <string name="back">Назад</string>
+    <string name="search">Поиск</string>
+    <string name="edit_mode">Режим редактирования</string>
+    <string name="add_shelf">Добавить полку</string>
+    <string name="add_item">Добавить предмет</string>
+    <string name="item_name">Название предмета</string>
+    <string name="client_name">Имя клиента</string>
+    <string name="note">Примечание</string>
+    <string name="has_alarm">Есть напоминание?</string>
+    <string name="entry_date">Дата поступления</string>
+    <string name="return_date">Дата возврата</string>
+    <string name="add">Добавить</string>
+    <string name="cancel">Отмена</string>
+    <string name="language">Язык</string>
+    <string name="section_date_display">Отображение даты в секции</string>
+    <string name="date_display_format">Формат отображения даты</string>
+    <string name="default_return_date">Дата возврата по умолчанию</string>
+    <string name="days_after_entry">Дней после поступления</string>
+    <string name="unknown_client">Неизвестный клиент</string>
+    <string name="shelf">Полка</string>
+    <string name="section">Секция</string>
+    <string name="system_language">Системный</string>
+    <string name="english_language">English</string>
+    <string name="hebrew_language">עברית</string>
+    <string name="russian_language">Русский</string>
+    <string name="numeric_date">Числовой (01/15)</string>
+    <string name="day_of_week">День (Пн)</string>
+    <string name="section_details">Детали секции</string>
+</resources> 
