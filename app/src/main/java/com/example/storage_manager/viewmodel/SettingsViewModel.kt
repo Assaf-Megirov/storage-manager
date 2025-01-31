@@ -105,7 +105,7 @@ class SettingsViewModel(context: Context) : ViewModel() {
         val locale = when (language) {
             AppLanguage.SYSTEM -> Resources.getSystem().configuration.locales[0]
             AppLanguage.ENGLISH -> Locale("en")
-            AppLanguage.HEBREW -> Locale("he")
+            AppLanguage.HEBREW -> Locale("iw")
             AppLanguage.RUSSIAN -> Locale("ru")
         }
         

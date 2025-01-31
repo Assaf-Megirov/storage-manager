@@ -26,6 +26,9 @@ import java.util.Locale
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.storage_manager.ui.theme.StorageManagerTheme
+import android.view.View
+import androidx.core.os.ConfigurationCompat
+import android.os.Build
 
 class MainActivity : ComponentActivity() {
     private lateinit var settingsViewModel: SettingsViewModel
@@ -37,13 +40,21 @@ class MainActivity : ComponentActivity() {
         val locale = when (settings.language) {
             AppLanguage.SYSTEM -> Resources.getSystem().configuration.locales[0]
             AppLanguage.ENGLISH -> Locale("en")
-            AppLanguage.HEBREW -> Locale("he")
+            AppLanguage.HEBREW -> Locale("iw")
             AppLanguage.RUSSIAN -> Locale("ru")
         }
         
         val config = Configuration(newBase.resources.configuration)
         config.setLocale(locale)
+        
+        // Create a wrapped context with the new configuration
         val context = newBase.createConfigurationContext(config)
+        
+        // Force RTL for Hebrew after context creation
+        if (settings.language == AppLanguage.HEBREW) {
+            context.resources.configuration.setLayoutDirection(locale)
+        }
+        
         super.attachBaseContext(context)
     }
     
