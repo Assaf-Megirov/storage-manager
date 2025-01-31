@@ -39,4 +39,10 @@
     <string name="more_items">+%d больше предметов</string>
     <string name="section_width">ширина секции</string>
     <string name="width_in_dp">ширина (относительные единицы)</string>
+    <string name="confirm_delete">Подтвердить удаление</string>
+    <string name="delete">Удалить</string>
+    <string name="shelf_not_empty_warning">Предупреждение: Эта полка содержит элементы. Вы уверены, что хотите удалить ее и все ее содержимое?</string>
+    <string name="section_not_empty_warning">Предупреждение: Этот раздел содержит элементы. Вы уверены, что хотите удалить его и все его содержимое?</string>
+    <string name="confirm_delete_shelf">Вы уверены, что хотите удалить эту полку?</string>
+    <string name="confirm_delete_section">Вы уверены, что хотите удалить этот раздел?</string>
 </resources> 

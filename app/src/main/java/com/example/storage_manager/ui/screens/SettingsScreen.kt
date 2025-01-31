@@ -20,7 +20,7 @@ import com.example.storage_manager.model.FontSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -119,37 +119,33 @@ fun SettingsScreen(
                 )
             }
 
-            // Language Setting
-            Column {
-                Text(
-                    text = stringResource(R.string.language),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FilterChip(
-                        selected = settings.language == AppLanguage.SYSTEM,
-                        onClick = { viewModel.updateLanguage(AppLanguage.SYSTEM) },
-                        label = { Text(stringResource(R.string.system_language)) }
-                    )
-                    FilterChip(
-                        selected = settings.language == AppLanguage.ENGLISH,
-                        onClick = { viewModel.updateLanguage(AppLanguage.ENGLISH) },
-                        label = { Text(stringResource(R.string.english_language)) }
-                    )
-                    FilterChip(
-                        selected = settings.language == AppLanguage.HEBREW,
-                        onClick = { viewModel.updateLanguage(AppLanguage.HEBREW) },
-                        label = { Text(stringResource(R.string.hebrew_language)) }
-                    )
-                    FilterChip(
-                        selected = settings.language == AppLanguage.RUSSIAN,
-                        onClick = { viewModel.updateLanguage(AppLanguage.RUSSIAN) },
-                        label = { Text(stringResource(R.string.russian_language)) }
-                    )
+            // Language selection
+            Text(
+                text = stringResource(R.string.language),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                AppLanguage.values().forEach { language ->
+                    FilledTonalButton(
+                        onClick = { viewModel.updateLanguage(language) },
+                        modifier = Modifier.wrapContentWidth(),
+                        enabled = settings.language != language
+                    ) {
+                        Text(
+                            text = when (language) {
+                                AppLanguage.SYSTEM -> stringResource(R.string.system_language)
+                                AppLanguage.ENGLISH -> stringResource(R.string.english_language)
+                                AppLanguage.HEBREW -> stringResource(R.string.hebrew_language)
+                                AppLanguage.RUSSIAN -> stringResource(R.string.russian_language)
+                            },
+                            maxLines = 1
+                        )
+                    }
                 }
             }
 
