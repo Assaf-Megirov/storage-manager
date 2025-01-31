@@ -13,9 +13,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import androidx.work.*
+import com.example.storage_manager.services.ItemNotificationWorker
+import java.util.concurrent.TimeUnit
+import androidx.work.Data.Builder
 
 class StorageTrackerViewModel(context: Context) : ViewModel() {
-    private val persistenceService = StorageTrackerPersistenceService(context)
+    private val applicationContext = context.applicationContext
+    private val persistenceService = StorageTrackerPersistenceService(applicationContext)
     private val _shelves = MutableStateFlow<List<Shelf>>(persistenceService.loadData())
     val shelves: StateFlow<List<Shelf>> = _shelves.asStateFlow()
 
@@ -69,6 +74,33 @@ class StorageTrackerViewModel(context: Context) : ViewModel() {
         saveData()
     }
 
+    private fun scheduleNotification(item: Item) {
+        if (!item.hasAlarm || item.alarmDate == null) return
+
+        val workManager = WorkManager.getInstance(applicationContext)
+        
+        val notificationData = Builder()
+            .putString("itemName", item.name)
+            .putString("clientName", item.clientName)
+            .putLong("entryDate", item.entryDate?.time ?: -1)
+            .putLong("returnDate", item.returnDate?.time ?: -1)
+            .build()
+
+        val delay = item.alarmDate.time - System.currentTimeMillis()
+        if (delay <= 0) return
+
+        val notificationWork = OneTimeWorkRequestBuilder<ItemNotificationWorker>()
+            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+            .setInputData(notificationData)
+            .build()
+
+        workManager.enqueueUniqueWork(
+            "notification_${item.id}",
+            ExistingWorkPolicy.REPLACE,
+            notificationWork
+        )
+    }
+
     fun addItemToSection(shelfId: String, sectionId: String, item: Item) {
         _shelves.value = _shelves.value.map { shelf ->
             if (shelf.id == shelfId) {
@@ -89,6 +121,7 @@ class StorageTrackerViewModel(context: Context) : ViewModel() {
             } else shelf
         }
         saveData()
+        scheduleNotification(item)
     }
 
     fun removeItemFromSection(shelfId: String, sectionId: String, itemId: String) {

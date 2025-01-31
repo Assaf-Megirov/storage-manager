@@ -45,4 +45,5 @@
     <string name="section_not_empty_warning">אזהרה: מדור זה מכיל פריטים. האם אתה בטוח שאתה רוצה למחוק אותו ואת כל תכולתו?</string>
     <string name="confirm_delete_shelf">האם אתה בטוח שאתה רוצה למחוק את המדף הזה?</string>
     <string name="confirm_delete_section">האם אתה בטוח שאתה רוצה למחוק את המדור הזה?</string>
+    <string name="alarm_date">תאריך תזכורת</string>
 </resources> 

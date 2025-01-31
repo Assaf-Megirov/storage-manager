@@ -13,7 +13,7 @@ class AlarmService(private val context: Context) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     fun setItemReturnAlarm(item: Item) {
-        item.alarmDateTime?.let { alarmTime ->
+        item.alarmDate?.let { alarmTime ->
             val intent = Intent(context, ReturnAlarmReceiver::class.java).apply {
                 putExtra("ITEM_ID", item.id)
                 putExtra("ITEM_NAME", item.name)

@@ -66,6 +66,7 @@ fun SectionDetailsScreen(
             Date(System.currentTimeMillis() + (settings.defaultReturnDateDays * 24 * 60 * 60 * 1000L))
         )
     }
+    var newItemAlarmDate by remember { mutableStateOf<Date?>(null) }
 
     Scaffold(
         topBar = {
@@ -184,6 +185,7 @@ fun SectionDetailsScreen(
                             entryDate = newItemEntryDate,
                             returnDate = newItemReturnDate,
                             hasAlarm = newItemHasAlarm,
+                            alarmDate = newItemAlarmDate,
                             note = newItemNote
                         )
                         viewModel.addItemToSection(shelfId, sectionId, newItem)
@@ -195,12 +197,14 @@ fun SectionDetailsScreen(
                     hasAlarm = newItemHasAlarm,
                     entryDate = newItemEntryDate,
                     returnDate = newItemReturnDate,
+                    alarmDate = newItemAlarmDate,
                     onNameChange = { newItemName = it },
                     onClientNameChange = { newItemClientName = it },
                     onNoteChange = { newItemNote = it },
                     onHasAlarmChange = { newItemHasAlarm = it },
                     onEntryDateChange = { newItemEntryDate = it },
                     onReturnDateChange = { newItemReturnDate = it },
+                    onAlarmDateChange = { newItemAlarmDate = it },
                     settings = settings
                 )
             }

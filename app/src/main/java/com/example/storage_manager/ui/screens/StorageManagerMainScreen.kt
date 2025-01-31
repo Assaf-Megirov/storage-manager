@@ -72,6 +72,7 @@ fun StorageManagerMainScreen(
     var newItemNote by remember { mutableStateOf("") }
     var newItemHasAlarm by remember { mutableStateOf(false) }
     var newItemEntryDate by remember { mutableStateOf(Date()) }
+    var newItemAlarmDate by remember { mutableStateOf<Date?>(null) }
     
     // Get settings first
     val settings by settingsViewModel.settings.collectAsState()
@@ -143,6 +144,7 @@ fun StorageManagerMainScreen(
                             entryDate = newItemEntryDate,
                             returnDate = newItemReturnDate,
                             hasAlarm = newItemHasAlarm,
+                            alarmDate = newItemAlarmDate,
                             note = newItemNote
                         )
                         selectedShelfId?.let { shelfId ->
@@ -157,6 +159,7 @@ fun StorageManagerMainScreen(
                         newItemHasAlarm = false
                         newItemEntryDate = Date()
                         newItemReturnDate = Date(System.currentTimeMillis() + (settings.defaultReturnDateDays * 24 * 60 * 60 * 1000L))
+                        newItemAlarmDate = null
                     },
                     name = newItemName,
                     clientName = newItemClientName,
@@ -164,115 +167,20 @@ fun StorageManagerMainScreen(
                     hasAlarm = newItemHasAlarm,
                     entryDate = newItemEntryDate,
                     returnDate = newItemReturnDate,
+                    alarmDate = newItemAlarmDate,
                     onNameChange = { newItemName = it },
                     onClientNameChange = { newItemClientName = it },
                     onNoteChange = { newItemNote = it },
                     onHasAlarmChange = { newItemHasAlarm = it },
                     onEntryDateChange = { newItemEntryDate = it },
                     onReturnDateChange = { newItemReturnDate = it },
+                    onAlarmDateChange = { newItemAlarmDate = it },
                     settings = settings
                 )
             }
         }
     }
 }
-
-//@Composable
-//fun AddItemDialog(
-//    onDismiss: () -> Unit,
-//    onAddItem: () -> Unit,
-//    name: String,
-//    clientName: String,
-//    note: String,
-//    hasAlarm: Boolean,
-//    entryDate: Date,
-//    returnDate: Date,
-//    onNameChange: (String) -> Unit,
-//    onClientNameChange: (String) -> Unit,
-//    onNoteChange: (String) -> Unit,
-//    onHasAlarmChange: (Boolean) -> Unit,
-//    onEntryDateChange: (Date) -> Unit,
-//    onReturnDateChange: (Date) -> Unit,
-//    settings: Settings
-//) {
-//    AlertDialog(
-//        onDismissRequest = onDismiss,
-//        title = { Text(stringResource(R.string.add_item)) },
-//        text = {
-//            Column {
-//                OutlinedTextField(
-//                    value = name,
-//                    onValueChange = onNameChange,
-//                    label = { Text(stringResource(R.string.item_name)) },
-//                    trailingIcon = {
-//                        if (name.isNotEmpty()) {
-//                            IconButton(onClick = { onNameChange("") }) {
-//                                Icon(Icons.Default.Close,
-//                                    contentDescription = stringResource(R.string.cancel))
-//                            }
-//                        }
-//                    },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                OutlinedTextField(
-//                    value = clientName,
-//                    onValueChange = onClientNameChange,
-//                    label = { Text(stringResource(R.string.client_name)) },
-//                    trailingIcon = {
-//                        if (clientName.isNotEmpty()) {
-//                            IconButton(onClick = { onClientNameChange("") }) {
-//                                Icon(Icons.Default.Close,
-//                                    contentDescription = stringResource(R.string.cancel))
-//                            }
-//                        }
-//                    },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                OutlinedTextField(
-//                    value = note,
-//                    onValueChange = onNoteChange,
-//                    label = { Text(stringResource(R.string.note)) },
-//                    trailingIcon = {
-//                        if (note.isNotEmpty()) {
-//                            IconButton(onClick = { onNoteChange("") }) {
-//                                Icon(Icons.Default.Close,
-//                                    contentDescription = stringResource(R.string.cancel))
-//                            }
-//                        }
-//                    },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                Row {
-//                    Text(stringResource(R.string.has_alarm))
-//                    Checkbox(
-//                        checked = hasAlarm,
-//                        onCheckedChange = onHasAlarmChange
-//                    )
-//                }
-//                DatePickerField(
-//                    label = stringResource(R.string.entry_date),
-//                    selectedDate = entryDate,
-//                    onDateChange = onEntryDateChange
-//                )
-//                DatePickerField(
-//                    label = stringResource(R.string.return_date),
-//                    selectedDate = returnDate,
-//                    onDateChange = onReturnDateChange
-//                )
-//            }
-//        },
-//        confirmButton = {
-//            TextButton(onClick = onAddItem) {
-//                Text(stringResource(R.string.add))
-//            }
-//        },
-//        dismissButton = {
-//            TextButton(onClick = onDismiss) {
-//                Text(stringResource(R.string.cancel))
-//            }
-//        }
-//    )
-//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -557,8 +465,8 @@ fun SectionView(
         }
 
         // Subtract top and bottom areas from available space, accounting for edit mode button
-        val bottomPadding = if (isEditMode) 56.dp else 16.dp // Increased space when in edit mode
-        val availableSpace = (settings.sectionHeight.dp - (24.dp + bottomPadding)) // 24.dp for top header
+        val bottomPadding = if (isEditMode) 56.dp else 10.dp // Increased space when in edit mode
+        val availableSpace = (settings.sectionHeight.dp - (4.dp + bottomPadding)) // 24.dp for top header
         val maxVisibleItems = (availableSpace.value / itemHeight.value).toInt()
 
         // Middle section for items
@@ -692,187 +600,3 @@ fun StorageManagerApp(viewModel: StorageTrackerViewModel, settingsViewModel: Set
         }
     }
 }
-
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun SectionDetailsScreen(
-//    viewModel: StorageTrackerViewModel,
-//    settingsViewModel: SettingsViewModel,
-//    shelfId: String,
-//    sectionId: String,
-//    onBack: () -> Unit
-//) {
-//    // Get settings first
-//    val settings by settingsViewModel.settings.collectAsState()
-//
-//    // Then the rest of your state variables
-//    val section by viewModel.getSectionById(shelfId, sectionId).collectAsState()
-//    var isAddItemDialogVisible by remember { mutableStateOf(false) }
-//    var newItemName by remember { mutableStateOf("") }
-//    var newItemClientName by remember { mutableStateOf("") }
-//    var newItemNote by remember { mutableStateOf("") }
-//    var newItemHasAlarm by remember { mutableStateOf(false) }
-//    var newItemEntryDate by remember { mutableStateOf(Date()) }
-//    var newItemReturnDate by remember(settings.defaultReturnDateDays) {
-//        mutableStateOf(
-//            Date(System.currentTimeMillis() + (settings.defaultReturnDateDays * 24 * 60 * 60 * 1000L))
-//        )
-//    }
-//
-//    Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                title = { Text(text = "Section Details") },
-//                navigationIcon = {
-//                    IconButton(onClick = onBack) {
-//                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-//                    }
-//                }
-//            )
-//        },
-//        floatingActionButton = {
-//            FloatingActionButton(onClick = {
-//                // Open Add Item Dialog
-//                isAddItemDialogVisible = true
-//            }) {
-//                Icon(Icons.Default.Add, contentDescription = "Add Item")
-//            }
-//        }
-//    ) { padding ->
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(padding)
-//        ) {
-//            // Title for the section items list
-//            Text(
-//                text = "Items in Section",
-//                style = MaterialTheme.typography.titleMedium,
-//                modifier = Modifier.padding(16.dp)
-//            )
-//
-//            // Display the list of items using LazyColumn
-//            LazyColumn(
-//                modifier = Modifier.fillMaxSize()
-//            ) {
-//                section?.let {
-//                    items(it.items) { item ->
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(horizontal = 16.dp, vertical = 8.dp),
-//                            verticalAlignment = Alignment.CenterVertically
-//                        ) {
-//                            // Main Content (Name and Client Name)
-//                            Column(
-//                                modifier = Modifier.weight(1f) // Takes up remaining space
-//                            ) {
-//                                // Item Name
-//                                Text(
-//                                    text = item.name,
-//                                    style = MaterialTheme.typography.bodyLarge,
-//                                    maxLines = 1,
-//                                    overflow = TextOverflow.Ellipsis
-//                                )
-//
-//                                // Client Name
-//                                Text(
-//                                    text = item.clientName ?: "Unknown Client",
-//                                    style = MaterialTheme.typography.bodyMedium,
-//                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-//                                )
-//                            }
-//
-//                            // Dates and Delete Button in a Row
-//                            Row(
-//                                verticalAlignment = Alignment.CenterVertically,
-//                                horizontalArrangement = Arrangement.spacedBy(8.dp) // Space between dates and delete button
-//                            ) {
-//                                // Dates Container
-//                                Column(
-//                                    horizontalAlignment = Alignment.End
-//                                ) {
-//                                    // Return Date
-//                                    Row(
-//                                        verticalAlignment = Alignment.CenterVertically,
-//                                        modifier = Modifier.padding(bottom = 4.dp) // Space between return and entry dates
-//                                    ) {
-//                                        Icon(
-//                                            imageVector = Icons.Default.ExitToApp,
-//                                            contentDescription = "Return Date",
-//                                            modifier = Modifier.size(16.dp),
-//                                            tint = MaterialTheme.colorScheme.primary
-//                                        )
-//                                        Spacer(modifier = Modifier.width(4.dp))
-//                                        Text(
-//                                            text = item.entryDate?.toDisplayFormat() ?: "N/A",
-//                                            style = MaterialTheme.typography.bodySmall
-//                                        )
-//                                    }
-//
-//                                    // Entry Date
-//                                    Row(
-//                                        verticalAlignment = Alignment.CenterVertically
-//                                    ) {
-//                                        Icon(
-//                                            imageVector = Icons.Default.ArrowBack,
-//                                            contentDescription = "Entry Date",
-//                                            modifier = Modifier.size(16.dp),
-//                                            tint = MaterialTheme.colorScheme.primary
-//                                        )
-//                                        Spacer(modifier = Modifier.width(4.dp))
-//                                        Text(
-//                                            text = item.returnDate?.toDisplayFormat() ?: "N/A",
-//                                            style = MaterialTheme.typography.bodySmall
-//                                        )
-//                                    }
-//                                }
-//
-//                                // Delete Button
-//                                IconButton(
-//                                    onClick = {
-//                                        viewModel.removeItemFromSection(shelfId, sectionId, item.id)
-//                                    }
-//                                ) {
-//                                    Icon(Icons.Default.Delete, contentDescription = "Remove Item")
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            if (isAddItemDialogVisible) {
-//                AddItemDialog(
-//                    onDismiss = { isAddItemDialogVisible = false },
-//                    onAddItem = {
-//                        val newItem = Item(
-//                            name = newItemName,
-//                            clientName = newItemClientName,
-//                            entryDate = newItemEntryDate,
-//                            returnDate = newItemReturnDate,
-//                            hasAlarm = newItemHasAlarm,
-//                            note = newItemNote
-//                        )
-//                        viewModel.addItemToSection(shelfId, sectionId, newItem)
-//                        isAddItemDialogVisible = false // Close dialog after adding the item
-//                    },
-//                    name = newItemName,
-//                    clientName = newItemClientName,
-//                    note = newItemNote,
-//                    hasAlarm = newItemHasAlarm,
-//                    entryDate = newItemEntryDate,
-//                    returnDate = newItemReturnDate,
-//                    onNameChange = { newItemName = it },
-//                    onClientNameChange = { newItemClientName = it },
-//                    onNoteChange = { newItemNote = it },
-//                    onHasAlarmChange = { newItemHasAlarm = it },
-//                    onEntryDateChange = { newItemEntryDate = it },
-//                    onReturnDateChange = { newItemReturnDate = it },
-//                    settings = settings
-//                )
-//            }
-//        }
-//    }
-//}
-
-

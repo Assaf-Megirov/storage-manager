@@ -45,6 +45,8 @@ fun AddItemDialog(
     onHasAlarmChange: (Boolean) -> Unit,
     onEntryDateChange: (Date) -> Unit,
     onReturnDateChange: (Date) -> Unit,
+    alarmDate: Date?,
+    onAlarmDateChange: (Date) -> Unit,
     settings: Settings
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -135,6 +137,14 @@ fun AddItemDialog(
                                     modifier = Modifier.padding(start = 8.dp)
                                 )
                             }
+                            if (hasAlarm) {
+                                DatePickerField(
+                                    label = stringResource(R.string.alarm_date),
+                                    selectedDate = alarmDate ?: Date(),
+                                    onDateChange = onAlarmDateChange,
+                                    settings = settings
+                                )
+                            }
                         }
                     }
                 } else {
@@ -182,6 +192,14 @@ fun AddItemDialog(
                             Text(
                                 text = stringResource(R.string.has_alarm),
                                 modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                        if (hasAlarm) {
+                            DatePickerField(
+                                label = stringResource(R.string.alarm_date),
+                                selectedDate = alarmDate ?: Date(),
+                                onDateChange = onAlarmDateChange,
+                                settings = settings
                             )
                         }
                     }

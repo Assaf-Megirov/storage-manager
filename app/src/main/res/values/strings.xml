@@ -45,4 +45,5 @@
     <string name="section_not_empty_warning">Warning: This section contains items. Are you sure you want to delete it and all its contents?</string>
     <string name="confirm_delete_shelf">Are you sure you want to delete this shelf?</string>
     <string name="confirm_delete_section">Are you sure you want to delete this section?</string>
+    <string name="alarm_date">Alarm date</string>
 </resources>

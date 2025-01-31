@@ -45,4 +45,5 @@
     <string name="section_not_empty_warning">Предупреждение: Этот раздел содержит элементы. Вы уверены, что хотите удалить его и все его содержимое?</string>
     <string name="confirm_delete_shelf">Вы уверены, что хотите удалить эту полку?</string>
     <string name="confirm_delete_section">Вы уверены, что хотите удалить этот раздел?</string>
+    <string name="alarm_date">Дата будильника</string>
 </resources> 

@@ -6,10 +6,10 @@ import java.util.UUID
 data class Item(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
-    val clientName: String,
-    val entryDate: Date,
-    val returnDate: Date,
-    val hasAlarm: Boolean,
-    val alarmDateTime: Date? = null,
-    val note: String
+    val clientName: String = "",
+    val entryDate: Date? = null,
+    val returnDate: Date? = null,
+    val hasAlarm: Boolean = false,
+    val alarmDate: Date? = null,
+    val note: String = ""
 )
