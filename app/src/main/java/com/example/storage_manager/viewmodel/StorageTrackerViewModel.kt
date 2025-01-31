@@ -56,13 +56,15 @@ class StorageTrackerViewModel(context: Context) : ViewModel() {
         saveData()
     }
 
-    fun removeSectionFromShelf(shelfId: String, sectionId: String) {
+    fun removeSection(shelfId: String, sectionId: String) {
         _shelves.value = _shelves.value.map { shelf ->
             if (shelf.id == shelfId) {
-                shelf.copy(sections = mutableListOf<ShelfSection>().also { newList ->
-                    newList.addAll(shelf.sections.filter { it.id != sectionId })
+                shelf.copy(sections = mutableListOf<ShelfSection>().also { newSections ->
+                    newSections.addAll(shelf.sections.filter { it.id != sectionId })
                 })
-            } else shelf
+            } else {
+                shelf
+            }
         }
         saveData()
     }

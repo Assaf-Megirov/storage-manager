@@ -89,11 +89,6 @@ fun SectionDetailsScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            Text(
-                text = stringResource(R.string.section_details),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(16.dp)
-            )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize()

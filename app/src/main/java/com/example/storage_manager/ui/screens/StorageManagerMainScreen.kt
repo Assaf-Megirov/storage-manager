@@ -127,6 +127,8 @@ fun StorageManagerMainScreen(
                     isAddItemDialogVisible = true
                 },
                 onSectionClick = onSectionClick,
+                onRemoveShelf = { shelfId -> viewModel.removeShelf(shelfId) },
+                onRemoveSection = { shelfId, sectionId -> viewModel.removeSection(shelfId, sectionId) },
                 settings = settings
             )
 
@@ -355,6 +357,8 @@ fun ShelvesScrollableView(
     onAddSection: (String) -> Unit,
     onAddItem: (String, String) -> Unit,
     onSectionClick: (String, String) -> Unit,
+    onRemoveShelf: (String) -> Unit,
+    onRemoveSection: (String, String) -> Unit,
     settings: Settings
 ) {
     Column(
@@ -370,6 +374,8 @@ fun ShelvesScrollableView(
                 onAddSection = onAddSection,
                 onAddItem = onAddItem,
                 onSectionClick = onSectionClick,
+                onRemoveShelf = onRemoveShelf,
+                onRemoveSection = onRemoveSection,
                 settings = settings
             )
         }
@@ -384,8 +390,39 @@ fun ShelfView(
     onAddSection: (String) -> Unit,
     onAddItem: (String, String) -> Unit,
     onSectionClick: (String, String) -> Unit,
+    onRemoveShelf: (String) -> Unit,
+    onRemoveSection: (String, String) -> Unit,
     settings: Settings
 ) {
+    var showDeleteShelfDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteShelfDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteShelfDialog = false },
+            title = { Text(stringResource(R.string.confirm_delete)) },
+            text = { 
+                if (shelf.sections.any { it.items.isNotEmpty() }) {
+                    Text(stringResource(R.string.shelf_not_empty_warning))
+                } else {
+                    Text(stringResource(R.string.confirm_delete_shelf))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onRemoveShelf(shelf.id)
+                    showDeleteShelfDialog = false
+                }) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteShelfDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     val shelfColor = Color.hsl(
         hue = 66f,
         saturation = 0.33f,
@@ -406,8 +443,16 @@ fun ShelfView(
         ) {
             Column {
                 if (isEditMode) {
-                    IconButton(onClick = { onAddSection(shelf.id) }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Section")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        IconButton(onClick = { onAddSection(shelf.id) }) {
+                            Icon(Icons.Default.Add, contentDescription = "Add Section")
+                        }
+                        IconButton(onClick = { showDeleteShelfDialog = true }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Remove Shelf")
+                        }
                     }
                 }
                 Row(
@@ -429,6 +474,7 @@ fun ShelfView(
                                 isEditMode = isEditMode,
                                 onAddItem = { onAddItem(shelf.id, section.id) },
                                 onSectionClick = { onSectionClick(shelf.id, section.id) },
+                                onRemoveSection = { onRemoveSection(shelf.id, section.id) },
                                 settings = settings
                             )
                         }
@@ -447,8 +493,38 @@ fun SectionView(
     isEditMode: Boolean,
     onAddItem: () -> Unit,
     onSectionClick: () -> Unit,
+    onRemoveSection: () -> Unit,
     settings: Settings
 ) {
+    var showDeleteSectionDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteSectionDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteSectionDialog = false },
+            title = { Text(stringResource(R.string.confirm_delete)) },
+            text = { 
+                if (section.items.isNotEmpty()) {
+                    Text(stringResource(R.string.section_not_empty_warning))
+                } else {
+                    Text(stringResource(R.string.confirm_delete_section))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onRemoveSection()
+                    showDeleteSectionDialog = false
+                }) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteSectionDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .width(settings.sectionWidth.dp)
@@ -480,8 +556,9 @@ fun SectionView(
             FontSize.LARGE -> 48.dp
         }
 
-        // Subtract top and bottom areas from available space
-        val availableSpace = (settings.sectionHeight.dp - 40.dp) // Reduced from 80.dp to 40.dp for more space
+        // Subtract top and bottom areas from available space, accounting for edit mode button
+        val bottomPadding = if (isEditMode) 56.dp else 16.dp // Increased space when in edit mode
+        val availableSpace = (settings.sectionHeight.dp - (24.dp + bottomPadding)) // 24.dp for top header
         val maxVisibleItems = (availableSpace.value / itemHeight.value).toInt()
 
         // Middle section for items
@@ -532,16 +609,21 @@ fun SectionView(
             }
         }
 
-        // Bottom row for add button (if in edit mode)
+        // Bottom row for add and delete buttons (if in edit mode)
         if (isEditMode) {
-            Box(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = onAddItem,
-                    modifier = Modifier.align(Alignment.CenterEnd)
+                    onClick = { showDeleteSectionDialog = true }
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = "Remove Section")
+                }
+                IconButton(
+                    onClick = onAddItem
                 ) {
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
                 }
@@ -792,4 +874,5 @@ fun StorageManagerApp(viewModel: StorageTrackerViewModel, settingsViewModel: Set
 //        }
 //    }
 //}
+
 
