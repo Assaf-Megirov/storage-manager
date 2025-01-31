@@ -18,6 +18,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -49,6 +54,20 @@ fun AddItemDialog(
     onAlarmDateChange: (Date) -> Unit,
     settings: Settings
 ) {
+    // Update alarm date whenever return date changes
+    LaunchedEffect(returnDate) {
+        if (alarmDate == null || alarmDate == returnDate) {
+            onAlarmDateChange(returnDate)
+        }
+    }
+
+    // When hasAlarm is toggled on, set alarm date to return date if it's not already set
+    LaunchedEffect(hasAlarm) {
+        if (hasAlarm && alarmDate == null) {
+            onAlarmDateChange(returnDate)
+        }
+    }
+
     Dialog(onDismissRequest = onDismiss) {
         val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -140,7 +159,7 @@ fun AddItemDialog(
                             if (hasAlarm) {
                                 DatePickerField(
                                     label = stringResource(R.string.alarm_date),
-                                    selectedDate = alarmDate ?: Date(),
+                                    selectedDate = alarmDate ?: returnDate,
                                     onDateChange = onAlarmDateChange,
                                     settings = settings
                                 )
@@ -197,7 +216,7 @@ fun AddItemDialog(
                         if (hasAlarm) {
                             DatePickerField(
                                 label = stringResource(R.string.alarm_date),
-                                selectedDate = alarmDate ?: Date(),
+                                selectedDate = alarmDate ?: returnDate,
                                 onDateChange = onAlarmDateChange,
                                 settings = settings
                             )

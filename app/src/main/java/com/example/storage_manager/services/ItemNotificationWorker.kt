@@ -46,12 +46,12 @@ class ItemNotificationWorker(
         // Format dates using the localized context
         val entryDateStr = if (entryDateMillis != -1L) {
             contextWithLocale.getString(R.string.entry_date_format, 
-                SimpleDateFormat("MM/dd/yyyy", configuration.locales[0]).format(Date(entryDateMillis)))
+                SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(entryDateMillis)))
         } else contextWithLocale.getString(R.string.entry_date_na)
 
         val returnDateStr = if (returnDateMillis != -1L) {
             contextWithLocale.getString(R.string.return_date_format,
-                SimpleDateFormat("MM/dd/yyyy", configuration.locales[0]).format(Date(returnDateMillis)))
+                SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(returnDateMillis)))
         } else contextWithLocale.getString(R.string.return_date_na)
 
         createNotificationChannel(contextWithLocale)
