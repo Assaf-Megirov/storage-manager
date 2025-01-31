@@ -46,4 +46,15 @@
     <string name="confirm_delete_shelf">Вы уверены, что хотите удалить эту полку?</string>
     <string name="confirm_delete_section">Вы уверены, что хотите удалить этот раздел?</string>
     <string name="alarm_date">Дата будильника</string>
+    <string name="item_reminder">Напоминание о предмет</string>
+    <string name="reminder_for_item">Памятка для предмет: %1$s (клиент: %2$s)</string>
+    <string name="item_reminder_details">предмет: %1$s\nклиент: %2$s\n%3$s\n%4$s</string>
+    <string name="entry_date_format">Дата поступления: %1$s</string>
+    <string name="return_date_format">Дата возврата: %1$s</string>
+    <string name="entry_date_na">Дата поступления: Не применимо</string>
+    <string name="return_date_na">Дата возврата: Не применимо</string>
+    <string name="item_reminders">напоминания о предметах</string>
+    <string name="item_reminders_description">Уведомления для напоминаний о предметах</string>
+    <string name="confirm_delete_item">Вы уверены, что хотите удалить этот предмет?</string>
+    <string name="item_not_empty_warning">Предупреждение: Это навсегда удалит предмет и все связанные с ним данные.</string>
 </resources> 

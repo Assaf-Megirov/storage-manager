@@ -46,4 +46,15 @@
     <string name="confirm_delete_shelf">האם אתה בטוח שאתה רוצה למחוק את המדף הזה?</string>
     <string name="confirm_delete_section">האם אתה בטוח שאתה רוצה למחוק את המדור הזה?</string>
     <string name="alarm_date">תאריך תזכורת</string>
+    <string name="item_reminder">תזכורת פריט</string>
+    <string name="reminder_for_item">תזכורת עבור פריט: %1$s (לקוח: %2$s)</string>
+    <string name="item_reminder_details">פריט: %1$s\nלקוח: %2$s\n%3$s\n%4$s</string>
+    <string name="entry_date_format">תאריך כניסה: %1$s</string>
+    <string name="return_date_format">תאריך החזרה: %1$s</string>
+    <string name="entry_date_na">תאריך כניסה: לא זמין</string>
+    <string name="return_date_na">תאריך החזרה: לא זמין</string>
+    <string name="item_reminders">תזכורות פריטים</string>
+    <string name="item_reminders_description">התראות עבור תזכורות פריטים</string>
+    <string name="confirm_delete_item">האם אתה בטוח שברצונך למחוק פריט זה?</string>
+    <string name="item_not_empty_warning">אזהרה: פעולה זו תמחק לצמיתות את הפריט ואת כל הנתונים הקשורים אליו.</string>
 </resources> 

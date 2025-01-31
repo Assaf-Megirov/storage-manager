@@ -46,4 +46,15 @@
     <string name="confirm_delete_shelf">Are you sure you want to delete this shelf?</string>
     <string name="confirm_delete_section">Are you sure you want to delete this section?</string>
     <string name="alarm_date">Alarm date</string>
+    <string name="item_reminder">Item Reminder</string>
+    <string name="reminder_for_item">Reminder for item: %1$s (Client: %2$s)</string>
+    <string name="item_reminder_details">Item: %1$s\nClient: %2$s\n%3$s\n%4$s</string>
+    <string name="entry_date_format">Entry Date: %1$s</string>
+    <string name="return_date_format">Return Date: %1$s</string>
+    <string name="entry_date_na">Entry Date: N/A</string>
+    <string name="return_date_na">Return Date: N/A</string>
+    <string name="item_reminders">Item Reminders</string>
+    <string name="item_reminders_description">Notifications for item reminders</string>
+    <string name="confirm_delete_item">Are you sure you want to delete this item?</string>
+    <string name="item_not_empty_warning">Warning: This will permanently delete the item and all its associated data.</string>
 </resources>

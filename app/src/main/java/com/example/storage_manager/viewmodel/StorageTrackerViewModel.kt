@@ -17,6 +17,7 @@ import androidx.work.*
 import com.example.storage_manager.services.ItemNotificationWorker
 import java.util.concurrent.TimeUnit
 import androidx.work.Data.Builder
+import com.example.storage_manager.model.AppLanguage
 
 class StorageTrackerViewModel(context: Context) : ViewModel() {
     private val applicationContext = context.applicationContext
@@ -79,23 +80,29 @@ class StorageTrackerViewModel(context: Context) : ViewModel() {
 
         val workManager = WorkManager.getInstance(applicationContext)
         
+        // Get the current locale configuration from SharedPreferences
+        val sharedPrefs = applicationContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val languageStr = sharedPrefs.getString("language", AppLanguage.SYSTEM.name)
+        val language = AppLanguage.valueOf(languageStr ?: AppLanguage.SYSTEM.name)
+        
         val notificationData = Builder()
             .putString("itemName", item.name)
             .putString("clientName", item.clientName)
             .putLong("entryDate", item.entryDate?.time ?: -1)
             .putLong("returnDate", item.returnDate?.time ?: -1)
+            .putString("language", language.name)  // Pass the language setting
             .build()
 
         val delay = item.alarmDate.time - System.currentTimeMillis()
         if (delay <= 0) return
 
         val notificationWork = OneTimeWorkRequestBuilder<ItemNotificationWorker>()
-            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
             .setInputData(notificationData)
+            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
             .build()
 
         workManager.enqueueUniqueWork(
-            "notification_${item.id}",
+            item.id,
             ExistingWorkPolicy.REPLACE,
             notificationWork
         )

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -23,6 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,6 +44,8 @@ import com.example.storage_manager.services.toDisplayFormat
 import com.example.storage_manager.viewmodel.SettingsViewModel
 import com.example.storage_manager.viewmodel.StorageTrackerViewModel
 import java.util.Date
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +59,8 @@ fun SectionDetailsScreen(
     val settings by settingsViewModel.settings.collectAsState()
     val section by viewModel.getSectionById(shelfId, sectionId).collectAsState()
     
+    val detailsDateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+
     var isAddItemDialogVisible by remember { mutableStateOf(false) }
     var newItemName by remember { mutableStateOf("") }
     var newItemClientName by remember { mutableStateOf("") }
@@ -67,6 +73,8 @@ fun SectionDetailsScreen(
         )
     }
     var newItemAlarmDate by remember { mutableStateOf<Date?>(null) }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var itemToDelete by remember { mutableStateOf<Item?>(null) }
 
     Scaffold(
         topBar = {
@@ -138,7 +146,7 @@ fun SectionDetailsScreen(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = item.entryDate?.toDisplayFormat(settings) ?: "N/A",
+                                            text = item.entryDate?.let { detailsDateFormatter.format(it) } ?: "N/A",
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
@@ -154,7 +162,7 @@ fun SectionDetailsScreen(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = item.returnDate?.toDisplayFormat(settings) ?: "N/A",
+                                            text = item.returnDate?.let { detailsDateFormatter.format(it) } ?: "N/A",
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
@@ -162,12 +170,13 @@ fun SectionDetailsScreen(
 
                                 IconButton(
                                     onClick = {
-                                        viewModel.removeItemFromSection(shelfId, sectionId, item.id)
+                                        itemToDelete = item
+                                        showDeleteConfirmation = true
                                     }
                                 ) {
                                     Icon(
                                         Icons.Default.Delete,
-                                        contentDescription = stringResource(R.string.cancel)
+                                        contentDescription = stringResource(R.string.delete)
                                     )
                                 }
                             }
@@ -206,6 +215,49 @@ fun SectionDetailsScreen(
                     onReturnDateChange = { newItemReturnDate = it },
                     onAlarmDateChange = { newItemAlarmDate = it },
                     settings = settings
+                )
+            }
+            if (showDeleteConfirmation && itemToDelete != null) {
+                AlertDialog(
+                    onDismissRequest = { 
+                        showDeleteConfirmation = false
+                        itemToDelete = null
+                    },
+                    title = { Text(stringResource(R.string.confirm_delete)) },
+                    text = {
+                        Column {
+                            Text(stringResource(R.string.confirm_delete_item))
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.item_not_empty_warning),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                itemToDelete?.let { item ->
+                                    viewModel.removeItemFromSection(shelfId, sectionId, item.id)
+                                }
+                                showDeleteConfirmation = false
+                                itemToDelete = null
+                            }
+                        ) {
+                            Text(stringResource(R.string.delete))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { 
+                                showDeleteConfirmation = false
+                                itemToDelete = null
+                            }
+                        ) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
                 )
             }
         }
