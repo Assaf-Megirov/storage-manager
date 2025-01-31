@@ -95,7 +95,7 @@ class SettingsViewModel(context: Context) : ViewModel() {
     }
 
     fun updateSectionWidth(width: Int) {
-        if (width in 200..500) {  // Validate range
+        if (width in 100..500) {  // Changed from 200 to 100
             _settings.value = _settings.value.copy(sectionWidth = width)
             saveSettings(_settings.value)
         }

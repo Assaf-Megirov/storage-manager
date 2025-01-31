@@ -30,4 +30,13 @@
     <string name="numeric_date">מספרי (01/15)</string>
     <string name="day_of_week">יום (שני)</string>
     <string name="section_details">פרטי מדור</string>
+    <string name="font_size">גודל גופן</string>
+    <string name="small">קטן</string>
+    <string name="medium">בינוני</string>
+    <string name="large">גדול</string>
+    <string name="section_height">גובה מדור</string>
+    <string name="height_in_dp">גובה (יחידות יחסיות)</string>
+    <string name="more_items">פריטים +%d</string>
+    <string name="section_width">רוחב מדור</string>
+    <string name="width_in_dp">רוחב (יחידות יחסיות)</string>
 </resources> 

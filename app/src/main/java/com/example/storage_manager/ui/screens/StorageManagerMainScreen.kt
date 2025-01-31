@@ -481,7 +481,7 @@ fun SectionView(
         }
 
         // Subtract top and bottom areas from available space
-        val availableSpace = (settings.sectionHeight.dp - 80.dp) // Subtract header and footer areas
+        val availableSpace = (settings.sectionHeight.dp - 40.dp) // Reduced from 80.dp to 40.dp for more space
         val maxVisibleItems = (availableSpace.value / itemHeight.value).toInt()
 
         // Middle section for items

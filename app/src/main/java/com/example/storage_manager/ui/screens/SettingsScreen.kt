@@ -197,7 +197,7 @@ fun SettingsScreen(
                         // Try to update the setting if it's valid
                         if (newValue.all { it.isDigit() }) {
                             newValue.toIntOrNull()?.let { height ->
-                                if (height in 100..500) {
+                                if (height in 99..500) {
                                     viewModel.updateSectionHeight(height)
                                 }
                             }
@@ -227,7 +227,7 @@ fun SettingsScreen(
                         // Try to update the setting if it's valid
                         if (newValue.all { it.isDigit() }) {
                             newValue.toIntOrNull()?.let { width ->
-                                if (width in 100..500) {
+                                if (width in 99..500) {
                                     viewModel.updateSectionWidth(width)
                                 }
                             }

@@ -30,4 +30,13 @@
     <string name="numeric_date">Числовой (01/15)</string>
     <string name="day_of_week">День (Пн)</string>
     <string name="section_details">Детали секции</string>
+    <string name="font_size">Размер шрифта</string>
+    <string name="small">маленький</string>
+    <string name="medium">середина</string>
+    <string name="large">большой</string>
+    <string name="section_height">высота сечения</string>
+    <string name="height_in_dp">высота (относительные единицы)</string>
+    <string name="more_items">+%d больше предметов</string>
+    <string name="section_width">ширина секции</string>
+    <string name="width_in_dp">ширина (относительные единицы)</string>
 </resources> 
