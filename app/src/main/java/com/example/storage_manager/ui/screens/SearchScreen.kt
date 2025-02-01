@@ -2,6 +2,7 @@ package com.example.storage_manager.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,6 +47,8 @@ import com.example.storage_manager.viewmodel.StorageTrackerViewModel
 import com.example.storage_manager.viewmodel.SettingsViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 
 // Add this enum at the top level with SortOrder
 enum class SearchType {
@@ -113,112 +116,187 @@ fun SearchScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.search_items)) },
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(stringResource(R.string.back), style = MaterialTheme.typography.titleMedium)
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
-                }
+                },
+                modifier = Modifier.height(48.dp)
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            Column(
+        if (isLandscape()) {
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                    .fillMaxSize()
+                    .padding(padding)
             ) {
-                Row(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .weight(1f)
+                        .padding(4.dp)
                 ) {
-                    FilterChip(
-                        selected = searchType == SearchType.ITEM_NAME,
-                        onClick = { searchType = SearchType.ITEM_NAME },
-                        label = { Text(stringResource(R.string.search_by_item_name)) }
-                    )
-                    FilterChip(
-                        selected = searchType == SearchType.CLIENT_NAME,
-                        onClick = { searchType = SearchType.CLIENT_NAME },
-                        label = { Text(stringResource(R.string.search_by_client_name)) }
+                    // Search options (filters, sort options, etc.)
+                    SearchOptions(
+                        searchQuery = searchQuery,
+                        onSearchQueryChange = { searchQuery = it },
+                        searchType = searchType,
+                        onSearchTypeChange = { searchType = it },
+                        sortOrder = sortOrder,
+                        onSortOrderChange = { sortOrder = it }
                     )
                 }
 
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                LazyColumn(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    placeholder = { Text(stringResource(R.string.search_hint)) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
-                )
-
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .weight(2f)
+                        .fillMaxHeight()
+                        .padding(4.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.sort_by),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        FlowRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            SortChip(
-                                text = stringResource(R.string.name),
-                                isAscending = sortOrder == SortOrder.NAME_ASC,
-                                isSelected = sortOrder in listOf(SortOrder.NAME_ASC, SortOrder.NAME_DESC),
-                                onClick = {
-                                    sortOrder = if (sortOrder == SortOrder.NAME_ASC)
-                                        SortOrder.NAME_DESC else SortOrder.NAME_ASC
-                                }
-                            )
-                            SortChip(
-                                text = stringResource(R.string.entry),
-                                isAscending = sortOrder == SortOrder.ENTRY_DATE_ASC,
-                                isSelected = sortOrder in listOf(SortOrder.ENTRY_DATE_ASC, SortOrder.ENTRY_DATE_DESC),
-                                onClick = {
-                                    sortOrder = if (sortOrder == SortOrder.ENTRY_DATE_ASC)
-                                        SortOrder.ENTRY_DATE_DESC else SortOrder.ENTRY_DATE_ASC
-                                }
-                            )
-                            SortChip(
-                                text = stringResource(R.string.return_sort),
-                                isAscending = sortOrder == SortOrder.RETURN_DATE_ASC,
-                                isSelected = sortOrder in listOf(SortOrder.RETURN_DATE_ASC, SortOrder.RETURN_DATE_DESC),
-                                onClick = {
-                                    sortOrder = if (sortOrder == SortOrder.RETURN_DATE_ASC)
-                                        SortOrder.RETURN_DATE_DESC else SortOrder.RETURN_DATE_ASC
-                                }
-                            )
-                        }
+                    items(filteredAndSortedItems) { searchItem ->
+                        SearchItemCard(
+                            searchItem = searchItem,
+                            onClick = { onItemClick(searchItem.shelfId, searchItem.sectionId) },
+                            settings = settings
+                        )
                     }
                 }
             }
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp)
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
             ) {
-                items(filteredAndSortedItems) { searchItem ->
-                    SearchItemCard(
-                        searchItem = searchItem,
-                        onClick = { onItemClick(searchItem.shelfId, searchItem.sectionId) },
-                        settings = settings
+                // Search options and results in a single column for portrait mode
+                SearchOptions(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { searchQuery = it },
+                    searchType = searchType,
+                    onSearchTypeChange = { searchType = it },
+                    sortOrder = sortOrder,
+                    onSortOrderChange = { sortOrder = it }
+                )
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    items(filteredAndSortedItems) { searchItem ->
+                        SearchItemCard(
+                            searchItem = searchItem,
+                            onClick = { onItemClick(searchItem.shelfId, searchItem.sectionId) },
+                            settings = settings
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SearchOptions(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    searchType: SearchType,
+    onSearchTypeChange: (SearchType) -> Unit,
+    sortOrder: SortOrder,
+    onSortOrderChange: (SortOrder) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+    ) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            placeholder = { Text(stringResource(R.string.search_hint)) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            FilterChip(
+                selected = searchType == SearchType.ITEM_NAME,
+                onClick = { onSearchTypeChange(SearchType.ITEM_NAME) },
+                label = { Text(stringResource(R.string.search_by_item_name)) }
+            )
+            FilterChip(
+                selected = searchType == SearchType.CLIENT_NAME,
+                onClick = { onSearchTypeChange(SearchType.CLIENT_NAME) },
+                label = { Text(stringResource(R.string.search_by_client_name)) }
+            )
+        }
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.sort_by),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    SortChip(
+                        text = stringResource(R.string.name),
+                        isAscending = sortOrder == SortOrder.NAME_ASC,
+                        isSelected = sortOrder in listOf(SortOrder.NAME_ASC, SortOrder.NAME_DESC),
+                        onClick = {
+                            onSortOrderChange(
+                                if (sortOrder == SortOrder.NAME_ASC)
+                                    SortOrder.NAME_DESC else SortOrder.NAME_ASC
+                            )
+                        }
+                    )
+                    SortChip(
+                        text = stringResource(R.string.entry),
+                        isAscending = sortOrder == SortOrder.ENTRY_DATE_ASC,
+                        isSelected = sortOrder in listOf(SortOrder.ENTRY_DATE_ASC, SortOrder.ENTRY_DATE_DESC),
+                        onClick = {
+                            onSortOrderChange(
+                                if (sortOrder == SortOrder.ENTRY_DATE_ASC)
+                                    SortOrder.ENTRY_DATE_DESC else SortOrder.ENTRY_DATE_ASC
+                            )
+                        }
+                    )
+                    SortChip(
+                        text = stringResource(R.string.return_sort),
+                        isAscending = sortOrder == SortOrder.RETURN_DATE_ASC,
+                        isSelected = sortOrder in listOf(SortOrder.RETURN_DATE_ASC, SortOrder.RETURN_DATE_DESC),
+                        onClick = {
+                            onSortOrderChange(
+                                if (sortOrder == SortOrder.RETURN_DATE_ASC)
+                                    SortOrder.RETURN_DATE_DESC else SortOrder.RETURN_DATE_ASC
+                            )
+                        }
                     )
                 }
             }

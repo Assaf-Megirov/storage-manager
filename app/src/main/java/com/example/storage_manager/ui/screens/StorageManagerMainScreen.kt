@@ -4,6 +4,7 @@ import AddItemDialog
 import SectionDetailsScreen
 import android.app.TimePickerDialog
 import android.app.DatePickerDialog
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,12 +47,26 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.platform.LocalConfiguration
 import com.example.storage_manager.model.Settings
 import com.example.storage_manager.model.SectionDateType
 import com.example.storage_manager.model.DateDisplayFormat
 import com.example.storage_manager.R
 import androidx.compose.ui.res.stringResource
 import com.example.storage_manager.model.FontSize
+import com.example.storage_manager.ui.components.SideBar
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.DrawerValue
+
+@Composable
+fun isLandscape(): Boolean {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    Log.d("OrientationCheck", "isLandscape: $isLandscape")
+    return isLandscape
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,98 +99,119 @@ fun StorageManagerMainScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
-                actions = {
-                    IconButton(onClick = onSearchClick) {
-                        Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search))
-                    }
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
-                    }
-                    IconButton(onClick = { isEditMode = !isEditMode }) {
-                        Icon(
-                            imageVector = if (isEditMode) Icons.Default.Done else Icons.Default.Edit,
-                            contentDescription = stringResource(R.string.edit_mode)
-                        )
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            if (isEditMode) {
-                FloatingActionButton(
-                    onClick = { viewModel.addShelf() }
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_shelf))
-                }
-            }
-        }
-    ) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
-            val shelves by viewModel.shelves.collectAsState()
-            ShelvesScrollableView(
-                shelves = shelves,
+    Row {
+        if (isLandscape()) {
+            SideBar(
+                onSearchClick = onSearchClick,
+                onSettingsClick = onSettingsClick,
                 isEditMode = isEditMode,
-                onShelfSelect = { shelf -> selectedShelf = shelf },
-                onAddSection = { shelfId -> viewModel.addSectionToShelf(shelfId, "New Section") },
-                onAddItem = { shelfId, sectionId ->
-                    selectedShelfId = shelfId
-                    selectedSectionId = sectionId
-                    isAddItemDialogVisible = true
-                },
-                onSectionClick = onSectionClick,
-                onRemoveShelf = { shelfId -> viewModel.removeShelf(shelfId) },
-                onRemoveSection = { shelfId, sectionId -> viewModel.removeSection(shelfId, sectionId) },
-                settings = settings
+                onEditModeToggle = { isEditMode = !isEditMode }
             )
+        }
 
-            // Show Add Item Dialog
-            if (isAddItemDialogVisible) {
-                AddItemDialog(
-                    onDismiss = { isAddItemDialogVisible = false },
-                    onAddItem = {
-                        val newItem = Item(
-                            name = newItemName,
-                            clientName = newItemClientName,
-                            entryDate = newItemEntryDate,
-                            returnDate = newItemReturnDate,
-                            hasAlarm = newItemHasAlarm,
-                            alarmDate = newItemAlarmDate,
-                            note = newItemNote
-                        )
-                        selectedShelfId?.let { shelfId ->
-                            selectedSectionId?.let { sectionId ->
-                                viewModel.addItemToSection(shelfId, sectionId, newItem)
+        Scaffold(
+            topBar = if (!isLandscape()) {
+                {
+                    TopAppBar(
+                        title = { Text(stringResource(R.string.app_name)) },
+                        actions = {
+                            IconButton(onClick = onSearchClick) {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = stringResource(R.string.search)
+                                )
+                            }
+                            IconButton(onClick = onSettingsClick) {
+                                Icon(
+                                    Icons.Default.Settings,
+                                    contentDescription = stringResource(R.string.settings)
+                                )
+                            }
+                            IconButton(onClick = { isEditMode = !isEditMode }) {
+                                Icon(
+                                    imageVector = if (isEditMode) Icons.Default.Done else Icons.Default.Edit,
+                                    contentDescription = stringResource(R.string.edit_mode)
+                                )
                             }
                         }
-                        isAddItemDialogVisible = false
-                        newItemName = ""
-                        newItemClientName = ""
-                        newItemNote = ""
-                        newItemHasAlarm = false
-                        newItemEntryDate = Date()
-                        newItemReturnDate = Date(System.currentTimeMillis() + (settings.defaultReturnDateDays * 24 * 60 * 60 * 1000L))
-                        newItemAlarmDate = null
+                    )
+                }
+            } else {
+                {}
+            },
+            floatingActionButton = {
+                if (isEditMode) {
+                    FloatingActionButton(
+                        onClick = { viewModel.addShelf() }
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_shelf))
+                    }
+                }
+            }
+        ) { padding ->
+            Box(modifier = Modifier.padding(padding)) {
+                val shelves by viewModel.shelves.collectAsState()
+                ShelvesScrollableView(
+                    shelves = shelves,
+                    isEditMode = isEditMode,
+                    onShelfSelect = { shelf -> selectedShelf = shelf },
+                    onAddSection = { shelfId -> viewModel.addSectionToShelf(shelfId, "New Section") },
+                    onAddItem = { shelfId, sectionId ->
+                        selectedShelfId = shelfId
+                        selectedSectionId = sectionId
+                        isAddItemDialogVisible = true
                     },
-                    name = newItemName,
-                    clientName = newItemClientName,
-                    note = newItemNote,
-                    hasAlarm = newItemHasAlarm,
-                    entryDate = newItemEntryDate,
-                    returnDate = newItemReturnDate,
-                    alarmDate = newItemAlarmDate,
-                    onNameChange = { newItemName = it },
-                    onClientNameChange = { newItemClientName = it },
-                    onNoteChange = { newItemNote = it },
-                    onHasAlarmChange = { newItemHasAlarm = it },
-                    onEntryDateChange = { newItemEntryDate = it },
-                    onReturnDateChange = { newItemReturnDate = it },
-                    onAlarmDateChange = { newItemAlarmDate = it },
+                    onSectionClick = onSectionClick,
+                    onRemoveShelf = { shelfId -> viewModel.removeShelf(shelfId) },
+                    onRemoveSection = { shelfId, sectionId -> viewModel.removeSection(shelfId, sectionId) },
                     settings = settings
                 )
+
+                // Show Add Item Dialog
+                if (isAddItemDialogVisible) {
+                    AddItemDialog(
+                        onDismiss = { isAddItemDialogVisible = false },
+                        onAddItem = {
+                            val newItem = Item(
+                                name = newItemName,
+                                clientName = newItemClientName,
+                                entryDate = newItemEntryDate,
+                                returnDate = newItemReturnDate,
+                                hasAlarm = newItemHasAlarm,
+                                alarmDate = newItemAlarmDate,
+                                note = newItemNote
+                            )
+                            selectedShelfId?.let { shelfId ->
+                                selectedSectionId?.let { sectionId ->
+                                    viewModel.addItemToSection(shelfId, sectionId, newItem)
+                                }
+                            }
+                            isAddItemDialogVisible = false
+                            newItemName = ""
+                            newItemClientName = ""
+                            newItemNote = ""
+                            newItemHasAlarm = false
+                            newItemEntryDate = Date()
+                            newItemReturnDate = Date(System.currentTimeMillis() + (settings.defaultReturnDateDays * 24 * 60 * 60 * 1000L))
+                            newItemAlarmDate = null
+                        },
+                        name = newItemName,
+                        clientName = newItemClientName,
+                        note = newItemNote,
+                        hasAlarm = newItemHasAlarm,
+                        entryDate = newItemEntryDate,
+                        returnDate = newItemReturnDate,
+                        alarmDate = newItemAlarmDate,
+                        onNameChange = { newItemName = it },
+                        onClientNameChange = { newItemClientName = it },
+                        onNoteChange = { newItemNote = it },
+                        onHasAlarmChange = { newItemHasAlarm = it },
+                        onEntryDateChange = { newItemEntryDate = it },
+                        onReturnDateChange = { newItemReturnDate = it },
+                        onAlarmDateChange = { newItemAlarmDate = it },
+                        settings = settings
+                    )
+                }
             }
         }
     }
