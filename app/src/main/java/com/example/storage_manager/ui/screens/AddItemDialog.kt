@@ -87,11 +87,31 @@ fun AddItemDialog(
                     .fillMaxWidth()
                     .padding(if (isLandscape) 8.dp else 12.dp)
             ) {
-                Text(
-                    text = stringResource(R.string.add_item),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                Row{
+                    Text(
+                        text = stringResource(R.string.add_item),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    if(!isLandscape) {
+                        // Buttons
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TextButton(onClick = onDismiss) {
+                                Text(stringResource(R.string.cancel))
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(onClick = onAddItem) {
+                                Text(stringResource(R.string.add))
+                            }
+                        }
+                    }
+                }
 
                 if (isLandscape) {
                     Row(
@@ -165,6 +185,23 @@ fun AddItemDialog(
                                 )
                             }
                         }
+
+                        // Buttons
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TextButton(onClick = onDismiss) {
+                                Text(stringResource(R.string.cancel))
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(onClick = onAddItem) {
+                                Text(stringResource(R.string.add))
+                            }
+                        }
                     }
                 } else {
                     Column(
@@ -221,23 +258,6 @@ fun AddItemDialog(
                                 settings = settings
                             )
                         }
-                    }
-                }
-
-                // Buttons
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = onAddItem) {
-                        Text(stringResource(R.string.add))
                     }
                 }
             }

@@ -106,9 +106,8 @@ fun StorageManagerMainScreen(
         },
         floatingActionButton = {
             if (isEditMode) {
-                val shelfText = stringResource(R.string.shelf)
                 FloatingActionButton(
-                    onClick = { viewModel.addShelf(shelfText) }
+                    onClick = { viewModel.addShelf() }
                 ) {
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_shelf))
                 }
@@ -349,42 +348,50 @@ fun ShelfView(
                 .fillMaxSize()
                 .background(shelfColor)
         ) {
-            Column {
-                if (isEditMode) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        IconButton(onClick = { onAddSection(shelf.id) }) {
-                            Icon(Icons.Default.Add, contentDescription = "Add Section")
-                        }
-                        IconButton(onClick = { showDeleteShelfDialog = true }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Remove Shelf")
+            Row {
+                Text(
+                    text = shelf.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .padding(8.dp, 8.dp, 4.dp, 4.dp)
+                )
+                Column {
+                    if (isEditMode) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            IconButton(onClick = { onAddSection(shelf.id) }) {
+                                Icon(Icons.Default.Add, contentDescription = "Add Section")
+                            }
+                            IconButton(onClick = { showDeleteShelfDialog = true }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Remove Shelf")
+                            }
                         }
                     }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    shelf.sections.forEachIndexed { index, section ->
-                        Box(
-                            modifier = Modifier
-                                .padding(end = 8.dp)
-                                .height(settings.sectionHeight.dp)
-                        ) {
-                            SectionView(
-                                section = section,
-                                sectionNumber = index,
-                                isEditMode = isEditMode,
-                                onAddItem = { onAddItem(shelf.id, section.id) },
-                                onSectionClick = { onSectionClick(shelf.id, section.id) },
-                                onRemoveSection = { onRemoveSection(shelf.id, section.id) },
-                                settings = settings
-                            )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        shelf.sections.forEachIndexed { index, section ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .height(settings.sectionHeight.dp)
+                            ) {
+                                SectionView(
+                                    section = section,
+                                    sectionNumber = index,
+                                    isEditMode = isEditMode,
+                                    onAddItem = { onAddItem(shelf.id, section.id) },
+                                    onSectionClick = { onSectionClick(shelf.id, section.id) },
+                                    onRemoveSection = { onRemoveSection(shelf.id, section.id) },
+                                    settings = settings
+                                )
+                            }
                         }
                     }
                 }

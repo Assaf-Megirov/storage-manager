@@ -3,6 +3,7 @@ package com.example.storage_manager.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,12 +37,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.storage_manager.R
 import com.example.storage_manager.model.Item
 import com.example.storage_manager.services.toDisplayFormat
 import com.example.storage_manager.viewmodel.StorageTrackerViewModel
 import com.example.storage_manager.viewmodel.SettingsViewModel
 import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.layout.FlowRow
 
 // Add this enum at the top level with SortOrder
 enum class SearchType {
@@ -49,7 +53,7 @@ enum class SearchType {
     CLIENT_NAME
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SearchScreen(
     viewModel: StorageTrackerViewModel,
@@ -109,10 +113,10 @@ fun SearchScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Search Items") },
+                title = { Text(stringResource(R.string.search_items)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -137,62 +141,71 @@ fun SearchScreen(
                     FilterChip(
                         selected = searchType == SearchType.ITEM_NAME,
                         onClick = { searchType = SearchType.ITEM_NAME },
-                        label = { Text("Item Name") }
+                        label = { Text(stringResource(R.string.search_by_item_name)) }
                     )
                     FilterChip(
                         selected = searchType == SearchType.CLIENT_NAME,
                         onClick = { searchType = SearchType.CLIENT_NAME },
-                        label = { Text("Client Name") }
+                        label = { Text(stringResource(R.string.search_by_client_name)) }
                     )
                 }
 
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    label = { Text(if (searchType == SearchType.ITEM_NAME) "Search items" else "Search clients") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(16.dp),
+                    placeholder = { Text(stringResource(R.string.search_hint)) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+                )
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Sort by:", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = stringResource(R.string.sort_by),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        SortChip(
-                            text = "Name",
-                            isAscending = sortOrder == SortOrder.NAME_ASC,
-                            isSelected = sortOrder in listOf(SortOrder.NAME_ASC, SortOrder.NAME_DESC),
-                            onClick = {
-                                sortOrder = if (sortOrder == SortOrder.NAME_ASC)
-                                    SortOrder.NAME_DESC else SortOrder.NAME_ASC
-                            }
-                        )
-                        SortChip(
-                            text = "Entry",
-                            isAscending = sortOrder == SortOrder.ENTRY_DATE_ASC,
-                            isSelected = sortOrder in listOf(SortOrder.ENTRY_DATE_ASC, SortOrder.ENTRY_DATE_DESC),
-                            onClick = {
-                                sortOrder = if (sortOrder == SortOrder.ENTRY_DATE_ASC)
-                                    SortOrder.ENTRY_DATE_DESC else SortOrder.ENTRY_DATE_ASC
-                            }
-                        )
-                        SortChip(
-                            text = "Return",
-                            isAscending = sortOrder == SortOrder.RETURN_DATE_ASC,
-                            isSelected = sortOrder in listOf(SortOrder.RETURN_DATE_ASC, SortOrder.RETURN_DATE_DESC),
-                            onClick = {
-                                sortOrder = if (sortOrder == SortOrder.RETURN_DATE_ASC)
-                                    SortOrder.RETURN_DATE_DESC else SortOrder.RETURN_DATE_ASC
-                            }
-                        )
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            SortChip(
+                                text = stringResource(R.string.name),
+                                isAscending = sortOrder == SortOrder.NAME_ASC,
+                                isSelected = sortOrder in listOf(SortOrder.NAME_ASC, SortOrder.NAME_DESC),
+                                onClick = {
+                                    sortOrder = if (sortOrder == SortOrder.NAME_ASC)
+                                        SortOrder.NAME_DESC else SortOrder.NAME_ASC
+                                }
+                            )
+                            SortChip(
+                                text = stringResource(R.string.entry),
+                                isAscending = sortOrder == SortOrder.ENTRY_DATE_ASC,
+                                isSelected = sortOrder in listOf(SortOrder.ENTRY_DATE_ASC, SortOrder.ENTRY_DATE_DESC),
+                                onClick = {
+                                    sortOrder = if (sortOrder == SortOrder.ENTRY_DATE_ASC)
+                                        SortOrder.ENTRY_DATE_DESC else SortOrder.ENTRY_DATE_ASC
+                                }
+                            )
+                            SortChip(
+                                text = stringResource(R.string.return_sort),
+                                isAscending = sortOrder == SortOrder.RETURN_DATE_ASC,
+                                isSelected = sortOrder in listOf(SortOrder.RETURN_DATE_ASC, SortOrder.RETURN_DATE_DESC),
+                                onClick = {
+                                    sortOrder = if (sortOrder == SortOrder.RETURN_DATE_ASC)
+                                        SortOrder.RETURN_DATE_DESC else SortOrder.RETURN_DATE_ASC
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -269,13 +282,17 @@ private fun SearchItemCard(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = searchItem.item.clientName ?: "Unknown Client",
+                        text = searchItem.item.clientName ?: stringResource(R.string.unknown_client),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Text(
-                    text = "Shelf ${searchItem.shelfName} - Section ${searchItem.sectionNumber}",
+                    text = stringResource(
+                        R.string.shelf_section_format,
+                        searchItem.shelfName,
+                        searchItem.sectionNumber
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -293,7 +310,7 @@ private fun SearchItemCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ExitToApp,
-                        contentDescription = "Entry Date",
+                        contentDescription = stringResource(R.string.entry_date_label),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -308,7 +325,7 @@ private fun SearchItemCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Return Date",
+                        contentDescription = stringResource(R.string.return_date_label),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )

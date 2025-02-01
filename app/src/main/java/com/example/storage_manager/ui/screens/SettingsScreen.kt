@@ -1,5 +1,7 @@
 package com.example.storage_manager.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +21,7 @@ import com.example.storage_manager.viewmodel.SettingsViewModel
 import com.example.storage_manager.model.FontSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
+import com.example.storage_manager.ui.components.SettingsSlider
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -177,63 +180,55 @@ fun SettingsScreen(
             }
 
             // Section Height Setting
-            Column {
-                Text(
-                    text = stringResource(R.string.section_height),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                var heightText by remember { mutableStateOf(settings.sectionHeight.toString()) }
+            SettingsSlider(
+                title = stringResource(R.string.section_height),
+                value = settings.sectionHeight.toFloat(),
+                onValueChange = { newValue -> 
+                    viewModel.updateSectionHeight(newValue.toInt())
+                },
+                valueRange = 100f..300f,
+                valueText = stringResource(R.string.height_in_dp)
+            )
 
-                OutlinedTextField(
-                    value = heightText,
-                    onValueChange = { newValue -> 
-                        // Update the text field immediately
-                        heightText = newValue
-                        // Try to update the setting if it's valid
-                        if (newValue.all { it.isDigit() }) {
-                            newValue.toIntOrNull()?.let { height ->
-                                if (height in 99..500) {
-                                    viewModel.updateSectionHeight(height)
-                                }
-                            }
-                        }
-                    },
-                    label = { Text(stringResource(R.string.height_in_dp)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Section Width Setting
-            Column {
-                Text(
-                    text = stringResource(R.string.section_width),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                var widthText by remember { mutableStateOf(settings.sectionWidth.toString()) }
+            SettingsSlider(
+                title = stringResource(R.string.section_width),
+                value = settings.sectionWidth.toFloat(),
+                onValueChange = { newValue ->
+                    viewModel.updateSectionWidth(newValue.toInt())
+                },
+                valueRange = 100f..300f,
+                valueText = stringResource(R.string.width_in_dp)
+            )
 
-                OutlinedTextField(
-                    value = widthText,
-                    onValueChange = { newValue -> 
-                        // Update the text field immediately
-                        widthText = newValue
-                        // Try to update the setting if it's valid
-                        if (newValue.all { it.isDigit() }) {
-                            newValue.toIntOrNull()?.let { width ->
-                                if (width in 99..500) {
-                                    viewModel.updateSectionWidth(width)
-                                }
-                            }
-                        }
-                    },
-                    label = { Text(stringResource(R.string.width_in_dp)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Preview shelf with multiple sections
+            Text(
+                text = stringResource(R.string.shelf),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            
+            Row(
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                repeat(5) {
+                    Box(
+                        modifier = Modifier
+                            .width(settings.sectionWidth.dp)
+                            .height(settings.sectionHeight.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                shape = MaterialTheme.shapes.medium
+                            )
+                    )
+                }
             }
         }
     }

@@ -57,4 +57,17 @@
     <string name="item_reminders_description">Уведомления для напоминаний о предметах</string>
     <string name="confirm_delete_item">Вы уверены, что хотите удалить этот предмет?</string>
     <string name="item_not_empty_warning">Предупреждение: Это навсегда удалит предмет и все связанные с ним данные.</string>
+    <!-- Search Screen -->
+    <string name="search_items">Поиск предметов</string>
+    <string name="search_hint">Поиск...</string>
+    <string name="search_by_item_name">Название предмета</string>
+    <string name="search_by_client_name">Имя клиента</string>
+    <string name="shelf_section_format">Полка %1$s - Секция %2$d</string>
+    <string name="entry_date_label">Дата поступления</string>
+    <string name="return_date_label">Дата возврата</string>
+    <!-- Sort options -->
+    <string name="sort_by">Сортировать по</string>
+    <string name="name">Имя</string>
+    <string name="entry">Поступление</string>
+    <string name="return_sort">Возврат</string>
 </resources> 

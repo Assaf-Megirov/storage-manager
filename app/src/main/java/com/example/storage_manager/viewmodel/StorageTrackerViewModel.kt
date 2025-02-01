@@ -40,13 +40,20 @@ class StorageTrackerViewModel(context: Context) : ViewModel() {
         null
     )
 
-    fun addShelf(name: String) {
-        _shelves.value = _shelves.value + Shelf(name = name)
+    private fun updateShelfNames() {
+        _shelves.value = _shelves.value.mapIndexed { index, shelf ->
+            shelf.copy(name = (index + 1).toString())
+        }
+    }
+
+    fun addShelf() {
+        _shelves.value = _shelves.value + Shelf(name = (_shelves.value.size + 1).toString())
         saveData()
     }
 
     fun removeShelf(shelfId: String) {
         _shelves.value = _shelves.value.filter { it.id != shelfId }
+        updateShelfNames()
         saveData()
     }
 

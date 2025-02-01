@@ -57,4 +57,17 @@
     <string name="item_reminders_description">התראות עבור תזכורות פריטים</string>
     <string name="confirm_delete_item">האם אתה בטוח שברצונך למחוק פריט זה?</string>
     <string name="item_not_empty_warning">אזהרה: פעולה זו תמחק לצמיתות את הפריט ואת כל הנתונים הקשורים אליו.</string>
+    <!-- Search Screen -->
+    <string name="search_items">חיפוש פריטים</string>
+    <string name="search_hint">חיפוש...</string>
+    <string name="search_by_item_name">שם פריט</string>
+    <string name="search_by_client_name">שם לקוח</string>
+    <string name="shelf_section_format">מדף %1$s - מדור %2$d</string>
+    <string name="entry_date_label">תאריך כניסה</string>
+    <string name="return_date_label">תאריך החזרה</string>
+    <!-- Sort options -->
+    <string name="sort_by">מיין לפי</string>
+    <string name="name">שם</string>
+    <string name="entry">כניסה</string>
+    <string name="return_sort">החזרה</string>
 </resources> 

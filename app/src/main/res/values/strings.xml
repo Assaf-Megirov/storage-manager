@@ -57,4 +57,17 @@
     <string name="item_reminders_description">Notifications for item reminders</string>
     <string name="confirm_delete_item">Are you sure you want to delete this item?</string>
     <string name="item_not_empty_warning">Warning: This will permanently delete the item and all its associated data.</string>
+    <!-- Search Screen -->
+    <string name="search_items">Search Items</string>
+    <string name="search_hint">Search...</string>
+    <string name="search_by_item_name">Item Name</string>
+    <string name="search_by_client_name">Client Name</string>
+    <string name="shelf_section_format">Shelf %1$s - Section %2$d</string>
+    <string name="entry_date_label">Entry Date</string>
+    <string name="return_date_label">Return Date</string>
+    <!-- Sort options -->
+    <string name="sort_by">Sort by</string>
+    <string name="name">Name</string>
+    <string name="entry">Entry</string>
+    <string name="return_sort">Return</string>
 </resources>
