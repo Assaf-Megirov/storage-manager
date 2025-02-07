@@ -146,8 +146,8 @@ fun SectionDetailsScreen(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = item.entryDate?.let { detailsDateFormatter.format(it) } ?: "N/A",
-                                            style = MaterialTheme.typography.bodySmall
+                                            text = item.entryDate?.toDisplayFormat(settings) ?: stringResource(R.string.entry_date_na),
+                                            style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
 
@@ -162,8 +162,8 @@ fun SectionDetailsScreen(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = item.returnDate?.let { detailsDateFormatter.format(it) } ?: "N/A",
-                                            style = MaterialTheme.typography.bodySmall
+                                            text = item.returnDate?.toDisplayFormat(settings) ?: stringResource(R.string.return_date_na),
+                                            style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
                                 }

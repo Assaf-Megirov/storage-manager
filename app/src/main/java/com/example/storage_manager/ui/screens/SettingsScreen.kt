@@ -143,7 +143,6 @@ fun SettingsScreen(
             Text(
                 text = stringResource(R.string.language),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 4.dp)
             )
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),

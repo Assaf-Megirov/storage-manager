@@ -150,23 +150,23 @@ fun AddItemDialog(
                             OutlinedTextField(
                                 value = name,
                                 onValueChange = onNameChange,
-                                label = { Text(stringResource(R.string.item_name)) },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true
+                                label = { Text(stringResource(R.string.item_name), style = MaterialTheme.typography.bodyMedium) },
+                                textStyle = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.fillMaxWidth()
                             )
                             OutlinedTextField(
                                 value = clientName,
                                 onValueChange = onClientNameChange,
-                                label = { Text(stringResource(R.string.client_name)) },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true
+                                label = { Text(stringResource(R.string.client_name), style = MaterialTheme.typography.bodyMedium) },
+                                textStyle = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.fillMaxWidth()
                             )
                             OutlinedTextField(
                                 value = note,
                                 onValueChange = onNoteChange,
-                                label = { Text(stringResource(R.string.note)) },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true
+                                label = { Text(stringResource(R.string.note), style = MaterialTheme.typography.bodyMedium) },
+                                textStyle = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
 
@@ -219,19 +219,22 @@ fun AddItemDialog(
                         OutlinedTextField(
                             value = name,
                             onValueChange = onNameChange,
-                            label = { Text(stringResource(R.string.item_name)) },
+                            label = { Text(stringResource(R.string.item_name), style = MaterialTheme.typography.bodyMedium) },
+                            textStyle = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
                             value = clientName,
                             onValueChange = onClientNameChange,
-                            label = { Text(stringResource(R.string.client_name)) },
+                            label = { Text(stringResource(R.string.client_name), style = MaterialTheme.typography.bodyMedium) },
+                            textStyle = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
                             value = note,
                             onValueChange = onNoteChange,
-                            label = { Text(stringResource(R.string.note)) },
+                            label = { Text(stringResource(R.string.note), style = MaterialTheme.typography.bodyMedium) },
+                            textStyle = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.fillMaxWidth()
                         )
                         DatePickerField(

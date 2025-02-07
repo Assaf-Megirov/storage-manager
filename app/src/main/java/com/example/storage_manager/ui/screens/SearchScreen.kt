@@ -225,25 +225,42 @@ fun SearchOptions(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp, bottom = 8.dp),
-            placeholder = { Text(stringResource(R.string.search_hint)) },
+            placeholder = { 
+                Text(
+                    text = stringResource(R.string.search_hint),
+                    style = MaterialTheme.typography.bodySmall
+                ) 
+            },
+            textStyle = MaterialTheme.typography.bodyMedium,
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
         )
 
-        Row(
+        FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             FilterChip(
                 selected = searchType == SearchType.ITEM_NAME,
                 onClick = { onSearchTypeChange(SearchType.ITEM_NAME) },
-                label = { Text(stringResource(R.string.search_by_item_name)) }
+                label = { 
+                    Text(
+                        text = stringResource(R.string.search_by_item_name),
+                        style = MaterialTheme.typography.bodyMedium
+                    ) 
+                }
             )
             FilterChip(
                 selected = searchType == SearchType.CLIENT_NAME,
                 onClick = { onSearchTypeChange(SearchType.CLIENT_NAME) },
-                label = { Text(stringResource(R.string.search_by_client_name)) }
+                label = { 
+                    Text(
+                        text = stringResource(R.string.search_by_client_name),
+                        style = MaterialTheme.typography.bodyMedium
+                    ) 
+                }
             )
         }
 
@@ -253,7 +270,7 @@ fun SearchOptions(
         ) {
             Text(
                 text = stringResource(R.string.sort_by),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.titleMedium
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -319,7 +336,10 @@ private fun SortChip(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text)
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 if (isSelected) {
                     Icon(
                         imageVector = if (isAscending) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
@@ -360,7 +380,7 @@ private fun SearchItemCard(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = searchItem.item.clientName ?: stringResource(R.string.unknown_client),
+                        text = searchItem.item.clientName?.ifEmpty { stringResource(R.string.unknown_client) } ?: stringResource(R.string.unknown_client),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -371,7 +391,7 @@ private fun SearchItemCard(
                         searchItem.shelfName,
                         searchItem.sectionNumber
                     ),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -394,7 +414,7 @@ private fun SearchItemCard(
                     )
                     Text(
                         text = searchItem.item.entryDate?.toDisplayFormat(settings) ?: "N/A",
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 Row(
@@ -409,7 +429,7 @@ private fun SearchItemCard(
                     )
                     Text(
                         text = searchItem.item.returnDate?.toDisplayFormat(settings) ?: "N/A",
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }

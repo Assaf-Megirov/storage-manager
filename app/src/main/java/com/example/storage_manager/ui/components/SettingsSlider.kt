@@ -46,7 +46,7 @@ fun SettingsSlider(
             )
             Text(
                 text = "$valueText (${valueRange.start.toInt()}-${valueRange.endInclusive.toInt()})",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -75,7 +75,8 @@ fun SettingsSlider(
             singleLine = true,
             isError = textFieldValue.toIntOrNull()?.let { 
                 it < valueRange.start || it > valueRange.endInclusive 
-            } ?: true
+            } ?: true,
+            textStyle = MaterialTheme.typography.bodyMedium
         )
         
         if (showPreview) {

@@ -495,7 +495,7 @@ fun SectionView(
         ) {
             Text(
                 text = (sectionNumber + 1).toString(),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.align(Alignment.TopEnd)
             )
         }
@@ -536,7 +536,7 @@ fun SectionView(
                         )
                         Text(
                             text = item.clientName.ifEmpty { stringResource(R.string.unknown_client) },
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -546,7 +546,7 @@ fun SectionView(
                             SectionDateType.ENTRY_DATE -> item.entryDate
                             SectionDateType.RETURN_DATE -> item.returnDate
                         }?.toDisplayFormat(settings) ?: "",
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
@@ -554,7 +554,7 @@ fun SectionView(
             if (section.items.size > maxVisibleItems) {
                 Text(
                     text = stringResource(R.string.more_items, section.items.size - maxVisibleItems),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
