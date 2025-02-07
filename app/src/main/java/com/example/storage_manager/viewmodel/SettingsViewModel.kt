@@ -13,8 +13,18 @@ import com.example.storage_manager.model.AppLanguage
 import android.content.res.Resources
 import java.util.*
 import com.example.storage_manager.model.FontSize
+import android.net.Uri
+import android.util.Log
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import com.example.storage_manager.services.StorageTrackerPersistenceService
 
-class SettingsViewModel(context: Context) : ViewModel() {
+class SettingsViewModel(
+    context: Context,
+    private val persistenceService: StorageTrackerPersistenceService,
+    private val storageTrackerViewModel: StorageTrackerViewModel
+) : ViewModel() {
     // Store application context reference for configuration updates
     private val appContext = context.applicationContext
     private val prefs = appContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
@@ -121,13 +131,57 @@ class SettingsViewModel(context: Context) : ViewModel() {
     }
 
     // Factory for creating SettingsViewModel with context
-    class Factory(private val context: Context) : ViewModelProvider.Factory {
+    class Factory(
+        private val context: Context,
+        private val persistenceService: StorageTrackerPersistenceService,
+        private val storageTrackerViewModel: StorageTrackerViewModel
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
-                return SettingsViewModel(context.applicationContext) as T
+                return SettingsViewModel(
+                    context.applicationContext,
+                    persistenceService,
+                    storageTrackerViewModel
+                ) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }
+    }
+
+    fun exportData(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                persistenceService.exportToFile(uri, settings.value)
+            } catch (e: Exception) {
+                Log.e("SettingsViewModel", "Error exporting data", e)
+                // Handle error (you might want to add error state handling)
+            }
+        }
+    }
+
+    fun importData(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val importedData = persistenceService.importFromFile(uri)
+                // Update settings
+                updateSettings(importedData.settings)
+                // Update shelves data
+                persistenceService.saveData(importedData.shelves)
+                // Notify StorageTrackerViewModel to reload
+                storageTrackerViewModel.reloadData()
+            } catch (e: Exception) {
+                Log.e("SettingsViewModel", "Error importing data", e)
+                // Handle error
+            }
+        }
+    }
+
+    private fun updateSettings(newSettings: Settings) {
+        _settings.value = newSettings
+        saveSettings(newSettings)
+        // Always recreate after import to refresh all data
+        updateLocale(newSettings.language)
+        _recreateActivity.value = true
     }
 } 

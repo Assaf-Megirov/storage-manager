@@ -36,7 +36,6 @@ fun SettingsSlider(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()

@@ -70,4 +70,8 @@
     <string name="name">Имя</string>
     <string name="entry">Поступление</string>
     <string name="return_sort">Возврат</string>
+    <string name="data_management">Управление данными</string>
+    <string name="export_data">Экспорт данных</string>
+    <string name="import_data">Импорт данных</string>
+    <string name="shelf_preview">Предварительный просмотр полки</string>
 </resources> 

@@ -19,11 +19,17 @@ import java.util.concurrent.TimeUnit
 import androidx.work.Data.Builder
 import com.example.storage_manager.model.AppLanguage
 
-class StorageTrackerViewModel(context: Context) : ViewModel() {
+class StorageTrackerViewModel(
+    context: Context,
+    private val persistenceService: StorageTrackerPersistenceService
+) : ViewModel() {
     private val applicationContext = context.applicationContext
-    private val persistenceService = StorageTrackerPersistenceService(applicationContext)
     private val _shelves = MutableStateFlow<List<Shelf>>(persistenceService.loadData())
     val shelves: StateFlow<List<Shelf>> = _shelves.asStateFlow()
+
+    fun reloadData() {
+        _shelves.value = persistenceService.loadData()
+    }
 
     private fun saveData() {
         persistenceService.saveData(_shelves.value)

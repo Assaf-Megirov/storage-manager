@@ -70,4 +70,9 @@
     <string name="name">Name</string>
     <string name="entry">Entry</string>
     <string name="return_sort">Return</string>
+    <!-- Add these to your existing English strings -->
+    <string name="data_management">Data Management</string>
+    <string name="export_data">Export Data</string>
+    <string name="import_data">Import Data</string>
+    <string name="shelf_preview">Shelf preview</string>
 </resources>

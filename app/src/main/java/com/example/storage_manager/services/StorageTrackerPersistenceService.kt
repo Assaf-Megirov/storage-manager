@@ -1,11 +1,15 @@
 package com.example.storage_manager.services
 
 import android.content.Context
+import android.net.Uri
+import android.util.Log
+import com.example.storage_manager.model.ExportData
+import com.example.storage_manager.model.Settings
 import com.example.storage_manager.model.Shelf
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class StorageTrackerPersistenceService(context: Context) {
+class StorageTrackerPersistenceService(private val context: Context) {
     private val prefs = context.getSharedPreferences("StorageTrackerPrefs", Context.MODE_PRIVATE)
     private val gson = Gson()
 
@@ -19,5 +23,35 @@ class StorageTrackerPersistenceService(context: Context) {
         return shelvesJson?.let {
             gson.fromJson(it, object : TypeToken<List<Shelf>>() {}.type)
         } ?: emptyList()
+    }
+
+    fun exportToFile(uri: Uri, settings: Settings) {
+        try {
+            val exportData = ExportData(
+                settings = settings,
+                shelves = loadData(),
+                version = 1
+            )
+            val jsonString = gson.toJson(exportData)
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write(jsonString.toByteArray())
+            }
+        } catch (e: Exception) {
+            Log.e("StorageTrackerPersistenceService", "Error exporting data", e)
+            throw e
+        }
+    }
+
+    fun importFromFile(uri: Uri): ExportData {
+        try {
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                val jsonString = inputStream.bufferedReader().use { it.readText() }
+                return gson.fromJson(jsonString, ExportData::class.java)
+            }
+            throw IllegalStateException("Could not open input stream")
+        } catch (e: Exception) {
+            Log.e("StorageTrackerPersistenceService", "Error importing data", e)
+            throw e
+        }
     }
 }

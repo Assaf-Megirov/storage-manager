@@ -22,6 +22,10 @@ import com.example.storage_manager.model.FontSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.storage_manager.ui.components.SettingsSlider
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -30,6 +34,19 @@ fun SettingsScreen(
     onBack: () -> Unit
 ) {
     val settings by viewModel.settings.collectAsState()
+
+    // Add file pickers
+    val exportFilePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri?.let { viewModel.exportData(it) }
+    }
+
+    val importFilePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.importData(it) }
+    }
 
     Scaffold(
         topBar = {
@@ -126,7 +143,7 @@ fun SettingsScreen(
             Text(
                 text = stringResource(R.string.language),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 4.dp)
             )
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -190,7 +207,7 @@ fun SettingsScreen(
                 valueText = stringResource(R.string.height_in_dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Section Width Setting
             SettingsSlider(
@@ -203,19 +220,19 @@ fun SettingsScreen(
                 valueText = stringResource(R.string.width_in_dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Preview shelf with multiple sections
             Text(
-                text = stringResource(R.string.shelf),
+                text = stringResource(R.string.shelf_preview),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 4.dp)
             )
             
             Row(
                 modifier = Modifier
                     .horizontalScroll(rememberScrollState())
-                    .padding(16.dp),
+                    .padding(bottom = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 repeat(5) {
@@ -229,6 +246,44 @@ fun SettingsScreen(
                             )
                     )
                 }
+            }
+
+
+            // Data Management Section
+            Text(
+                text = stringResource(R.string.data_management),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top=8.dp)
+            )
+
+            // Export Button
+            Button(
+                onClick = {
+                    exportFilePicker.launch("storage_manager_backup.json")
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowUp,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text(stringResource(R.string.export_data))
+            }
+
+            // Import Button
+            Button(
+                onClick = {
+                    importFilePicker.launch(arrayOf("application/json"))
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ExitToApp,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text(stringResource(R.string.import_data))
             }
         }
     }

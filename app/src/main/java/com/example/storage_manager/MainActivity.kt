@@ -29,13 +29,30 @@ import com.example.storage_manager.ui.theme.StorageManagerTheme
 import android.view.View
 import androidx.core.os.ConfigurationCompat
 import android.os.Build
+import com.example.storage_manager.services.StorageTrackerPersistenceService
 
 class MainActivity : ComponentActivity() {
-    private lateinit var settingsViewModel: SettingsViewModel
+    private val persistenceService by lazy {
+        StorageTrackerPersistenceService(this)
+    }
+
+    private val storageTrackerViewModel: StorageTrackerViewModel by viewModels {
+        StorageTrackerViewModelFactory.provide(this, persistenceService)
+    }
+
+    private val settingsViewModel: SettingsViewModel by viewModels {
+        SettingsViewModel.Factory(this, persistenceService, storageTrackerViewModel)
+    }
     
     override fun attachBaseContext(newBase: Context) {
-        // Use a temporary SettingsViewModel just for initial configuration
-        val tempSettingsViewModel = SettingsViewModel(newBase)
+        // Use temporary ViewModels just for initial configuration
+        val tempPersistenceService = StorageTrackerPersistenceService(newBase)
+        val tempStorageTrackerViewModel = StorageTrackerViewModel(newBase, tempPersistenceService)
+        val tempSettingsViewModel = SettingsViewModel(
+            newBase, 
+            tempPersistenceService,
+            tempStorageTrackerViewModel
+        )
         val settings = tempSettingsViewModel.settings.value
         val locale = when (settings.language) {
             AppLanguage.SYSTEM -> Resources.getSystem().configuration.locales[0]
@@ -61,12 +78,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Initialize the SettingsViewModel after super.onCreate
-        settingsViewModel = ViewModelProvider(
-            this,
-            SettingsViewModel.Factory(applicationContext)
-        )[SettingsViewModel::class.java]
-
         // Observe recreation events
         lifecycleScope.launch {
             settingsViewModel.recreateActivity.collect { shouldRecreate ->
@@ -84,11 +95,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val viewModel: StorageTrackerViewModel = viewModel(
-                        factory = StorageTrackerViewModelFactory.provide(applicationContext)
-                    )
                     StorageManagerApp(
-                        viewModel = viewModel,
+                        viewModel = storageTrackerViewModel,
                         settingsViewModel = settingsViewModel
                     )
                 }
