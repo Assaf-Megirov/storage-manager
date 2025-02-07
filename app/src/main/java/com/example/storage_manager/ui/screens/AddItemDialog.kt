@@ -3,7 +3,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -29,6 +31,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.storage_manager.R
 import com.example.storage_manager.model.Settings
 import com.example.storage_manager.ui.screens.DatePickerField
@@ -68,52 +71,73 @@ fun AddItemDialog(
         }
     }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
         Card(
             modifier = Modifier
-                .padding(if (isLandscape) 0.dp else 4.dp)
-                .fillMaxWidth(),
-            shape = if (isLandscape) {
-                MaterialTheme.shapes.extraSmall
-            } else {
-                MaterialTheme.shapes.medium
-            }
+                .fillMaxWidth(if (isLandscape) 0.85f else 1f)
+                .then(if (isLandscape) {
+                    Modifier.fillMaxHeight(0.95f)
+                } else {
+                    Modifier.wrapContentHeight()
+                })
+                .padding(
+                    horizontal = if (isLandscape) 32.dp else 8.dp,
+                    vertical = if (isLandscape) 16.dp else 8.dp
+                ),
+            shape = MaterialTheme.shapes.medium
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(if (isLandscape) 8.dp else 12.dp)
+                    .then(if (isLandscape) {
+                        Modifier.verticalScroll(rememberScrollState())
+                    } else {
+                        Modifier
+                    })
+                    .padding(16.dp)
             ) {
-                Row{
+                // Title and buttons row at the top
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = stringResource(R.string.add_item),
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        modifier = Modifier.weight(1f)
                     )
-                    if(!isLandscape) {
-                        // Buttons
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.dp),
-                            horizontalArrangement = Arrangement.End,
-                            verticalAlignment = Alignment.CenterVertically
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(2f)
+                    ) {
+                        TextButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.weight(1f)
                         ) {
-                            TextButton(onClick = onDismiss) {
-                                Text(stringResource(R.string.cancel))
-                            }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Button(onClick = onAddItem) {
-                                Text(stringResource(R.string.add))
-                            }
+                            Text(stringResource(R.string.cancel))
+                        }
+                        Button(
+                            onClick = onAddItem,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(stringResource(R.string.add))
                         }
                     }
                 }
 
+                // Rest of the dialog content
                 if (isLandscape) {
+                    // Landscape layout
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -121,7 +145,7 @@ fun AddItemDialog(
                         // Left column
                         Column(
                             modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             OutlinedTextField(
                                 value = name,
@@ -149,7 +173,7 @@ fun AddItemDialog(
                         // Right column
                         Column(
                             modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             DatePickerField(
                                 label = stringResource(R.string.entry_date),
@@ -185,25 +209,9 @@ fun AddItemDialog(
                                 )
                             }
                         }
-
-                        // Buttons
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp),
-                            horizontalArrangement = Arrangement.End,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            TextButton(onClick = onDismiss) {
-                                Text(stringResource(R.string.cancel))
-                            }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Button(onClick = onAddItem) {
-                                Text(stringResource(R.string.add))
-                            }
-                        }
                     }
                 } else {
+                    // Portrait layout (existing code)
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
