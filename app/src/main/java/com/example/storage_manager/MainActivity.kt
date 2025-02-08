@@ -30,6 +30,7 @@ import android.view.View
 import androidx.core.os.ConfigurationCompat
 import android.os.Build
 import com.example.storage_manager.services.StorageTrackerPersistenceService
+import android.content.Intent
 
 class MainActivity : ComponentActivity() {
     private val persistenceService by lazy {
@@ -88,6 +89,14 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // Get the import URI only from the initial intent
+        val importUri = if (savedInstanceState == null) {
+            when (intent?.action) {
+                Intent.ACTION_VIEW -> intent?.data
+                else -> null
+            }
+        } else null
+
         setContent {
             val settings by settingsViewModel.settings.collectAsState()
             StorageManagerTheme(settings = settings) {
@@ -97,7 +106,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     StorageManagerApp(
                         viewModel = storageTrackerViewModel,
-                        settingsViewModel = settingsViewModel
+                        settingsViewModel = settingsViewModel,
+                        importUri = importUri
                     )
                 }
             }

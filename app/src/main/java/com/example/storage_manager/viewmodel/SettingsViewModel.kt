@@ -19,6 +19,9 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import com.example.storage_manager.services.StorageTrackerPersistenceService
+import android.content.Intent
+import androidx.core.content.FileProvider
+import java.io.File
 
 class SettingsViewModel(
     context: Context,
@@ -183,5 +186,39 @@ class SettingsViewModel(
         // Always recreate after import to refresh all data
         updateLocale(newSettings.language)
         _recreateActivity.value = true
+    }
+
+    fun shareData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Create temporary file
+                val tempFile = File(appContext.cacheDir, "storage_manager_backup.json")
+                tempFile.createNewFile()
+                
+                // Export data to temporary file with current settings
+                persistenceService.exportToFile(tempFile, settings.value)
+                
+                // Get content URI using FileProvider
+                val contentUri = FileProvider.getUriForFile(
+                    appContext,
+                    "${appContext.packageName}.fileprovider",
+                    tempFile
+                )
+                
+                // Create share intent
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "application/json"
+                    putExtra(Intent.EXTRA_STREAM, contentUri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                
+                // Start share activity
+                val chooserIntent = Intent.createChooser(shareIntent, null)
+                chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                appContext.startActivity(chooserIntent)
+            } catch (e: Exception) {
+                Log.e("SettingsViewModel", "Error sharing data", e)
+            }
+        }
     }
 } 

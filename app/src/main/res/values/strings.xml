@@ -75,4 +75,9 @@
     <string name="export_data">Export Data</string>
     <string name="import_data">Import Data</string>
     <string name="shelf_preview">Shelf preview</string>
+    <string name="save_to_storage">Save to Storage</string>
+    <string name="share">Share</string>
+    <string name="import_confirmation">Import Data</string>
+    <string name="import_confirmation_message">Do you want to import data from this file? This will replace your current data.</string>
+    <string name="import_string">Import</string>
 </resources>

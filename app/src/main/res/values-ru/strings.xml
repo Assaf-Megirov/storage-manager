@@ -74,4 +74,9 @@
     <string name="export_data">Экспорт данных</string>
     <string name="import_data">Импорт данных</string>
     <string name="shelf_preview">Предварительный просмотр полки</string>
+    <string name="import_confirmation">Импорт данных</string>
+    <string name="import_confirmation_message">Вы хотите импортировать данные из этого файла? Это заменит ваши текущие данные.</string>
+    <string name="import_string">Импортировать</string>
+    <string name="save_to_storage">Сохранить в хранилище</string>
+    <string name="share">Поделиться</string>
 </resources> 

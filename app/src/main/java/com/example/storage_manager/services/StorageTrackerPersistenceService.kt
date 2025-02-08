@@ -8,6 +8,7 @@ import com.example.storage_manager.model.Settings
 import com.example.storage_manager.model.Shelf
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.io.File
 
 class StorageTrackerPersistenceService(private val context: Context) {
     private val prefs = context.getSharedPreferences("StorageTrackerPrefs", Context.MODE_PRIVATE)
@@ -25,6 +26,26 @@ class StorageTrackerPersistenceService(private val context: Context) {
         } ?: emptyList()
     }
 
+    fun exportToFile(file: File, settings: Settings) {
+        try {
+            val exportData = ExportData(
+                settings = settings,
+                shelves = loadData(),
+                version = 1
+            )
+            val jsonString = gson.toJson(exportData)
+            file.writeText(jsonString)
+        } catch (e: Exception) {
+            Log.e("StorageTrackerPersistenceService", "Error exporting data to file", e)
+            throw e
+        }
+    }
+
+    @Deprecated("Use the version with settings parameter instead")
+    fun exportToFile(file: File) {
+        exportToFile(file, loadSettings())
+    }
+
     fun exportToFile(uri: Uri, settings: Settings) {
         try {
             val exportData = ExportData(
@@ -35,9 +56,9 @@ class StorageTrackerPersistenceService(private val context: Context) {
             val jsonString = gson.toJson(exportData)
             context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                 outputStream.write(jsonString.toByteArray())
-            }
+            } ?: throw IllegalStateException("Could not open output stream")
         } catch (e: Exception) {
-            Log.e("StorageTrackerPersistenceService", "Error exporting data", e)
+            Log.e("StorageTrackerPersistenceService", "Error exporting data to URI", e)
             throw e
         }
     }
@@ -53,5 +74,12 @@ class StorageTrackerPersistenceService(private val context: Context) {
             Log.e("StorageTrackerPersistenceService", "Error importing data", e)
             throw e
         }
+    }
+
+    private fun loadSettings(): Settings {
+        val settingsJson = prefs.getString("settings", null)
+        return settingsJson?.let {
+            gson.fromJson(it, Settings::class.java)
+        } ?: Settings() // Return default settings if none found
     }
 }

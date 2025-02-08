@@ -59,6 +59,8 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.DrawerValue
+import android.net.Uri
+import com.example.storage_manager.ui.components.ImportConfirmationDialog
 
 @Composable
 fun isLandscape(): Boolean {
@@ -532,12 +534,16 @@ fun SectionView(
                             text = item.name,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                            )
                         )
                         Text(
                             text = item.clientName.ifEmpty { stringResource(R.string.unknown_client) },
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                     
@@ -584,8 +590,34 @@ fun SectionView(
 }
 
 @Composable
-fun StorageManagerApp(viewModel: StorageTrackerViewModel, settingsViewModel: SettingsViewModel) {
+fun StorageManagerApp(
+    viewModel: StorageTrackerViewModel,
+    settingsViewModel: SettingsViewModel,
+    importUri: Uri? = null
+) {
     val navController = rememberNavController()
+    var showImportDialog by remember { mutableStateOf(false) }
+    var handledUri by remember { mutableStateOf<Uri?>(null) }
+    
+    // Show import dialog if URI is provided and hasn't been handled
+    LaunchedEffect(importUri) {
+        if (importUri != null && importUri != handledUri) {
+            showImportDialog = true
+            handledUri = importUri
+        }
+    }
+
+    if (showImportDialog) {
+        ImportConfirmationDialog(
+            onConfirm = {
+                importUri?.let { settingsViewModel.importData(it) }
+                showImportDialog = false
+            },
+            onDismiss = {
+                showImportDialog = false
+            }
+        )
+    }
 
     NavHost(navController = navController, startDestination = "main") {
         // Main screen composable

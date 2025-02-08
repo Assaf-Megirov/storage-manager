@@ -75,4 +75,9 @@
     <string name="export_data">ייצוא נתונים</string>
     <string name="import_data">ייבוא נתונים</string>
     <string name="shelf_preview">תצוגה מקדימה למדף</string>
+    <string name="save_to_storage">שמור לאחסון</string>
+    <string name="share">שתף</string>
+    <string name="import_confirmation">ייבוא נתונים</string>
+    <string name="import_confirmation_message">האם ברצונך לייבא נתונים מקובץ זה? פעולה זו תחליף את הנתונים הנוכחיים שלך.</string>
+    <string name="import_string">ייבא</string>
 </resources> 
