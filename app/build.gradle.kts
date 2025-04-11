@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.storage_manager"
+    namespace = "com.awindyendprod.storage_manager"
     compileSdk = 35
 
     buildFeatures {
@@ -16,11 +16,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.storage_manager"
+        applicationId = "com.awindyendprod.storage_manager"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
