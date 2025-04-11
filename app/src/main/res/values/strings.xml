@@ -80,4 +80,8 @@
     <string name="import_confirmation">Import Data</string>
     <string name="import_confirmation_message">Do you want to import data from this file? This will replace your current data.</string>
     <string name="import_string">Import</string>
+    <!-- Help -->
+    <string name="help">Help</string>
+    <string name="close">Close</string>
+    <string name="help_message">Welcome to Simple Shelf Manager!\nThis app helps you manage items stored on shelves and sections.\nHere\'s how to use it:\n\n• Use Edit Mode (Pencil icon) to add/remove shelves and sections and press ✓ when you\'re done\n• Tap a section to view and manage its items\n• Once in the section view you can tap the plus button in the bottom to add an item\n• Use Search (Magnifying glass icon) to find items by name or client</string>
 </resources>

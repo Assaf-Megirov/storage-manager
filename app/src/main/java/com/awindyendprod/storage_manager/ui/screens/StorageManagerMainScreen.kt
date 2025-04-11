@@ -74,6 +74,7 @@ fun StorageManagerMainScreen(
     var selectedShelfId by remember { mutableStateOf<String?>(null) }
     var selectedSectionId by remember { mutableStateOf<String?>(null) }
     var isAddItemDialogVisible by remember { mutableStateOf(false) }
+    var showHelpDialog by remember { mutableStateOf(false) }
     var newItemName by remember { mutableStateOf("") }
     var newItemClientName by remember { mutableStateOf("") }
     var newItemNote by remember { mutableStateOf("") }
@@ -97,7 +98,8 @@ fun StorageManagerMainScreen(
                 onSearchClick = onSearchClick,
                 onSettingsClick = onSettingsClick,
                 isEditMode = isEditMode,
-                onEditModeToggle = { isEditMode = !isEditMode }
+                onEditModeToggle = { isEditMode = !isEditMode },
+                onHelpClick = { showHelpDialog = true }
             )
         }
 
@@ -117,6 +119,12 @@ fun StorageManagerMainScreen(
                                 Icon(
                                     Icons.Default.Settings,
                                     contentDescription = stringResource(R.string.settings)
+                                )
+                            }
+                            IconButton(onClick = { showHelpDialog = true }) {
+                                Icon(
+                                    Icons.Default.Info,
+                                    contentDescription = stringResource(R.string.help)
                                 )
                             }
                             IconButton(onClick = { isEditMode = !isEditMode }) {
@@ -202,6 +210,19 @@ fun StorageManagerMainScreen(
                         onReturnDateChange = { newItemReturnDate = it },
                         onAlarmDateChange = { newItemAlarmDate = it },
                         settings = settings
+                    )
+                }
+
+                if (showHelpDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showHelpDialog = false },
+                        title = { Text(stringResource(R.string.help)) },
+                        text = { Text(stringResource(R.string.help_message)) },
+                        confirmButton = {
+                            TextButton(onClick = { showHelpDialog = false }) {
+                                Text(stringResource(R.string.close))
+                            }
+                        }
                     )
                 }
             }
