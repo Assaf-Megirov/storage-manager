@@ -50,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import com.awindyendprod.storage_manager.model.FontSize
 import com.awindyendprod.storage_manager.ui.components.SideBar
 import android.net.Uri
+import androidx.compose.foundation.border
 import com.awindyendprod.storage_manager.ui.components.ImportConfirmationDialog
 
 @Composable
@@ -243,16 +244,15 @@ fun DatePickerField(
     val calendar = remember { Calendar.getInstance() }
 
     var dateText by remember { mutableStateOf(dateFormatter.format(selectedDate)) }
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
+    var showPicker by remember { mutableStateOf(false) }
 
     // Update dateText whenever selectedDate changes
     LaunchedEffect(selectedDate) {
         dateText = dateFormatter.format(selectedDate)
     }
 
-    // DatePickerDialog
-    if (showDatePicker) {
+    // Handle picker dialog
+    if (showPicker) {
         val currentCalendar = Calendar.getInstance().apply { time = selectedDate }
         DatePickerDialog(
             context,
@@ -261,47 +261,61 @@ fun DatePickerField(
                 calendar.set(Calendar.YEAR, year)
                 calendar.set(Calendar.MONTH, month)
                 calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                showDatePicker = false
-                showTimePicker = true
+                
+                // Show time picker immediately after date picker
+                TimePickerDialog(
+                    context,
+                    { _, hourOfDay, minute ->
+                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                        calendar.set(Calendar.MINUTE, minute)
+                        onDateChange(calendar.time)  // Update the parent with new date
+                        showPicker = false
+                    },
+                    currentCalendar.get(Calendar.HOUR_OF_DAY),
+                    currentCalendar.get(Calendar.MINUTE),
+                    true
+                ).show()
             },
             currentCalendar.get(Calendar.YEAR),
             currentCalendar.get(Calendar.MONTH),
             currentCalendar.get(Calendar.DAY_OF_MONTH)
         ).show()
+        showPicker = false
     }
 
-    // TimePickerDialog
-    if (showTimePicker) {
-        val currentCalendar = Calendar.getInstance().apply { time = selectedDate }
-        TimePickerDialog(
-            context,
-            { _, hourOfDay, minute ->
-                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                calendar.set(Calendar.MINUTE, minute)
-                onDateChange(calendar.time)  // Update the parent with new date
-                showTimePicker = false
-            },
-            currentCalendar.get(Calendar.HOUR_OF_DAY),
-            currentCalendar.get(Calendar.MINUTE),
-            true
-        ).show()
-    }
-
-    OutlinedTextField(
-        value = dateText,
-        onValueChange = { },
-        label = { Text(label) },
-        readOnly = true,
-        enabled = false,
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = rememberRipple()
             ) {
-                showDatePicker = true
+                showPicker = true
             }
-    )
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = MaterialTheme.shapes.small
+                )
+                .padding(horizontal = 12.dp, vertical = 16.dp)
+        ) {
+            Text(
+                text = dateText,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
 }
 
 
