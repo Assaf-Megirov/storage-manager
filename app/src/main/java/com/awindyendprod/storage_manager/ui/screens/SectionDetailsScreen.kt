@@ -1,3 +1,4 @@
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -54,7 +56,8 @@ fun SectionDetailsScreen(
     settingsViewModel: SettingsViewModel,
     shelfId: String,
     sectionId: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onEditItem: (String, String, String) -> Unit
 ) {
     val settings by settingsViewModel.settings.collectAsState()
     val section by viewModel.getSectionById(shelfId, sectionId).collectAsState()
@@ -98,7 +101,6 @@ fun SectionDetailsScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -107,7 +109,8 @@ fun SectionDetailsScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .clickable { onEditItem(shelfId, sectionId, item.id) },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(
@@ -184,6 +187,7 @@ fun SectionDetailsScreen(
                     }
                 }
             }
+
             if (isAddItemDialogVisible) {
                 AddItemDialog(
                     onDismiss = { isAddItemDialogVisible = false },
@@ -217,6 +221,7 @@ fun SectionDetailsScreen(
                     settings = settings
                 )
             }
+
             if (showDeleteConfirmation && itemToDelete != null) {
                 AlertDialog(
                     onDismissRequest = { 

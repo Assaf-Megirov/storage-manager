@@ -46,6 +46,19 @@ class StorageTrackerViewModel(
         null
     )
 
+    fun getItem(shelfId: String, sectionId: String, itemId: String): StateFlow<Item?> = shelves.map { shelvesList ->
+        shelvesList
+            .find { it.id == shelfId }
+            ?.sections
+            ?.find { it.id == sectionId }
+            ?.items
+            ?.find { it.id == itemId }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        null
+    )
+
     private fun updateShelfNames() {
         _shelves.value = _shelves.value.mapIndexed { index, shelf ->
             shelf.copy(name = (index + 1).toString())
@@ -142,6 +155,30 @@ class StorageTrackerViewModel(
         }
         saveData()
         scheduleNotification(item)
+    }
+
+    fun updateItem(shelfId: String, sectionId: String, itemId: String, updatedItem: Item) {
+        _shelves.value = _shelves.value.map { shelf ->
+            if (shelf.id == shelfId) {
+                shelf.copy(sections = mutableListOf<ShelfSection>().also { newSections ->
+                    shelf.sections.forEach { section ->
+                        if (section.id == sectionId) {
+                            newSections.add(section.copy(
+                                items = mutableListOf<Item>().also { newItems ->
+                                    newItems.addAll(section.items.map { item ->
+                                        if (item.id == itemId) updatedItem else item
+                                    })
+                                }
+                            ))
+                        } else {
+                            newSections.add(section)
+                        }
+                    }
+                })
+            } else shelf
+        }
+        saveData()
+        scheduleNotification(updatedItem)
     }
 
     fun removeItemFromSection(shelfId: String, sectionId: String, itemId: String) {

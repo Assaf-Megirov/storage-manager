@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Simple Shelf Manager</string>
+    <string name="app_name">Storage Manager</string>
     <string name="settings">Settings</string>
     <string name="back">Back</string>
     <string name="search">Search</string>
@@ -10,7 +10,7 @@
     <string name="item_name">Item Name</string>
     <string name="client_name">Client Name</string>
     <string name="note">Note</string>
-    <string name="has_alarm">Has Alarm?</string>
+    <string name="has_alarm">Has Alarm</string>
     <string name="entry_date">Entry Date</string>
     <string name="return_date">Return Date</string>
     <string name="add">Add</string>
@@ -41,11 +41,11 @@
     <string name="width_in_dp">Width (in dp)</string>
     <string name="confirm_delete">Confirm Delete</string>
     <string name="delete">Delete</string>
-    <string name="shelf_not_empty_warning">Warning: This shelf contains items. Are you sure you want to delete it and all its contents?</string>
-    <string name="section_not_empty_warning">Warning: This section contains items. Are you sure you want to delete it and all its contents?</string>
+    <string name="shelf_not_empty_warning">This shelf is not empty. Deleting it will also remove all items in its sections.</string>
+    <string name="section_not_empty_warning">This section is not empty. Deleting it will also remove all items in it.</string>
     <string name="confirm_delete_shelf">Are you sure you want to delete this shelf?</string>
     <string name="confirm_delete_section">Are you sure you want to delete this section?</string>
-    <string name="alarm_date">Alarm date</string>
+    <string name="alarm_date">Alarm Date</string>
     <string name="item_reminder">Item Reminder</string>
     <string name="reminder_for_item">Reminder for item: %1$s (Client: %2$s)</string>
     <string name="item_reminder_details">Item: %1$s\nClient: %2$s\n%3$s\n%4$s</string>
@@ -83,5 +83,7 @@
     <!-- Help -->
     <string name="help">Help</string>
     <string name="close">Close</string>
-    <string name="help_message">Welcome to Simple Shelf Manager!\nThis app helps you manage items stored on shelves and sections.\nHere\'s how to use it:\n\n• Use Edit Mode (Pencil icon) to add/remove shelves and sections and press ✓ when you\'re done\n• Tap a section to view and manage its items\n• Once in the section view you can tap the plus button in the bottom to add an item\n• Use Search (Magnifying glass icon) to find items by name or client</string>
+    <string name="help_message">Welcome to Storage Manager!\n\n• Use the search button to find items\n• Toggle edit mode to add/remove shelves and sections\n• Click on a section to view its items\n• Use settings to customize the app\n• Swipe items left/right to remove them</string>
+    <string name="edit_item">Edit Item</string>
+    <string name="save">Save</string>
 </resources>

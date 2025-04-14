@@ -614,6 +614,147 @@ fun SectionView(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditItemScreen(
+    viewModel: StorageTrackerViewModel,
+    settingsViewModel: SettingsViewModel,
+    shelfId: String,
+    sectionId: String,
+    itemId: String,
+    onBack: () -> Unit
+) {
+    val settings by settingsViewModel.settings.collectAsState()
+    val item by remember(shelfId, sectionId, itemId) {
+        viewModel.getItem(shelfId, sectionId, itemId)
+    }.collectAsState(initial = null)
+
+    var editedName by remember { mutableStateOf("") }
+    var editedClientName by remember { mutableStateOf("") }
+    var editedNote by remember { mutableStateOf("") }
+    var editedHasAlarm by remember { mutableStateOf(false) }
+    var editedEntryDate by remember { mutableStateOf(Date()) }
+    var editedReturnDate by remember { mutableStateOf(Date()) }
+    var editedAlarmDate by remember { mutableStateOf<Date?>(null) }
+
+    // Initialize state when item is loaded
+    LaunchedEffect(item) {
+        item?.let {
+            editedName = it.name
+            editedClientName = it.clientName
+            editedNote = it.note
+            editedHasAlarm = it.hasAlarm
+            editedEntryDate = it.entryDate!!
+            editedReturnDate = it.returnDate!!
+            editedAlarmDate = it.alarmDate
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.edit_item)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            item?.let {
+                                viewModel.updateItem(
+                                    shelfId,
+                                    sectionId,
+                                    itemId,
+                                    Item(
+                                        id = itemId,
+                                        name = editedName,
+                                        clientName = editedClientName,
+                                        note = editedNote,
+                                        hasAlarm = editedHasAlarm,
+                                        entryDate = editedEntryDate,
+                                        returnDate = editedReturnDate,
+                                        alarmDate = editedAlarmDate
+                                    )
+                                )
+                                onBack()
+                            }
+                        }
+                    ) {
+                        Icon(Icons.Default.Done, contentDescription = stringResource(R.string.save))
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            OutlinedTextField(
+                value = editedName,
+                onValueChange = { editedName = it },
+                label = { Text(stringResource(R.string.item_name)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = editedClientName,
+                onValueChange = { editedClientName = it },
+                label = { Text(stringResource(R.string.client_name)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = editedNote,
+                onValueChange = { editedNote = it },
+                label = { Text(stringResource(R.string.note)) },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(stringResource(R.string.has_alarm))
+                Switch(
+                    checked = editedHasAlarm,
+                    onCheckedChange = { editedHasAlarm = it }
+                )
+            }
+
+            DatePickerField(
+                label = stringResource(R.string.entry_date),
+                selectedDate = editedEntryDate,
+                onDateChange = { editedEntryDate = it },
+                settings = settings
+            )
+
+            DatePickerField(
+                label = stringResource(R.string.return_date),
+                selectedDate = editedReturnDate,
+                onDateChange = { editedReturnDate = it },
+                settings = settings
+            )
+
+            if (editedHasAlarm) {
+                DatePickerField(
+                    label = stringResource(R.string.alarm_date),
+                    selectedDate = editedAlarmDate ?: editedReturnDate,
+                    onDateChange = { editedAlarmDate = it },
+                    settings = settings
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun StorageManagerApp(
     viewModel: StorageTrackerViewModel,
@@ -675,7 +816,10 @@ fun StorageManagerApp(
                 settingsViewModel = settingsViewModel,
                 shelfId = backStackEntry.arguments?.getString("shelfId") ?: "",
                 sectionId = backStackEntry.arguments?.getString("sectionId") ?: "",
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onEditItem = { shelfId, sectionId, itemId ->
+                    navController.navigate("edit_item/$shelfId/$sectionId/$itemId")
+                }
             )
         }
 
@@ -696,6 +840,25 @@ fun StorageManagerApp(
                 onItemClick = { shelfId, sectionId ->
                     navController.navigate("section_details/$shelfId/$sectionId")
                 }
+            )
+        }
+
+        // Edit item screen
+        composable(
+            route = "edit_item/{shelfId}/{sectionId}/{itemId}",
+            arguments = listOf(
+                navArgument("shelfId") { type = NavType.StringType },
+                navArgument("sectionId") { type = NavType.StringType },
+                navArgument("itemId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            EditItemScreen(
+                viewModel = viewModel,
+                settingsViewModel = settingsViewModel,
+                shelfId = backStackEntry.arguments?.getString("shelfId") ?: "",
+                sectionId = backStackEntry.arguments?.getString("sectionId") ?: "",
+                itemId = backStackEntry.arguments?.getString("itemId") ?: "",
+                onBack = { navController.popBackStack() }
             )
         }
     }
