@@ -420,15 +420,37 @@ fun ShelfView(
                 )
                 Column {
                     if (isEditMode) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            IconButton(onClick = { onAddSection(shelf.id) }) {
-                                Icon(Icons.Default.Add, contentDescription = "Add Section")
+                        if (shelf.sections.isEmpty()) {
+                            // Keep original vertical size and horizontal position
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .padding(top = 16.dp),  // Add padding to move the button down
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                IconButton(
+                                    onClick = { onAddSection(shelf.id) },
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Add,
+                                        contentDescription = "Add Section",
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
                             }
-                            IconButton(onClick = { showDeleteShelfDialog = true }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Remove Shelf")
+                        } else {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                IconButton(onClick = { onAddSection(shelf.id) }) {
+                                    Icon(Icons.Default.Add, contentDescription = "Add Section")
+                                }
+                                IconButton(onClick = { showDeleteShelfDialog = true }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Remove Shelf")
+                                }
                             }
                         }
                     }
@@ -527,19 +549,16 @@ fun SectionView(
             )
         }
 
-        // Calculate available space for items
         val itemHeight = when (settings.fontSize) {
             FontSize.SMALL -> 36.dp
             FontSize.MEDIUM -> 42.dp
             FontSize.LARGE -> 48.dp
         }
 
-        // Subtract top and bottom areas from available space, accounting for edit mode button
-        val bottomPadding = if (isEditMode) 56.dp else 10.dp // Increased space when in edit mode
-        val availableSpace = (settings.sectionHeight.dp - (4.dp + bottomPadding)) // 24.dp for top header
+        val bottomPadding = if (isEditMode) 56.dp else 10.dp
+        val availableSpace = (settings.sectionHeight.dp - (4.dp + bottomPadding))
         val maxVisibleItems = (availableSpace.value / itemHeight.value).toInt()
 
-        // Middle section for items
         Column(
             modifier = Modifier
                 .weight(1f)
