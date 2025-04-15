@@ -80,6 +80,6 @@ class StorageTrackerPersistenceService(private val context: Context) {
         val settingsJson = prefs.getString("settings", null)
         return settingsJson?.let {
             gson.fromJson(it, Settings::class.java)
-        } ?: Settings() // Return default settings if none found
+        } ?: Settings()
     }
 }

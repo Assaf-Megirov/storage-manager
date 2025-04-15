@@ -38,8 +38,6 @@ fun SettingsScreen(
     onBack: () -> Unit
 ) {
     val settings by viewModel.settings.collectAsState()
-
-    // Add file pickers
     val exportFilePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
@@ -77,7 +75,6 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Section Date Type Setting
             Column {
                 Text(
                     text = stringResource(R.string.section_date_display),
@@ -101,7 +98,6 @@ fun SettingsScreen(
                 }
             }
 
-            // Date Display Format Setting
             Column {
                 Text(
                     text = stringResource(R.string.date_display_format),
@@ -125,7 +121,6 @@ fun SettingsScreen(
                 }
             }
 
-            // Default Return Date Setting
             Column {
                 Text(
                     text = stringResource(R.string.default_return_date),
@@ -145,7 +140,6 @@ fun SettingsScreen(
                 )
             }
 
-            // Language selection
             Text(
                 text = stringResource(R.string.language),
                 style = MaterialTheme.typography.titleMedium,
@@ -174,7 +168,6 @@ fun SettingsScreen(
                 }
             }
 
-            // Font Size Setting
             Column {
                 Text(
                     text = stringResource(R.string.font_size),
@@ -201,7 +194,6 @@ fun SettingsScreen(
                 }
             }
 
-            // Section Height Setting
             SettingsSlider(
                 title = stringResource(R.string.section_height),
                 value = settings.sectionHeight.toFloat(),
@@ -214,7 +206,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Section Width Setting
             SettingsSlider(
                 title = stringResource(R.string.section_width),
                 value = settings.sectionWidth.toFloat(),
@@ -227,7 +218,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Preview shelf with multiple sections
             Text(
                 text = stringResource(R.string.shelf_preview),
                 style = MaterialTheme.typography.titleMedium,
@@ -253,15 +243,12 @@ fun SettingsScreen(
                 }
             }
 
-
-            // Data Management Section
             Text(
                 text = stringResource(R.string.data_management),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(top=8.dp)
             )
 
-            // Export Button
             Box {
                 Button(
                     onClick = { showExportMenu = true },
@@ -308,7 +295,6 @@ fun SettingsScreen(
                 }
             }
 
-            // Import Button
             Button(
                 onClick = {
                     importFilePicker.launch(arrayOf("application/json"))

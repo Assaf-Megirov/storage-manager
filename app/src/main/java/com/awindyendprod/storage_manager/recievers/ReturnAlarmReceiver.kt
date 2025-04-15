@@ -12,7 +12,6 @@ class ReturnAlarmReceiver : BroadcastReceiver() {
         val itemId = intent.getStringExtra("ITEM_ID")
         val itemName = intent.getStringExtra("ITEM_NAME")
 
-        // Create and show notification
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notification = NotificationCompat.Builder(context, "StorageTrackerChannel")
             .setContentTitle("Item Return Reminder")

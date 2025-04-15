@@ -28,14 +28,12 @@ class SettingsViewModel(
     private val persistenceService: StorageTrackerPersistenceService,
     private val storageTrackerViewModel: StorageTrackerViewModel
 ) : ViewModel() {
-    // Store application context reference for configuration updates
     private val appContext = context.applicationContext
     private val prefs = appContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
     
     private val _settings = MutableStateFlow(loadSettings())
     val settings: StateFlow<Settings> = _settings.asStateFlow()
 
-    // Add this to track when we need to recreate the activity
     private val _recreateActivity = MutableStateFlow(false)
     val recreateActivity: StateFlow<Boolean> = _recreateActivity.asStateFlow()
 
@@ -91,7 +89,6 @@ class SettingsViewModel(
         _settings.value = _settings.value.copy(language = language)
         saveSettings(_settings.value)
         updateLocale(language)
-        // Trigger activity recreation
         _recreateActivity.value = true
     }
 
@@ -101,14 +98,14 @@ class SettingsViewModel(
     }
 
     fun updateSectionHeight(height: Int) {
-        if (height in 100..500) {  // Validate range
+        if (height in 100..500) {
             _settings.value = _settings.value.copy(sectionHeight = height)
             saveSettings(_settings.value)
         }
     }
 
     fun updateSectionWidth(width: Int) {
-        if (width in 100..500) {  // Changed from 200 to 100
+        if (width in 100..500) {
             _settings.value = _settings.value.copy(sectionWidth = width)
             saveSettings(_settings.value)
         }
@@ -128,12 +125,10 @@ class SettingsViewModel(
         Locale.setDefault(locale)
     }
 
-    // Call this after recreating the activity
     fun onActivityRecreated() {
         _recreateActivity.value = false
     }
 
-    // Factory for creating SettingsViewModel with context
     class Factory(
         private val context: Context,
         private val persistenceService: StorageTrackerPersistenceService,
@@ -158,7 +153,7 @@ class SettingsViewModel(
                 persistenceService.exportToFile(uri, settings.value)
             } catch (e: Exception) {
                 Log.e("SettingsViewModel", "Error exporting data", e)
-                // Handle error (you might want to add error state handling)
+                //TODO: Handle error
             }
         }
     }
@@ -167,15 +162,12 @@ class SettingsViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val importedData = persistenceService.importFromFile(uri)
-                // Update settings
                 updateSettings(importedData.settings)
-                // Update shelves data
                 persistenceService.saveData(importedData.shelves)
-                // Notify StorageTrackerViewModel to reload
                 storageTrackerViewModel.reloadData()
             } catch (e: Exception) {
                 Log.e("SettingsViewModel", "Error importing data", e)
-                // Handle error
+                //TODO: Handle error
             }
         }
     }
@@ -183,7 +175,6 @@ class SettingsViewModel(
     private fun updateSettings(newSettings: Settings) {
         _settings.value = newSettings
         saveSettings(newSettings)
-        // Always recreate after import to refresh all data
         updateLocale(newSettings.language)
         _recreateActivity.value = true
     }
@@ -191,28 +182,22 @@ class SettingsViewModel(
     fun shareData() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                // Create temporary file
                 val tempFile = File(appContext.cacheDir, "storage_manager_backup.json")
                 tempFile.createNewFile()
-                
-                // Export data to temporary file with current settings
                 persistenceService.exportToFile(tempFile, settings.value)
-                
-                // Get content URI using FileProvider
+
                 val contentUri = FileProvider.getUriForFile(
                     appContext,
                     "${appContext.packageName}.fileprovider",
                     tempFile
                 )
-                
-                // Create share intent
+
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                     type = "application/json"
                     putExtra(Intent.EXTRA_STREAM, contentUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                
-                // Start share activity
+
                 val chooserIntent = Intent.createChooser(shareIntent, null)
                 chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 appContext.startActivity(chooserIntent)

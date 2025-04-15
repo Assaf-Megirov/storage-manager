@@ -11,7 +11,7 @@ enum class DateDisplayFormat {
 }
 
 enum class AppLanguage {
-    SYSTEM,  // Use system language
+    SYSTEM,
     ENGLISH,
     HEBREW,
     RUSSIAN
@@ -29,6 +29,6 @@ data class Settings(
     val defaultReturnDateDays: Int = 14,
     val language: AppLanguage = AppLanguage.SYSTEM,
     val fontSize: FontSize = FontSize.MEDIUM,
-    val sectionHeight: Int = 210, // Default height in dp
-    val sectionWidth: Int = 300   // Default width in dp
+    val sectionHeight: Int = 210,
+    val sectionWidth: Int = 300
 ) 

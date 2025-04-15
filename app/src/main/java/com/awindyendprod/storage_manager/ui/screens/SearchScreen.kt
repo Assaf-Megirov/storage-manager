@@ -50,7 +50,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 
-// Add this enum at the top level with SortOrder
 enum class SearchType {
     ITEM_NAME,
     CLIENT_NAME
@@ -144,7 +143,6 @@ fun SearchScreen(
                         .weight(1f)
                         .padding(4.dp)
                 ) {
-                    // Search options (filters, sort options, etc.)
                     SearchOptions(
                         searchQuery = searchQuery,
                         onSearchQueryChange = { searchQuery = it },
@@ -177,7 +175,6 @@ fun SearchScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                // Search options and results in a single column for portrait mode
                 SearchOptions(
                     searchQuery = searchQuery,
                     onSearchQueryChange = { searchQuery = it },
@@ -437,7 +434,6 @@ private fun SearchItemCard(
     }
 }
 
-// Data class to hold search item information
 data class SearchItem(
     val item: Item,
     val shelfId: String,
@@ -446,7 +442,6 @@ data class SearchItem(
     val sectionNumber: Int
 )
 
-// Enum for sort orders
 enum class SortOrder {
     NAME_ASC,
     NAME_DESC,

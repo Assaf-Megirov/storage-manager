@@ -39,7 +39,6 @@ class MainActivity : ComponentActivity() {
     }
     
     override fun attachBaseContext(newBase: Context) {
-        // Use temporary ViewModels just for initial configuration
         val tempPersistenceService = StorageTrackerPersistenceService(newBase)
         val tempStorageTrackerViewModel = StorageTrackerViewModel(newBase, tempPersistenceService)
         val tempSettingsViewModel = SettingsViewModel(
@@ -57,11 +56,9 @@ class MainActivity : ComponentActivity() {
         
         val config = Configuration(newBase.resources.configuration)
         config.setLocale(locale)
-        
-        // Create a wrapped context with the new configuration
+
         val context = newBase.createConfigurationContext(config)
-        
-        // Force RTL for Hebrew after context creation
+
         if (settings.language == AppLanguage.HEBREW) {
             context.resources.configuration.setLayoutDirection(locale)
         }
@@ -71,8 +68,7 @@ class MainActivity : ComponentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Observe recreation events
+
         lifecycleScope.launch {
             settingsViewModel.recreateActivity.collect { shouldRecreate ->
                 if (shouldRecreate) {
@@ -82,7 +78,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Get the import URI only from the initial intent
         val importUri = if (savedInstanceState == null) {
             when (intent?.action) {
                 Intent.ACTION_VIEW -> intent?.data

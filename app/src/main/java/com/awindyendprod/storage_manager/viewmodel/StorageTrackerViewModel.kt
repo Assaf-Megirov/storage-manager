@@ -105,8 +105,7 @@ class StorageTrackerViewModel(
         if (!item.hasAlarm || item.alarmDate == null) return
 
         val workManager = WorkManager.getInstance(applicationContext)
-        
-        // Get the current locale configuration from SharedPreferences
+
         val sharedPrefs = applicationContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
         val languageStr = sharedPrefs.getString("language", AppLanguage.SYSTEM.name)
         val language = AppLanguage.valueOf(languageStr ?: AppLanguage.SYSTEM.name)
@@ -116,7 +115,7 @@ class StorageTrackerViewModel(
             .putString("clientName", item.clientName)
             .putLong("entryDate", item.entryDate?.time ?: -1)
             .putLong("returnDate", item.returnDate?.time ?: -1)
-            .putString("language", language.name)  // Pass the language setting
+            .putString("language", language.name)
             .build()
 
         val delay = item.alarmDate.time - System.currentTimeMillis()

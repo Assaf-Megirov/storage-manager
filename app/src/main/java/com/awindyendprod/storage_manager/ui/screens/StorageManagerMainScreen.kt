@@ -87,7 +87,6 @@ fun StorageManagerMainScreen(
     val settings by settingsViewModel.settings.collectAsState()
     val isLandscape = isLandscape()
 
-    // Then use settings in the remember block for newItemReturnDate
     var newItemReturnDate by remember(settings.defaultReturnDateDays) { 
         mutableStateOf(
             Date(System.currentTimeMillis() + (settings.defaultReturnDateDays * 24 * 60 * 60 * 1000L))
@@ -185,7 +184,6 @@ fun StorageManagerMainScreen(
                     )
                 }
 
-                // Show Add Item Dialog
                 if (isAddItemDialogVisible) {
                     AddItemDialog(
                         onDismiss = { isAddItemDialogVisible = false },
@@ -293,29 +291,26 @@ fun DatePickerField(
     var dateText by remember { mutableStateOf(dateFormatter.format(selectedDate)) }
     var showPicker by remember { mutableStateOf(false) }
 
-    // Update dateText whenever selectedDate changes
     LaunchedEffect(selectedDate) {
         dateText = dateFormatter.format(selectedDate)
     }
 
-    // Handle picker dialog
     if (showPicker) {
         val currentCalendar = Calendar.getInstance().apply { time = selectedDate }
         DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
-                calendar.time = selectedDate  // Start with current selected date
+                calendar.time = selectedDate
                 calendar.set(Calendar.YEAR, year)
                 calendar.set(Calendar.MONTH, month)
                 calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                
-                // Show time picker immediately after date picker
+
                 TimePickerDialog(
                     context,
                     { _, hourOfDay, minute ->
                         calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
                         calendar.set(Calendar.MINUTE, minute)
-                        onDateChange(calendar.time)  // Update the parent with new date
+                        onDateChange(calendar.time)
                         showPicker = false
                     },
                     currentCalendar.get(Calendar.HOUR_OF_DAY),
@@ -468,12 +463,11 @@ fun ShelfView(
                 Column {
                     if (isEditMode) {
                         if (shelf.sections.isEmpty()) {
-                            // Keep original vertical size and horizontal position
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .padding(top = 16.dp),  // Add padding to move the button down
+                                    .padding(top = 16.dp),
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 IconButton(
@@ -583,7 +577,6 @@ fun SectionView(
             )
             .clickable(onClick = onSectionClick)
     ) {
-        // Top row for section number
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -657,7 +650,6 @@ fun SectionView(
             }
         }
 
-        // Bottom row for add and delete buttons (if in edit mode)
         if (isEditMode) {
             Row(
                 modifier = Modifier
@@ -703,7 +695,6 @@ fun EditItemScreen(
     var editedReturnDate by remember { mutableStateOf(Date()) }
     var editedAlarmDate by remember { mutableStateOf<Date?>(null) }
 
-    // Initialize state when item is loaded
     LaunchedEffect(item) {
         item?.let {
             editedName = it.name
@@ -830,8 +821,7 @@ fun StorageManagerApp(
     val navController = rememberNavController()
     var showImportDialog by remember { mutableStateOf(false) }
     var handledUri by remember { mutableStateOf<Uri?>(null) }
-    
-    // Show import dialog if URI is provided and hasn't been handled
+
     LaunchedEffect(importUri) {
         if (importUri != null && importUri != handledUri) {
             showImportDialog = true
@@ -852,7 +842,6 @@ fun StorageManagerApp(
     }
 
     NavHost(navController = navController, startDestination = "main") {
-        // Main screen composable
         composable("main") {
             StorageManagerMainScreen(
                 viewModel = viewModel,
@@ -869,7 +858,6 @@ fun StorageManagerApp(
             )
         }
 
-        // Section details screen
         composable(
             route = "section_details/{shelfId}/{sectionId}",
             arguments = listOf(
@@ -889,7 +877,6 @@ fun StorageManagerApp(
             )
         }
 
-        // Settings screen
         composable("settings") {
             SettingsScreen(
                 viewModel = settingsViewModel,
@@ -897,7 +884,6 @@ fun StorageManagerApp(
             )
         }
 
-        // Search screen
         composable("search") {
             SearchScreen(
                 viewModel = viewModel,
@@ -909,7 +895,6 @@ fun StorageManagerApp(
             )
         }
 
-        // Edit item screen
         composable(
             route = "edit_item/{shelfId}/{sectionId}/{itemId}",
             arguments = listOf(

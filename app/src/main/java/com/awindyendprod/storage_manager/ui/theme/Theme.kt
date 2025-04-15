@@ -15,7 +15,7 @@ fun StorageManagerTheme(
     settings: Settings,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = lightColorScheme()  // You can add dark theme support later if needed
+    val colorScheme = lightColorScheme()
     val typography = Typography.withCustomSize(settings.fontSize)
     val view = LocalView.current
     

@@ -49,14 +49,12 @@ fun AddItemDialog(
     onAlarmDateChange: (Date) -> Unit,
     settings: Settings
 ) {
-    // Update alarm date whenever return date changes
     LaunchedEffect(returnDate) {
         if (alarmDate == null || alarmDate == returnDate) {
             onAlarmDateChange(returnDate)
         }
     }
 
-    // When hasAlarm is toggled on, set alarm date to return date if it's not already set
     LaunchedEffect(hasAlarm) {
         if (hasAlarm && alarmDate == null) {
             onAlarmDateChange(returnDate)
@@ -94,7 +92,6 @@ fun AddItemDialog(
                     })
                     .padding(16.dp)
             ) {
-                // Title and buttons row at the top
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -127,14 +124,11 @@ fun AddItemDialog(
                     }
                 }
 
-                // Rest of the dialog content
                 if (isLandscape) {
-                    // Landscape layout
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Left column
                         Column(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -162,7 +156,6 @@ fun AddItemDialog(
                             )
                         }
 
-                        // Right column
                         Column(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -203,7 +196,6 @@ fun AddItemDialog(
                         }
                     }
                 } else {
-                    // Portrait layout (existing code)
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)

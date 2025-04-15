@@ -27,7 +27,6 @@ fun SettingsSlider(
 ) {
     var textFieldValue by remember { mutableStateOf(value.toInt().toString()) }
 
-    // Update text field when slider changes
     LaunchedEffect(value) {
         textFieldValue = value.toInt().toString()
     }

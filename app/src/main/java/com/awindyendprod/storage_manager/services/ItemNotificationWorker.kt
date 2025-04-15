@@ -20,11 +20,9 @@ class ItemNotificationWorker(
 ) : Worker(context, params) {
 
     override fun doWork(): Result {
-        // Get the language setting from input data
         val languageStr = inputData.getString("language") ?: AppLanguage.SYSTEM.name
         val language = AppLanguage.valueOf(languageStr)
-        
-        // Create locale based on language setting
+
         val locale = when (language) {
             AppLanguage.SYSTEM -> Resources.getSystem().configuration.locales[0]
             AppLanguage.ENGLISH -> Locale("en")
@@ -32,7 +30,6 @@ class ItemNotificationWorker(
             AppLanguage.RUSSIAN -> Locale("ru")
         }
 
-        // Create configuration with the correct locale
         val configuration = context.resources.configuration.apply {
             setLocale(locale)
         }
@@ -43,7 +40,6 @@ class ItemNotificationWorker(
         val entryDateMillis = inputData.getLong("entryDate", -1)
         val returnDateMillis = inputData.getLong("returnDate", -1)
 
-        // Format dates using the localized context
         val entryDateStr = if (entryDateMillis != -1L) {
             contextWithLocale.getString(R.string.entry_date_format, 
                 SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(entryDateMillis)))
