@@ -86,4 +86,7 @@
     <string name="help_message">Welcome to Storage Manager!\nThis app helps you manage items stored on shelves and in sections.\nHere\'s how to use it:\n\n• Use Edit mode (the pencil icon) to add or remove shelves and sections, then tap ✓ when you\'re finished.\n\n• Tap on a section to view and manage its items.\n\n• In the section window, tap the plus button at the bottom to add an item.\n\n• Use the search (magnifying glass icon) to find items by name or client.</string>
     <string name="edit_item">Edit Item</string>
     <string name="save">Save</string>
+    <string name="no_shelves_message">No shelves available</string>
+    <string name="click_edit_to_add">Click the edit button to add shelves</string>
+    <string name="click_edit_to_add_landscape">Click edit in the sidebar</string>
 </resources>

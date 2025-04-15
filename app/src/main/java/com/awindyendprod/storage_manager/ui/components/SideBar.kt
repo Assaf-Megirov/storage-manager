@@ -37,6 +37,12 @@ fun SideBar(
             .padding(4.dp, top=24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        IconButton(onClick = onEditModeToggle) {
+            Icon(
+                imageVector = if (isEditMode) Icons.Default.Done else Icons.Default.Edit,
+                contentDescription = stringResource(R.string.edit_mode)
+            )
+        }
         IconButton(onClick = onSearchClick) {
             Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search))
         }
@@ -45,12 +51,6 @@ fun SideBar(
         }
         IconButton(onClick = onHelpClick) {
             Icon(Icons.Default.Info, contentDescription = stringResource(R.string.help))
-        }
-        IconButton(onClick = onEditModeToggle) {
-            Icon(
-                imageVector = if (isEditMode) Icons.Default.Done else Icons.Default.Edit,
-                contentDescription = stringResource(R.string.edit_mode)
-            )
         }
     }
 }

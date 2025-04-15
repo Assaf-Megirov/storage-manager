@@ -52,6 +52,7 @@ import com.awindyendprod.storage_manager.ui.components.SideBar
 import android.net.Uri
 import androidx.compose.foundation.border
 import com.awindyendprod.storage_manager.ui.components.ImportConfirmationDialog
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun isLandscape(): Boolean {
@@ -83,9 +84,9 @@ fun StorageManagerMainScreen(
     var newItemEntryDate by remember { mutableStateOf(Date()) }
     var newItemAlarmDate by remember { mutableStateOf<Date?>(null) }
     
-    // Get settings first
     val settings by settingsViewModel.settings.collectAsState()
-    
+    val isLandscape = isLandscape()
+
     // Then use settings in the remember block for newItemReturnDate
     var newItemReturnDate by remember(settings.defaultReturnDateDays) { 
         mutableStateOf(
@@ -94,7 +95,7 @@ fun StorageManagerMainScreen(
     }
 
     Row {
-        if (isLandscape()) {
+        if (isLandscape) {
             SideBar(
                 onSearchClick = onSearchClick,
                 onSettingsClick = onSettingsClick,
@@ -105,7 +106,7 @@ fun StorageManagerMainScreen(
         }
 
         Scaffold(
-            topBar = if (!isLandscape()) {
+            topBar = if (!isLandscape) {
                 {
                     TopAppBar(
                         title = { Text(stringResource(R.string.app_name)) },
@@ -150,23 +151,39 @@ fun StorageManagerMainScreen(
                 }
             }
         ) { padding ->
-            Box(modifier = Modifier.padding(padding)) {
+            Box(modifier = Modifier.padding(padding).fillMaxSize()) {
                 val shelves by viewModel.shelves.collectAsState()
-                ShelvesScrollableView(
-                    shelves = shelves,
-                    isEditMode = isEditMode,
-                    onShelfSelect = { shelf -> selectedShelf = shelf },
-                    onAddSection = { shelfId -> viewModel.addSectionToShelf(shelfId, "New Section") },
-                    onAddItem = { shelfId, sectionId ->
-                        selectedShelfId = shelfId
-                        selectedSectionId = sectionId
-                        isAddItemDialogVisible = true
-                    },
-                    onSectionClick = onSectionClick,
-                    onRemoveShelf = { shelfId -> viewModel.removeShelf(shelfId) },
-                    onRemoveSection = { shelfId, sectionId -> viewModel.removeSection(shelfId, sectionId) },
-                    settings = settings
-                )
+                
+                if (shelves.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.no_shelves_message),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+
+                    EmptyShelvesHint(isLandscape = isLandscape)
+
+                } else {
+                    ShelvesScrollableView(
+                        shelves = shelves,
+                        isEditMode = isEditMode,
+                        onShelfSelect = { shelf -> selectedShelf = shelf },
+                        onAddSection = { shelfId -> viewModel.addSectionToShelf(shelfId, "New Section") },
+                        onAddItem = { shelfId, sectionId ->
+                            selectedShelfId = shelfId
+                            selectedSectionId = sectionId
+                            isAddItemDialogVisible = true
+                        },
+                        onSectionClick = onSectionClick,
+                        onRemoveShelf = { shelfId -> viewModel.removeShelf(shelfId) },
+                        onRemoveSection = { shelfId, sectionId -> viewModel.removeSection(shelfId, sectionId) },
+                        settings = settings
+                    )
+                }
 
                 // Show Add Item Dialog
                 if (isAddItemDialogVisible) {
@@ -227,6 +244,36 @@ fun StorageManagerMainScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun EmptyShelvesHint(isLandscape: Boolean) {
+    val hintAlignment = if (isLandscape) Alignment.TopStart else Alignment.TopEnd
+    val hintPadding = 16.dp
+    val hintIcon = if (isLandscape) Icons.Default.KeyboardArrowLeft else Icons.Default.KeyboardArrowUp
+    val hintTextRes = R.string.click_edit_to_add
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(hintPadding),
+        contentAlignment = hintAlignment
+    ) {
+        Column(
+            horizontalAlignment = if (isLandscape) Alignment.Start else Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                imageVector = hintIcon,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = stringResource(hintTextRes),
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }
