@@ -85,4 +85,9 @@
     <string name="help_message">ברוכים הבאים למנהל אחסון!\nאפליקציה זו עוזרת לך לנהל פריטים המאוחסנים במדפים ובמדורים.\nכך תשתמש בה:\n\n• השתמש במצב עריכה (העיפרון) להוספה/מחיקה של מדפים ומדורים ולחץ על ✓ כשסיימת\n\n• לחץ על מדור כדי לצפות ולנהל את הפריטים שלו\n\n• בחלון המדור, לחץ על כפתור הפלוס בתחתית כדי להוסיף פריט\n\n• השתמש בחיפוש (זכוכית מגדלת) כדי למצוא פריטים לפי שם או לקוח</string>
     <string name="edit_item">ערוך פריט</string>
     <string name="save">שמור</string>
+    <string name="no_shelves_message">אין מדפים</string>
+    <string name="click_edit_to_add">לחץ על כפתור העריכה כדי להוסיף מדפים</string>
+    <string name="click_edit_to_add_landscape">לחץ על כפתור העריכה כדי להוסיף מדפים</string>
+    <string name="click_fab_to_add_shelf">לחץ על כפתור ה+ כדי להוסיף מדף</string>
+    <string name="click_plus_to_add_section">לחץ על כפתור ה+ כדי להוסיף מדור</string>
 </resources> 

@@ -86,11 +86,23 @@ fun StorageManagerMainScreen(
     
     val settings by settingsViewModel.settings.collectAsState()
     val isLandscape = isLandscape()
+    val shelves by viewModel.shelves.collectAsState()
 
     var newItemReturnDate by remember(settings.defaultReturnDateDays) { 
         mutableStateOf(
             Date(System.currentTimeMillis() + (settings.defaultReturnDateDays * 24 * 60 * 60 * 1000L))
         )
+    }
+
+    val onboardingState by remember(isEditMode, shelves) {
+        derivedStateOf {
+            when {
+                !isEditMode -> OnboardingState.NEEDS_EDIT_MODE
+                shelves.isEmpty() -> OnboardingState.NEEDS_SHELF
+                shelves.all { shelf -> shelf.sections.isEmpty() } -> OnboardingState.NEEDS_SECTION
+                else -> OnboardingState.COMPLETED
+            }
+        }
     }
 
     Row {
@@ -151,7 +163,6 @@ fun StorageManagerMainScreen(
             }
         ) { padding ->
             Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-                val shelves by viewModel.shelves.collectAsState()
                 
                 if (shelves.isEmpty()) {
                     Box(
@@ -164,24 +175,35 @@ fun StorageManagerMainScreen(
                         )
                     }
 
-                    EmptyShelvesHint(isLandscape = isLandscape)
+                    when (onboardingState) {
+                        OnboardingState.NEEDS_EDIT_MODE -> EmptyShelvesHint(isLandscape = isLandscape)
+                        OnboardingState.NEEDS_SHELF -> ShelfAddHint(isLandscape = isLandscape)
+                        else -> {} // No hint needed in other states when there are no shelves
+                    }
 
                 } else {
-                    ShelvesScrollableView(
-                        shelves = shelves,
-                        isEditMode = isEditMode,
-                        onShelfSelect = { shelf -> selectedShelf = shelf },
-                        onAddSection = { shelfId -> viewModel.addSectionToShelf(shelfId, "New Section") },
-                        onAddItem = { shelfId, sectionId ->
-                            selectedShelfId = shelfId
-                            selectedSectionId = sectionId
-                            isAddItemDialogVisible = true
-                        },
-                        onSectionClick = onSectionClick,
-                        onRemoveShelf = { shelfId -> viewModel.removeShelf(shelfId) },
-                        onRemoveSection = { shelfId, sectionId -> viewModel.removeSection(shelfId, sectionId) },
-                        settings = settings
-                    )
+                    Column (
+
+                    ){
+                        if (onboardingState == OnboardingState.NEEDS_SECTION) {
+                            SectionAddHint(isLandscape = isLandscape)
+                        }
+                        ShelvesScrollableView(
+                            shelves = shelves,
+                            isEditMode = isEditMode,
+                            onShelfSelect = { shelf -> selectedShelf = shelf },
+                            onAddSection = { shelfId -> viewModel.addSectionToShelf(shelfId, "New Section") },
+                            onAddItem = { shelfId, sectionId ->
+                                selectedShelfId = shelfId
+                                selectedSectionId = sectionId
+                                isAddItemDialogVisible = true
+                            },
+                            onSectionClick = onSectionClick,
+                            onRemoveShelf = { shelfId -> viewModel.removeShelf(shelfId) },
+                            onRemoveSection = { shelfId, sectionId -> viewModel.removeSection(shelfId, sectionId) },
+                            settings = settings
+                        )
+                    }
                 }
 
                 if (isAddItemDialogVisible) {
@@ -246,6 +268,13 @@ fun StorageManagerMainScreen(
     }
 }
 
+enum class OnboardingState {
+    NEEDS_EDIT_MODE,
+    NEEDS_SHELF,
+    NEEDS_SECTION,
+    COMPLETED
+}
+
 @Composable
 fun EmptyShelvesHint(isLandscape: Boolean) {
     val hintAlignment = if (isLandscape) Alignment.TopStart else Alignment.TopEnd
@@ -271,6 +300,64 @@ fun EmptyShelvesHint(isLandscape: Boolean) {
             Text(
                 text = stringResource(hintTextRes),
                 style = MaterialTheme.typography.titleMedium
+            )
+        }
+    }
+}
+
+@Composable
+fun ShelfAddHint(isLandscape: Boolean) {
+    // Calculate position based on FAB location
+    val fabBottomPadding = 16.dp
+    val fabSize = 56.dp
+    val hintSpacing = 12.dp
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                bottom = fabBottomPadding + fabSize + hintSpacing,
+                end = 32.dp
+            ),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.click_fab_to_add_shelf),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
+// New hint for adding sections to the shelf
+@Composable
+fun SectionAddHint(isLandscape: Boolean) {
+    Box(
+        modifier = Modifier
+            .padding(vertical = 2.dp, horizontal = 50.dp),
+        contentAlignment = Alignment.TopStart
+    ) {
+        Column(
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.click_plus_to_add_section),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
             )
         }
     }
