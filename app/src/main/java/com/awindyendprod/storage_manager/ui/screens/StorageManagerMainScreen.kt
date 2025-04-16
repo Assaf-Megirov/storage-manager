@@ -518,7 +518,7 @@ fun ShelfView(
                         shelf.sections.forEachIndexed { index, section ->
                             Box(
                                 modifier = Modifier
-                                    .padding(end = 8.dp)
+                                    .padding(end = 4.dp)
                                     .height(settings.sectionHeight.dp)
                             ) {
                                 SectionView(
@@ -598,22 +598,22 @@ fun SectionView(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(4.dp)
         ) {
             Text(
                 text = (sectionNumber + 1).toString(),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.align(Alignment.TopEnd)
             )
         }
 
         val itemHeight = when (settings.fontSize) {
             FontSize.SMALL -> 36.dp
-            FontSize.MEDIUM -> 42.dp
-            FontSize.LARGE -> 48.dp
+            FontSize.MEDIUM -> 46.dp
+            FontSize.LARGE -> 54.dp
         }
 
-        val bottomPadding = if (isEditMode) 56.dp else 10.dp
+        val bottomPadding = 34.dp
         val availableSpace = (settings.sectionHeight.dp - (4.dp + bottomPadding))
         val maxVisibleItems = (availableSpace.value / itemHeight.value).toInt()
 
@@ -672,7 +672,7 @@ fun SectionView(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .height(bottomPadding),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
@@ -682,6 +682,21 @@ fun SectionView(
                 }
                 IconButton(
                     onClick = onAddItem
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
+                }
+            }
+        }
+        else{
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.End)
+                    .height(bottomPadding)
+            ) {
+                IconButton(
+                    onClick = onAddItem,
+                    modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
                 }
