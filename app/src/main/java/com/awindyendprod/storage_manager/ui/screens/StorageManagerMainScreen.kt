@@ -409,30 +409,35 @@ fun ShelfView(
     var showDeleteShelfDialog by remember { mutableStateOf(false) }
 
     if (showDeleteShelfDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteShelfDialog = false },
-            title = { Text(stringResource(R.string.confirm_delete)) },
-            text = { 
-                if (shelf.sections.any { it.items.isNotEmpty() }) {
-                    Text(stringResource(R.string.shelf_not_empty_warning))
-                } else {
-                    Text(stringResource(R.string.confirm_delete_shelf))
+        if(shelf.sections.isNotEmpty()){
+            AlertDialog(
+                onDismissRequest = { showDeleteShelfDialog = false },
+                title = { Text(stringResource(R.string.confirm_delete)) },
+                text = {
+                    if (shelf.sections.any { it.items.isNotEmpty() }) {
+                        Text(stringResource(R.string.shelf_not_empty_warning))
+                    } else {
+                        Text(stringResource(R.string.confirm_delete_shelf))
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onRemoveShelf(shelf.id)
+                        showDeleteShelfDialog = false
+                    }) {
+                        Text(stringResource(R.string.delete))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteShelfDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    onRemoveShelf(shelf.id)
-                    showDeleteShelfDialog = false
-                }) {
-                    Text(stringResource(R.string.delete))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteShelfDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
+            )
+        }else{
+            onRemoveShelf(shelf.id)
+            showDeleteShelfDialog = false
+        }
     }
 
     val shelfColor = Color.hsl(
@@ -479,6 +484,14 @@ fun ShelfView(
                                         contentDescription = "Add Section",
                                         modifier = Modifier.size(32.dp)
                                     )
+                                }
+                                IconButton(
+                                    onClick = { showDeleteShelfDialog = true },
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .align(Alignment.CenterEnd)
+                                ) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Remove Shelf")
                                 }
                             }
                         } else {
@@ -540,30 +553,35 @@ fun SectionView(
     var showDeleteSectionDialog by remember { mutableStateOf(false) }
 
     if (showDeleteSectionDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteSectionDialog = false },
-            title = { Text(stringResource(R.string.confirm_delete)) },
-            text = { 
-                if (section.items.isNotEmpty()) {
-                    Text(stringResource(R.string.section_not_empty_warning))
-                } else {
-                    Text(stringResource(R.string.confirm_delete_section))
+        if (section.items.isNotEmpty()) {
+            AlertDialog(
+                onDismissRequest = { showDeleteSectionDialog = false },
+                title = { Text(stringResource(R.string.confirm_delete)) },
+                text = {
+                    if (section.items.isNotEmpty()) {
+                        Text(stringResource(R.string.section_not_empty_warning))
+                    } else {
+                        Text(stringResource(R.string.confirm_delete_section))
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onRemoveSection()
+                        showDeleteSectionDialog = false
+                    }) {
+                        Text(stringResource(R.string.delete))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteSectionDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    onRemoveSection()
-                    showDeleteSectionDialog = false
-                }) {
-                    Text(stringResource(R.string.delete))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteSectionDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
+            )
+        }else{
+            onRemoveSection()
+            showDeleteSectionDialog = false
+        }
     }
 
     Column(
