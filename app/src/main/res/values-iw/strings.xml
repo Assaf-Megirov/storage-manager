@@ -90,4 +90,14 @@
     <string name="click_edit_to_add_landscape">לחץ על כפתור העריכה כדי להוסיף מדפים</string>
     <string name="click_fab_to_add_shelf">לחץ על כפתור ה+ כדי להוסיף מדף</string>
     <string name="click_plus_to_add_section">לחץ על כפתור ה+ כדי להוסיף מדור</string>
-</resources> 
+    <string name="cancel_selection">בטל בחירה</string>
+    <string name="select_all">בחר הכל</string>
+    <string name="move">העבר נבחרים</string>
+    <string name="confirm_delete_bulk_items">האם אתה בטוח שאתה רוצה למחוק את כל הפריטים האלה</string>
+    <string name="going_to_delete_items">אתה עומד למחוק %1$d פריטים!</string>
+    <string name="move_item">אשר העברה</string>
+    <string name="items_selected">נבחרו</string>
+    <string name="move_warning">העבר %1$d פריטים ל:</string>
+    <string name="long_press_hint">רמז: לחץ לחיצה ארוכה על פריט על מנת לבחור מספר פריטים</string>
+    <string name="deselect_all">הסר הכל</string>
+</resources>

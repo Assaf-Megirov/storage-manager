@@ -28,3 +28,8 @@ This app was made using Jetpack Compose.
 - Enabled minification and resource shrinking (reducing total size to around 5 MB).
 - Fixed issue: Delete button now shows on empty shelves.
 - The add button now appears on sections even when not in edit mode.
+
+### 1.0.4 (5)
+- Items can now be moved to another shelf and/or section
+- Sections now start with # to better differentiate them from shelf numbers
+- You can now select multiple items to delete or move

@@ -89,4 +89,14 @@
     <string name="click_edit_to_add_landscape">Нажмите кнопку «Изменить», чтобы добавить полки.</string>
     <string name="click_fab_to_add_shelf">Нажмите кнопку +, чтобы добавить полку.</string>
     <string name="click_plus_to_add_section">Нажмите кнопку +, чтобы добавить раздел</string>
+    <string name="cancel_selection">Отменить выбор</string>
+    <string name="select_all">Выбрать все</string>
+    <string name="move">Переместить выбор</string>
+    <string name="confirm_delete_bulk_items">Вы уверены, что хотите удалить все эти предметы?</string>
+    <string name="going_to_delete_items">Вы собираетесь удалить %1$d предметов!</string>
+    <string name="move_item">Подтвердите перемещение</string>
+    <string name="items_selected">Выбрано</string>
+    <string name="move_warning">Переместить %1$d предметов в:</string>
+    <string name="long_press_hint">Подсказка: нажмите и удерживайте предмет, чтобы выбрать несколько предметов</string>
+    <string name="deselect_all">Отменить выбор всех</string>
 </resources> 

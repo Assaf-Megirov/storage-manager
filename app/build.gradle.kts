@@ -19,8 +19,8 @@ android {
         applicationId = "com.awindyendprod.storage_manager"
         minSdk = 24
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.0.3"
+        versionCode = 5
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -57,6 +57,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     //implementation(libs.androidx.runtime.android)
+    implementation(libs.material.icons.extended)
+    implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.material3.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

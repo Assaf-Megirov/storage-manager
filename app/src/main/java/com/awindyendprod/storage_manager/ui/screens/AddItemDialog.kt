@@ -333,7 +333,7 @@ fun ShelfDropdown(
         modifier = modifier
     ) {
         OutlinedTextField(
-            value = selectedShelf?.name ?: stringResource(R.string.select_shelf),
+            value = selectedShelf?.name ?: stringResource(R.string.shelf),
             onValueChange = {},
             readOnly = true,
             label = { Text(stringResource(R.string.shelf)) },
@@ -376,7 +376,7 @@ fun SectionDropdown(
         modifier = modifier
     ) {
         OutlinedTextField(
-            value = selectedSectionIndex.toString() ?: stringResource(R.string.select_section),
+            value = selectedSectionIndex.toString() ?: stringResource(R.string.section),
             onValueChange = {},
             readOnly = true,
             label = { Text(stringResource(R.string.section)) },

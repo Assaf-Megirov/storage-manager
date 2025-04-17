@@ -52,6 +52,7 @@ androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "l
 # Material
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3-android" }
+material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 
 # Utilities
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
