@@ -91,4 +91,6 @@
     <string name="click_edit_to_add_landscape">Click edit in the sidebar</string>
     <string name="click_fab_to_add_shelf">Click the + button to add a shelf</string>
     <string name="click_plus_to_add_section">Click the + button to add a section</string>
+    <string name="select_shelf">Shelf</string>
+    <string name="select_section">section</string>
 </resources>

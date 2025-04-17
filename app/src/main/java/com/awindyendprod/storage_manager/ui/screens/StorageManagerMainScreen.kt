@@ -2,6 +2,8 @@ package com.awindyendprod.storage_manager.ui.screens
 
 import AddItemDialog
 import SectionDetailsScreen
+import SectionDropdown
+import ShelfDropdown
 import android.app.TimePickerDialog
 import android.app.DatePickerDialog
 import android.content.res.Configuration
@@ -162,7 +164,9 @@ fun StorageManagerMainScreen(
                 }
             }
         ) { padding ->
-            Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+            Box(modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()) {
                 
                 if (shelves.isEmpty()) {
                     Box(
@@ -178,7 +182,7 @@ fun StorageManagerMainScreen(
                     when (onboardingState) {
                         OnboardingState.NEEDS_EDIT_MODE -> EmptyShelvesHint(isLandscape = isLandscape)
                         OnboardingState.NEEDS_SHELF -> ShelfAddHint(isLandscape = isLandscape)
-                        else -> {} // No hint needed in other states when there are no shelves
+                        else -> {}
                     }
 
                 } else {
@@ -192,7 +196,7 @@ fun StorageManagerMainScreen(
                             shelves = shelves,
                             isEditMode = isEditMode,
                             onShelfSelect = { shelf -> selectedShelf = shelf },
-                            onAddSection = { shelfId -> viewModel.addSectionToShelf(shelfId, "New Section") },
+                            onAddSection = { shelfId, sectionName -> viewModel.addSectionToShelf(shelfId, sectionName) },
                             onAddItem = { shelfId, sectionId ->
                                 selectedShelfId = shelfId
                                 selectedSectionId = sectionId
@@ -247,6 +251,11 @@ fun StorageManagerMainScreen(
                         onEntryDateChange = { newItemEntryDate = it },
                         onReturnDateChange = { newItemReturnDate = it },
                         onAlarmDateChange = { newItemAlarmDate = it },
+                        onSelectedShelfIdChange = { selectedShelfId = it },
+                        onSelectedSectionIdChange = { selectedSectionId = it },
+                        newSelectedShelfId = selectedShelfId ?: "",
+                        newSelectedSectionId = selectedSectionId ?: "",
+                        shelves = shelves,
                         settings = settings
                     )
                 }
@@ -307,7 +316,6 @@ fun EmptyShelvesHint(isLandscape: Boolean) {
 
 @Composable
 fun ShelfAddHint(isLandscape: Boolean) {
-    // Calculate position based on FAB location
     val fabBottomPadding = 16.dp
     val fabSize = 56.dp
     val hintSpacing = 12.dp
@@ -338,7 +346,6 @@ fun ShelfAddHint(isLandscape: Boolean) {
     }
 }
 
-// New hint for adding sections to the shelf
 @Composable
 fun SectionAddHint(isLandscape: Boolean) {
     Box(
@@ -453,7 +460,7 @@ fun ShelvesScrollableView(
     shelves: List<Shelf>,
     isEditMode: Boolean,
     onShelfSelect: (Shelf) -> Unit,
-    onAddSection: (String) -> Unit,
+    onAddSection: (String, String) -> Unit,
     onAddItem: (String, String) -> Unit,
     onSectionClick: (String, String) -> Unit,
     onRemoveShelf: (String) -> Unit,
@@ -486,7 +493,7 @@ fun ShelfView(
     shelf: Shelf,
     isEditMode: Boolean,
     onShelfSelect: (Shelf) -> Unit,
-    onAddSection: (String) -> Unit,
+    onAddSection: (String, String) -> Unit,
     onAddItem: (String, String) -> Unit,
     onSectionClick: (String, String) -> Unit,
     onRemoveShelf: (String) -> Unit,
@@ -563,7 +570,7 @@ fun ShelfView(
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 IconButton(
-                                    onClick = { onAddSection(shelf.id) },
+                                    onClick = { onAddSection(shelf.id, "#1") },
                                     modifier = Modifier.size(48.dp)
                                 ) {
                                     Icon(
@@ -586,7 +593,7 @@ fun ShelfView(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                IconButton(onClick = { onAddSection(shelf.id) }) {
+                                IconButton(onClick = { onAddSection(shelf.id, "#"+(shelf.sections.size+1)) }) {
                                     Icon(Icons.Default.Add, contentDescription = "Add Section")
                                 }
                                 IconButton(onClick = { showDeleteShelfDialog = true }) {
@@ -688,7 +695,7 @@ fun SectionView(
                 .padding(4.dp)
         ) {
             Text(
-                text = (sectionNumber + 1).toString(),
+                text = "#"+(sectionNumber + 1).toString(),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.align(Alignment.TopEnd)
             )
@@ -814,6 +821,12 @@ fun EditItemScreen(
     var editedEntryDate by remember { mutableStateOf(Date()) }
     var editedReturnDate by remember { mutableStateOf(Date()) }
     var editedAlarmDate by remember { mutableStateOf<Date?>(null) }
+    var editedShelfId by remember { mutableStateOf(shelfId) }
+    var editedSectionId by remember { mutableStateOf(sectionId) }
+
+    val shelves = viewModel.shelves.collectAsState().value
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     LaunchedEffect(item) {
         item?.let {
@@ -821,9 +834,23 @@ fun EditItemScreen(
             editedClientName = it.clientName
             editedNote = it.note
             editedHasAlarm = it.hasAlarm
-            editedEntryDate = it.entryDate!!
-            editedReturnDate = it.returnDate!!
+            editedEntryDate = it.entryDate ?: Date()
+            editedReturnDate = it.returnDate ?: Date()
             editedAlarmDate = it.alarmDate
+            editedShelfId = shelfId
+            editedSectionId = sectionId
+        }
+    }
+
+    LaunchedEffect(editedShelfId) {
+        val currentShelf = shelves.find { it.id == editedShelfId }
+        val sectionBelongsToShelf = currentShelf?.sections?.any { it.id == editedSectionId } == true
+
+        if (!sectionBelongsToShelf) {
+            val defaultSection = currentShelf?.sections?.firstOrNull()
+            if (defaultSection != null) {
+                editedSectionId = defaultSection.id
+            }
         }
     }
 
@@ -841,8 +868,8 @@ fun EditItemScreen(
                         onClick = {
                             item?.let {
                                 viewModel.updateItem(
-                                    shelfId,
-                                    sectionId,
+                                    editedShelfId,
+                                    editedSectionId,
                                     itemId,
                                     Item(
                                         id = itemId,
@@ -869,64 +896,167 @@ fun EditItemScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            OutlinedTextField(
-                value = editedName,
-                onValueChange = { editedName = it },
-                label = { Text(stringResource(R.string.item_name)) },
-                modifier = Modifier.fillMaxWidth()
-            )
+            if (isLandscape) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = editedName,
+                            onValueChange = { editedName = it },
+                            label = { Text(stringResource(R.string.item_name)) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-            OutlinedTextField(
-                value = editedClientName,
-                onValueChange = { editedClientName = it },
-                label = { Text(stringResource(R.string.client_name)) },
-                modifier = Modifier.fillMaxWidth()
-            )
+                        OutlinedTextField(
+                            value = editedClientName,
+                            onValueChange = { editedClientName = it },
+                            label = { Text(stringResource(R.string.client_name)) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-            OutlinedTextField(
-                value = editedNote,
-                onValueChange = { editedNote = it },
-                label = { Text(stringResource(R.string.note)) },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3
-            )
+                        OutlinedTextField(
+                            value = editedNote,
+                            onValueChange = { editedNote = it },
+                            label = { Text(stringResource(R.string.note)) },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 3
+                        )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(stringResource(R.string.has_alarm))
-                Switch(
-                    checked = editedHasAlarm,
-                    onCheckedChange = { editedHasAlarm = it }
+                        ShelfDropdown(
+                            shelves = shelves,
+                            selectedShelfId = editedShelfId,
+                            onShelfSelected = { editedShelfId = it },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        SectionDropdown(
+                            sections = shelves.find { it.id == editedShelfId }?.sections ?: emptyList(),
+                            selectedSectionId = editedSectionId,
+                            onSectionSelected = { editedSectionId = it },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        DatePickerField(
+                            label = stringResource(R.string.entry_date),
+                            selectedDate = editedEntryDate,
+                            onDateChange = { editedEntryDate = it },
+                            settings = settings
+                        )
+
+                        DatePickerField(
+                            label = stringResource(R.string.return_date),
+                            selectedDate = editedReturnDate,
+                            onDateChange = { editedReturnDate = it },
+                            settings = settings
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(stringResource(R.string.has_alarm))
+                            Switch(
+                                checked = editedHasAlarm,
+                                onCheckedChange = { editedHasAlarm = it }
+                            )
+                        }
+
+                        if (editedHasAlarm) {
+                            DatePickerField(
+                                label = stringResource(R.string.alarm_date),
+                                selectedDate = editedAlarmDate ?: editedReturnDate,
+                                onDateChange = { editedAlarmDate = it },
+                                settings = settings
+                            )
+                        }
+                    }
+                }
+            } else {
+                OutlinedTextField(
+                    value = editedName,
+                    onValueChange = { editedName = it },
+                    label = { Text(stringResource(R.string.item_name)) },
+                    modifier = Modifier.fillMaxWidth()
                 )
-            }
 
-            DatePickerField(
-                label = stringResource(R.string.entry_date),
-                selectedDate = editedEntryDate,
-                onDateChange = { editedEntryDate = it },
-                settings = settings
-            )
+                OutlinedTextField(
+                    value = editedClientName,
+                    onValueChange = { editedClientName = it },
+                    label = { Text(stringResource(R.string.client_name)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            DatePickerField(
-                label = stringResource(R.string.return_date),
-                selectedDate = editedReturnDate,
-                onDateChange = { editedReturnDate = it },
-                settings = settings
-            )
+                OutlinedTextField(
+                    value = editedNote,
+                    onValueChange = { editedNote = it },
+                    label = { Text(stringResource(R.string.note)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
+                )
 
-            if (editedHasAlarm) {
+                ShelfDropdown(
+                    shelves = shelves,
+                    selectedShelfId = editedShelfId,
+                    onShelfSelected = { editedShelfId = it },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                SectionDropdown(
+                    sections = shelves.find { it.id == editedShelfId }?.sections ?: emptyList(),
+                    selectedSectionId = editedSectionId,
+                    onSectionSelected = { editedSectionId = it },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
                 DatePickerField(
-                    label = stringResource(R.string.alarm_date),
-                    selectedDate = editedAlarmDate ?: editedReturnDate,
-                    onDateChange = { editedAlarmDate = it },
+                    label = stringResource(R.string.entry_date),
+                    selectedDate = editedEntryDate,
+                    onDateChange = { editedEntryDate = it },
                     settings = settings
                 )
+
+                DatePickerField(
+                    label = stringResource(R.string.return_date),
+                    selectedDate = editedReturnDate,
+                    onDateChange = { editedReturnDate = it },
+                    settings = settings
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.has_alarm))
+                    Switch(
+                        checked = editedHasAlarm,
+                        onCheckedChange = { editedHasAlarm = it }
+                    )
+                }
+
+                if (editedHasAlarm) {
+                    DatePickerField(
+                        label = stringResource(R.string.alarm_date),
+                        selectedDate = editedAlarmDate ?: editedReturnDate,
+                        onDateChange = { editedAlarmDate = it },
+                        settings = settings
+                    )
+                }
             }
         }
     }

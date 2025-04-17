@@ -156,26 +156,29 @@ class StorageTrackerViewModel(
         scheduleNotification(item)
     }
 
-    fun updateItem(shelfId: String, sectionId: String, itemId: String, updatedItem: Item) {
-        _shelves.value = _shelves.value.map { shelf ->
-            if (shelf.id == shelfId) {
-                shelf.copy(sections = mutableListOf<ShelfSection>().also { newSections ->
-                    shelf.sections.forEach { section ->
-                        if (section.id == sectionId) {
-                            newSections.add(section.copy(
-                                items = mutableListOf<Item>().also { newItems ->
-                                    newItems.addAll(section.items.map { item ->
-                                        if (item.id == itemId) updatedItem else item
-                                    })
-                                }
-                            ))
-                        } else {
-                            newSections.add(section)
-                        }
-                    }
-                })
-            } else shelf
+    fun updateItem(newShelfId: String, newSectionId: String, itemId: String, updatedItem: Item) {
+        //remove old item
+        val shelvesWithItemRemoved = _shelves.value.map { shelf ->
+            shelf.copy(sections = shelf.sections.map { section ->
+                section.copy(items = section.items.filter { it.id != itemId })
+            }.toMutableList())
         }
+
+        //add new item
+        _shelves.value = shelvesWithItemRemoved.map { shelf ->
+            if (shelf.id == newShelfId) {
+                shelf.copy(sections = shelf.sections.map { section ->
+                    if (section.id == newSectionId) {
+                        section.copy(items = section.items + updatedItem)
+                    } else {
+                        section
+                    }
+                }.toMutableList())
+            } else {
+                shelf
+            }
+        }
+
         saveData()
         scheduleNotification(updatedItem)
     }

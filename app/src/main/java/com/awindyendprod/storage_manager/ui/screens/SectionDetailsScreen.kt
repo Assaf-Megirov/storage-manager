@@ -78,6 +78,9 @@ fun SectionDetailsScreen(
     var newItemAlarmDate by remember { mutableStateOf<Date?>(null) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var itemToDelete by remember { mutableStateOf<Item?>(null) }
+    var selectedShelfId by remember { mutableStateOf(shelfId) }
+    var selectedSectionId by remember { mutableStateOf(sectionId) }
+    val shelves by viewModel.shelves.collectAsState()
 
     Scaffold(
         topBar = {
@@ -201,7 +204,11 @@ fun SectionDetailsScreen(
                             alarmDate = newItemAlarmDate,
                             note = newItemNote
                         )
-                        viewModel.addItemToSection(shelfId, sectionId, newItem)
+                        selectedShelfId.let { shelfId ->
+                            selectedSectionId.let { sectionId ->
+                                viewModel.addItemToSection(shelfId, sectionId, newItem)
+                            }
+                        }
                         isAddItemDialogVisible = false
                     },
                     name = newItemName,
@@ -218,6 +225,11 @@ fun SectionDetailsScreen(
                     onEntryDateChange = { newItemEntryDate = it },
                     onReturnDateChange = { newItemReturnDate = it },
                     onAlarmDateChange = { newItemAlarmDate = it },
+                    onSelectedShelfIdChange = { selectedShelfId = it },
+                    onSelectedSectionIdChange = { selectedSectionId = it },
+                    newSelectedShelfId = selectedShelfId,
+                    newSelectedSectionId = selectedSectionId,
+                    shelves = shelves,
                     settings = settings
                 )
             }
