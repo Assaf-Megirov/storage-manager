@@ -146,12 +146,14 @@ fun SectionDetailsScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            Text(
-                text = stringResource(R.string.long_press_hint),
-                style = MaterialTheme.typography.bodySmall, // smaller text
-                color = MaterialTheme.colorScheme.onSurfaceVariant, // grayish color
-                modifier = Modifier.align(Alignment.CenterHorizontally) // center horizontally inside a Column/Box
-            )
+            if(!selectionMode){
+                Text(
+                    text = stringResource(R.string.long_press_hint),
+                    style = MaterialTheme.typography.bodySmall, // smaller text
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, // grayish color
+                    modifier = Modifier.align(Alignment.CenterHorizontally) // center horizontally inside a Column/Box
+                )
+            }
 
             LazyColumn(
 
