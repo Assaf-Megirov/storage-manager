@@ -1,4 +1,4 @@
-# Open Source Ad‑Free Offline App
+# Simple Shelf Manager (Ad‑Free, Offline)
 
 Welcome! This is an open source, ad‑free, offline app that lets you store items on shelves organized by sections.
 This app was made using Jetpack Compose.
