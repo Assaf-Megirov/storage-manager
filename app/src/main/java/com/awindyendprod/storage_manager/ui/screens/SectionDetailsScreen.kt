@@ -5,12 +5,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -448,25 +451,30 @@ fun SelectionTopAppBar(
 ) {
     TopAppBar(
         modifier = modifier,
-        title = { Text("$selectedCount "+stringResource(R.string.items_selected)) },
+        title = { Text("$selectedCount "+stringResource(R.string.items_selected), style = MaterialTheme.typography.titleSmall, modifier = Modifier.offset(-16.dp).wrapContentWidth(Alignment.Start, unbounded = true)) },
         navigationIcon = {
             IconButton(onClick = onCancelClick) {
                 Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.cancel_selection))
             }
         },
         actions = {//select all
-            val actionName = if (selectedCount == sectionItemsSize) stringResource(R.string.deselect_all) else stringResource(R.string.select_all)
-            Text(actionName, style = MaterialTheme.typography.bodyMedium)
-            Spacer(modifier = Modifier.width(8.dp))
-            Checkbox(
-                checked = selectedCount == sectionItemsSize,
-                onCheckedChange = { onSelectAllClick() }
-            )
-            IconButton(onClick = onMoveClick, enabled = selectedCount > 0) {
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(R.string.move))
-            }
-            IconButton(onClick = onDeleteClick, enabled = selectedCount > 0) {
-                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
+            Row(
+                modifier = Modifier.fillMaxHeight(),
+                horizontalArrangement = Arrangement.spacedBy(1.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                val actionName = if (selectedCount == sectionItemsSize) stringResource(R.string.deselect_all) else stringResource(R.string.select_all)
+                Text(actionName, style = MaterialTheme.typography.bodyMedium)
+                Checkbox(
+                    checked = selectedCount == sectionItemsSize,
+                    onCheckedChange = { onSelectAllClick() }
+                )
+                IconButton(onClick = onMoveClick, enabled = selectedCount > 0,modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(R.string.move))
+                }
+                IconButton(onClick = onDeleteClick, enabled = selectedCount > 0,modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors( //use secondary colors to differentiate from regular top app bar
