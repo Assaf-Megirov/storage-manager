@@ -50,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.awindyendprod.storage_manager.R
+import com.awindyendprod.storage_manager.model.FontSize
 import com.awindyendprod.storage_manager.model.Item
 import com.awindyendprod.storage_manager.model.Shelf
 import com.awindyendprod.storage_manager.services.toDisplayFormat
@@ -73,6 +74,18 @@ fun SectionDetailsScreen(
     val section by viewModel.getSectionById(shelfId, sectionId).collectAsState()
     
     val detailsDateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+
+    val iconSize = when (settings.fontSize) {
+        FontSize.SMALL -> 14.dp
+        FontSize.MEDIUM -> 16.dp
+        FontSize.LARGE -> 18.dp
+    }
+
+    val itemSpacing = when (settings.fontSize) {
+        FontSize.SMALL -> 2.dp
+        FontSize.MEDIUM -> 6.dp
+        FontSize.LARGE -> 10.dp
+    }
 
     var isAddItemDialogVisible by remember { mutableStateOf(false) }
     var newItemName by remember { mutableStateOf("") }
@@ -163,7 +176,7 @@ fun SectionDetailsScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .padding(horizontal = 16.dp, vertical = itemSpacing)
                                 .combinedClickable (
                                     onClick = {
                                         if (selectionMode) {
@@ -222,7 +235,7 @@ fun SectionDetailsScreen(
                                         Icon(
                                             imageVector = Icons.Default.ExitToApp,
                                             contentDescription = stringResource(R.string.entry_date),
-                                            modifier = Modifier.size(16.dp),
+                                            modifier = Modifier.size(iconSize),
                                             tint = MaterialTheme.colorScheme.primary
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
@@ -238,7 +251,7 @@ fun SectionDetailsScreen(
                                         Icon(
                                             imageVector = Icons.Default.ArrowBack,
                                             contentDescription = stringResource(R.string.return_date),
-                                            modifier = Modifier.size(16.dp),
+                                            modifier = Modifier.size(iconSize),
                                             tint = MaterialTheme.colorScheme.primary
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
@@ -260,7 +273,8 @@ fun SectionDetailsScreen(
                             ) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.CompareArrows,
-                                    contentDescription = stringResource(R.string.move)
+                                    contentDescription = stringResource(R.string.move),
+                                    modifier = Modifier.size(iconSize*2)
                                 )
                             }
                             IconButton(
@@ -271,7 +285,8 @@ fun SectionDetailsScreen(
                             ) {
                                 Icon(
                                     Icons.Default.Delete,
-                                    contentDescription = stringResource(R.string.delete)
+                                    contentDescription = stringResource(R.string.delete),
+                                    modifier = Modifier.size(iconSize*2)
                                 )
                             }
                         }
