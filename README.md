@@ -33,3 +33,6 @@ This app was made using Jetpack Compose.
 - Items can now be moved to another shelf and/or section
 - Sections now start with # to better differentiate them from shelf numbers
 - You can now select multiple items to delete or move
+
+### 1.0.41 (6) Hotfix
+- Fixed issue: Reduced size of "X Selected" title in section screen selection mode
