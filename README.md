@@ -36,3 +36,6 @@ This app was made using Jetpack Compose.
 
 ### 1.0.41 (6) Hotfix
 - Fixed issue: Reduced size of "X Selected" title in section screen selection mode
+
+### 1.0.42 (7) Hotfix
+- Fixed issue: Add item dialog from main screen was showing wrong default section/shelf

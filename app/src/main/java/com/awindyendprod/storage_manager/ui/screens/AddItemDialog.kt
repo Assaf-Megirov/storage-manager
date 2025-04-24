@@ -1,4 +1,5 @@
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -79,12 +80,21 @@ fun AddItemDialog(
     }
 
     LaunchedEffect(newSelectedShelfId) {
-        val defaultSection = shelves
+        // Only set default section if no section is currently selected
+        // or if the current section doesn't belong to the selected shelf
+        val currentSectionBelongsToShelf = shelves
             .find { it.id == newSelectedShelfId }
             ?.sections
-            ?.firstOrNull()
-        if (defaultSection != null) {
-            onSelectedSectionIdChange(defaultSection.id)
+            ?.any { it.id == newSelectedSectionId } == true
+
+        if (!currentSectionBelongsToShelf) {
+            val defaultSection = shelves
+                .find { it.id == newSelectedShelfId }
+                ?.sections
+                ?.firstOrNull()
+            if (defaultSection != null) {
+                onSelectedSectionIdChange(defaultSection.id)
+            }
         }
     }
 
@@ -270,6 +280,8 @@ fun AddItemDialog(
                             modifier = Modifier.fillMaxWidth()
                         )
 
+                        Log.d("AddItemDialog", "newSelectedShelfId: $newSelectedShelfId")
+                        Log.d("AddItemDialog", "newSelectedSectionId: $newSelectedSectionId")
                         SectionDropdown(
                             sections = shelves.find { it.id == newSelectedShelfId }?.sections ?: emptyList(),
                             selectedSectionId = newSelectedSectionId,
