@@ -534,17 +534,11 @@ fun ShelfView(
         }
     }
 
-    val shelfColor = Color.hsl(
-        hue = 66f,
-        saturation = 0.33f,
-        lightness = 0.78f,
-        alpha = 1f,
-        colorSpace = ColorSpaces.Srgb
-    )
+    val shelfColor = MaterialTheme.colorScheme.surface
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(6.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Box(
@@ -552,21 +546,21 @@ fun ShelfView(
                 .fillMaxSize()
                 .background(shelfColor)
         ) {
-            Row {
-                Text(
-                    text = shelf.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .padding(8.dp, 8.dp, 4.dp, 4.dp)
-                )
-                Column {
+            Column {
+                Row{
+                    Text(
+                        text = shelf.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .padding(6.dp, 6.dp, 2.dp, 2.dp)
+                    )
                     if (isEditMode) {
                         if (shelf.sections.isEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .padding(top = 16.dp),
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    .padding(top = 8.dp),
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 IconButton(
@@ -602,17 +596,21 @@ fun ShelfView(
                             }
                         }
                     }
+                }
+
+
+                Column {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState())
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         shelf.sections.forEachIndexed { index, section ->
                             Box(
                                 modifier = Modifier
-                                    .padding(end = 4.dp)
+                                    .padding(end = 2.dp)
                                     .height(settings.sectionHeight.dp)
                             ) {
                                 SectionView(

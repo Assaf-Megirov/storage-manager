@@ -49,6 +49,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.FilterChipDefaults
 
 enum class SearchType {
     ITEM_NAME,
@@ -128,7 +129,7 @@ fun SearchScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
-                modifier = Modifier.height(48.dp)
+                modifier = Modifier.height(70.dp)
             )
         }
     ) { padding ->
@@ -242,6 +243,14 @@ fun SearchOptions(
             FilterChip(
                 selected = searchType == SearchType.ITEM_NAME,
                 onClick = { onSearchTypeChange(SearchType.ITEM_NAME) },
+                colors = FilterChipDefaults.filterChipColors(
+                    // Use your theme’s primary for selected state
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor     = MaterialTheme.colorScheme.onPrimary,
+                    // Use your theme’s surface for default state
+                    containerColor          = MaterialTheme.colorScheme.surface,
+                    labelColor              = MaterialTheme.colorScheme.onSurface
+                ),
                 label = { 
                     Text(
                         text = stringResource(R.string.search_by_item_name),
@@ -252,6 +261,14 @@ fun SearchOptions(
             FilterChip(
                 selected = searchType == SearchType.CLIENT_NAME,
                 onClick = { onSearchTypeChange(SearchType.CLIENT_NAME) },
+                colors = FilterChipDefaults.filterChipColors(
+                    // Use your theme’s primary for selected state
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor     = MaterialTheme.colorScheme.onPrimary,
+                    // Use your theme’s surface for default state
+                    containerColor          = MaterialTheme.colorScheme.surface,
+                    labelColor              = MaterialTheme.colorScheme.onSurface
+                ),
                 label = { 
                     Text(
                         text = stringResource(R.string.search_by_client_name),
@@ -328,6 +345,14 @@ private fun SortChip(
     FilterChip(
         selected = isSelected,
         onClick = onClick,
+        colors = FilterChipDefaults.filterChipColors(
+            // Use your theme’s primary for selected state
+            selectedContainerColor = MaterialTheme.colorScheme.primary,
+            selectedLabelColor     = MaterialTheme.colorScheme.onPrimary,
+            // Use your theme’s surface for default state
+            containerColor          = MaterialTheme.colorScheme.surface,
+            labelColor              = MaterialTheme.colorScheme.onSurface
+        ),
         label = {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -335,13 +360,18 @@ private fun SortChip(
             ) {
                 Text(
                     text = text,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.onSurface
                 )
                 if (isSelected) {
                     Icon(
                         imageVector = if (isAscending) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                         contentDescription = if (isAscending) "Ascending" else "Descending",
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }

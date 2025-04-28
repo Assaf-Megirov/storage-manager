@@ -39,3 +39,7 @@ This app was made using Jetpack Compose.
 
 ### 1.0.42 (7) Hotfix
 - Fixed issue: Add item dialog from main screen was showing wrong default section/shelf
+
+### 1.0.5 (8)
+- Added themes: light, dark, and system
+- Minor cosmetic changes

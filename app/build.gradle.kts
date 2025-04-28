@@ -19,8 +19,8 @@ android {
         applicationId = "com.awindyendprod.storage_manager"
         minSdk = 24
         targetSdk = 35
-        versionCode = 7
-        versionName = "1.0.42"
+        versionCode = 8
+        versionName = "1.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

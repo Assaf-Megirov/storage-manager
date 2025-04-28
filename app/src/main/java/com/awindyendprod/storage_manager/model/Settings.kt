@@ -23,6 +23,12 @@ enum class FontSize {
     LARGE
 }
 
+enum class Theme{
+    SYSTEM,
+    LIGHT,
+    DARK
+}
+
 data class Settings(
     val sectionDateType: SectionDateType = SectionDateType.ENTRY_DATE,
     val dateDisplayFormat: DateDisplayFormat = DateDisplayFormat.NUMERIC,
@@ -30,5 +36,6 @@ data class Settings(
     val language: AppLanguage = AppLanguage.SYSTEM,
     val fontSize: FontSize = FontSize.MEDIUM,
     val sectionHeight: Int = 210,
-    val sectionWidth: Int = 300
+    val sectionWidth: Int = 300,
+    val theme: Theme = Theme.SYSTEM
 ) 

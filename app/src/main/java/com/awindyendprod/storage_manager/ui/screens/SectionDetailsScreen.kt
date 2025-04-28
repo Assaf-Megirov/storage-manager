@@ -167,7 +167,7 @@ fun SectionDetailsScreen(
                     text = stringResource(R.string.long_press_hint),
                     style = MaterialTheme.typography.bodySmall, // smaller text
                     color = MaterialTheme.colorScheme.onSurfaceVariant, // grayish color
-                    modifier = Modifier.align(Alignment.CenterHorizontally) // center horizontally inside a Column/Box
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp) // center horizontally inside a Column/Box
                 )
             }
 
@@ -478,10 +478,10 @@ fun SelectionTopAppBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors( //use secondary colors to differentiate from regular top app bar
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            navigationIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            actionIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     )
 }

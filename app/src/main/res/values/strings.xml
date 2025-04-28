@@ -101,4 +101,8 @@
     <string name="move_warning">Move %1$d items to:</string>
     <string name="long_press_hint">Hint: long press an item to select multiple items</string>
     <string name="deselect_all">Deselect all</string>
+    <string name="theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
 </resources>

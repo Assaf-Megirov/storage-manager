@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import com.awindyendprod.storage_manager.services.StorageTrackerPersistenceService
 import android.content.Intent
 import androidx.core.content.FileProvider
+import com.awindyendprod.storage_manager.model.Theme
 import java.io.File
 
 class SettingsViewModel(
@@ -53,7 +54,10 @@ class SettingsViewModel(
                 prefs.getString("fontSize", FontSize.MEDIUM.name)!!
             ),
             sectionHeight = prefs.getInt("sectionHeight", 210),
-            sectionWidth = prefs.getInt("sectionWidth", 300)
+            sectionWidth = prefs.getInt("sectionWidth", 300),
+            theme = Theme.valueOf(
+                prefs.getString("theme", Theme.SYSTEM.name)!!
+            )
         )
     }
 
@@ -66,6 +70,7 @@ class SettingsViewModel(
             putString("fontSize", settings.fontSize.name)
             putInt("sectionHeight", settings.sectionHeight)
             putInt("sectionWidth", settings.sectionWidth)
+            putString("theme", settings.theme.name)
             apply()
         }
     }
@@ -123,6 +128,11 @@ class SettingsViewModel(
         config.setLocale(locale)
         appContext.createConfigurationContext(config)
         Locale.setDefault(locale)
+    }
+
+    fun updateTheme(theme: Theme) {
+        _settings.value = _settings.value.copy(theme = theme)
+        saveSettings(_settings.value)
     }
 
     fun onActivityRecreated() {
