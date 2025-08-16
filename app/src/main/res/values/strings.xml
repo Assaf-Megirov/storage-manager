@@ -120,4 +120,17 @@
     <string name="entry_prefix">Entry: %1$s</string>
     <string name="not_available">N/A</string>
     <string name="alarm_set">🔔 Alarm set</string>
+    
+    <!-- Daily notifications -->
+    <string name="high_due_items_notification_title">High Due Items Alert</string>
+    <string name="high_due_items_notification_text">%1$d items are due %2$s</string>
+    <string name="due_items_alerts">Due Items Alerts</string>
+    <string name="due_items_alerts_description">Notifications for high volume of due items</string>
+    <string name="in_days">in %1$d days</string>
+    <string name="high_due_items_dialog_title">High Due Items Alert</string>
+    <string name="high_due_items_dialog_message">You have %1$d items due %2$s. Please review your inventory.</string>
+    <string name="daily_notifications">Daily Notifications</string>
+    <string name="notification_days_before">Days before due date</string>
+    <string name="notification_max_items">Alert threshold (items)</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

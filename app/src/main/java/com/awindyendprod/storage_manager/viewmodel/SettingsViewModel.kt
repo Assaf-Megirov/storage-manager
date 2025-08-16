@@ -63,7 +63,10 @@ class SettingsViewModel(
             fabPositionMainScreenY = prefs.getFloat("fabPositionMainScreenY", Float.MIN_VALUE),
             fabPositionSectionScreenX = prefs.getFloat("fabPositionSectionScreenX", Float.MIN_VALUE),
             fabPositionSectionScreenY = prefs.getFloat("fabPositionSectionScreenY", Float.MIN_VALUE),
-            hasSeenLongPressHint = prefs.getBoolean("hasSeenLongPressHint", false)
+            hasSeenLongPressHint = prefs.getBoolean("hasSeenLongPressHint", false),
+            notificationDaysBefore = prefs.getInt("notificationDaysBefore", 1),
+            notificationMaxItems = prefs.getInt("notificationMaxItems", 10),
+            dailyNotificationsEnabled = prefs.getBoolean("dailyNotificationsEnabled", true)
         )
     }
 
@@ -83,6 +86,9 @@ class SettingsViewModel(
             putFloat("fabPositionSectionScreenX", settings.fabPositionSectionScreenX)
             putFloat("fabPositionSectionScreenY", settings.fabPositionSectionScreenY)
             putBoolean("hasSeenLongPressHint", settings.hasSeenLongPressHint)
+            putInt("notificationDaysBefore", settings.notificationDaysBefore)
+            putInt("notificationMaxItems", settings.notificationMaxItems)
+            putBoolean("dailyNotificationsEnabled", settings.dailyNotificationsEnabled)
             apply()
         }
     }
@@ -180,6 +186,25 @@ class SettingsViewModel(
 
     fun updateHasSeenLongPressHint(hasSeen: Boolean) {
         _settings.value = _settings.value.copy(hasSeenLongPressHint = hasSeen)
+        saveSettings(_settings.value)
+    }
+
+    fun updateNotificationDaysBefore(days: Int) {
+        if (days in 0..7) {
+            _settings.value = _settings.value.copy(notificationDaysBefore = days)
+            saveSettings(_settings.value)
+        }
+    }
+
+    fun updateNotificationMaxItems(maxItems: Int) {
+        if (maxItems in 1..100) {
+            _settings.value = _settings.value.copy(notificationMaxItems = maxItems)
+            saveSettings(_settings.value)
+        }
+    }
+
+    fun updateDailyNotificationsEnabled(enabled: Boolean) {
+        _settings.value = _settings.value.copy(dailyNotificationsEnabled = enabled)
         saveSettings(_settings.value)
     }
 

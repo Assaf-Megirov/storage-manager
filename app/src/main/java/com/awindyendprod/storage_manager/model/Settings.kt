@@ -43,5 +43,8 @@ data class Settings(
     val fabPositionMainScreenY: Float = Float.MIN_VALUE,
     val fabPositionSectionScreenX: Float = Float.MIN_VALUE,
     val fabPositionSectionScreenY: Float = Float.MIN_VALUE,
-    val hasSeenLongPressHint: Boolean = false
+    val hasSeenLongPressHint: Boolean = false,
+    val notificationDaysBefore: Int = 1,
+    val notificationMaxItems: Int = 10,
+    val dailyNotificationsEnabled: Boolean = true
 ) 

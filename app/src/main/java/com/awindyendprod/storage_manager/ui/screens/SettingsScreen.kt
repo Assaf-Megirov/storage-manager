@@ -359,6 +359,62 @@ fun SettingsScreen(
                 }
             }
 
+            // Daily Notifications
+            Column {
+                Text(
+                    text = stringResource(R.string.daily_notifications),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.daily_notifications),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 8.dp)
+                    )
+                    Switch(
+                        checked = settings.dailyNotificationsEnabled,
+                        onCheckedChange = { viewModel.updateDailyNotificationsEnabled(it) }
+                    )
+                }
+                
+                if (settings.dailyNotificationsEnabled) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    OutlinedTextField(
+                        value = settings.notificationDaysBefore.toString(),
+                        onValueChange = {
+                            it.toIntOrNull()?.let { days ->
+                                if (days in 0..7) viewModel.updateNotificationDaysBefore(days)
+                            }
+                        },
+                        label = { Text(stringResource(R.string.notification_days_before)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    OutlinedTextField(
+                        value = settings.notificationMaxItems.toString(),
+                        onValueChange = {
+                            it.toIntOrNull()?.let { items ->
+                                if (items in 1..100) viewModel.updateNotificationMaxItems(items)
+                            }
+                        },
+                        label = { Text(stringResource(R.string.notification_max_items)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
             // Data Management
             Text(
                 text = stringResource(R.string.data_management),

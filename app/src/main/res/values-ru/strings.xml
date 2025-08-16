@@ -118,4 +118,17 @@
     <string name="entry_prefix">Поступление: %1$s</string>
     <string name="not_available">Н/Д</string>
     <string name="alarm_set">🔔 Напоминание установлено</string>
+    
+    <!-- Daily notifications -->
+    <string name="high_due_items_notification_title">Предупреждение о большом количестве предметов</string>
+    <string name="high_due_items_notification_text">%1$d предметов к возврату %2$s</string>
+    <string name="due_items_alerts">Уведомления о возврате</string>
+    <string name="due_items_alerts_description">Уведомления о большом количестве предметов к возврату</string>
+    <string name="in_days">через %1$d дней</string>
+    <string name="high_due_items_dialog_title">Предупреждение о большом количестве предметов</string>
+    <string name="high_due_items_dialog_message">У вас %1$d предметов к возврату %2$s. Пожалуйста, проверьте ваш инвентарь.</string>
+    <string name="daily_notifications">Ежедневные уведомления</string>
+    <string name="notification_days_before">Дней до срока возврата</string>
+    <string name="notification_max_items">Порог предупреждения (предметов)</string>
+    <string name="dismiss">Отклонить</string>
 </resources> 

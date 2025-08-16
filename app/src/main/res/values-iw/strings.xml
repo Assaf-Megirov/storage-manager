@@ -119,4 +119,17 @@
     <string name="entry_prefix">כניסה: %1$s</string>
     <string name="not_available">לא זמין</string>
     <string name="alarm_set">🔔 תזכורת מוגדרת</string>
+    
+    <!-- Daily notifications -->
+    <string name="high_due_items_notification_title">התראה על כמות גבוהה של פריטים</string>
+    <string name="high_due_items_notification_text">%1$d פריטים לטיפול %2$s</string>
+    <string name="due_items_alerts">התראות פריטים לטיפול</string>
+    <string name="due_items_alerts_description">התראות על כמות גבוהה של פריטים לטיפול</string>
+    <string name="in_days">בעוד %1$d ימים</string>
+    <string name="high_due_items_dialog_title">התראה על כמות גבוהה של פריטים</string>
+    <string name="high_due_items_dialog_message">יש לך %1$d פריטים לטיפול %2$s. אנא בדוק את המלאי שלך.</string>
+    <string name="daily_notifications">התראות יומיות</string>
+    <string name="notification_days_before">ימים לפני תאריך יעד</string>
+    <string name="notification_max_items">סף התראה (פריטים)</string>
+    <string name="dismiss">דחה</string>
 </resources>

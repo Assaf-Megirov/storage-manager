@@ -23,9 +23,19 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import com.awindyendprod.storage_manager.ui.theme.StorageManagerTheme
 import com.awindyendprod.storage_manager.services.StorageTrackerPersistenceService
+import com.awindyendprod.storage_manager.ui.components.DueItemsAlertDialog
 import android.content.Intent
+import androidx.work.OneTimeWorkRequest
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
+import com.awindyendprod.storage_manager.services.DailyDueItemCheckWorker
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
     private val persistenceService by lazy {
@@ -92,6 +102,22 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val settings by settingsViewModel.settings.collectAsState()
+            var showDueItemsAlert by remember { mutableStateOf(false) }
+            var alertItemCount by remember { mutableStateOf(0) }
+            var alertDaysBefore by remember { mutableStateOf(0) }
+
+            // Check for pending alerts when the app starts
+            LaunchedEffect(Unit) {
+                checkForPendingAlert { count, days ->
+                    alertItemCount = count
+                    alertDaysBefore = days
+                    showDueItemsAlert = true
+                }
+                
+                // Schedule daily checks
+                scheduleDailyChecks()
+            }
+
             StorageManagerTheme(settings = settings) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -102,8 +128,62 @@ class MainActivity : ComponentActivity() {
                         settingsViewModel = settingsViewModel,
                         importUri = importUri
                     )
+
+                    // Show alert dialog if needed
+                    if (showDueItemsAlert) {
+                        DueItemsAlertDialog(
+                            itemCount = alertItemCount,
+                            daysBefore = alertDaysBefore,
+                            onDismiss = {
+                                showDueItemsAlert = false
+                                clearPendingAlert()
+                            },
+                            onViewItems = {
+                                showDueItemsAlert = false
+                                clearPendingAlert()
+                                // TODO: Navigate to AllDue screen with specific date
+                            }
+                        )
+                    }
                 }
             }
         }
+    }
+
+    private fun checkForPendingAlert(onAlert: (Int, Int) -> Unit) {
+        val prefs = getSharedPreferences("daily_alerts", Context.MODE_PRIVATE)
+        val count = prefs.getInt("pending_alert_count", 0)
+        val days = prefs.getInt("pending_alert_days", 0)
+        val timestamp = prefs.getLong("alert_timestamp", 0)
+        
+        // Check if alert is recent (within last 24 hours) and valid
+        val isRecent = System.currentTimeMillis() - timestamp < TimeUnit.HOURS.toMillis(24)
+        if (count > 0 && isRecent) {
+            onAlert(count, days)
+        }
+    }
+
+    private fun clearPendingAlert() {
+        val prefs = getSharedPreferences("daily_alerts", Context.MODE_PRIVATE)
+        prefs.edit().clear().apply()
+    }
+
+    private fun scheduleDailyChecks() {
+        val workManager = WorkManager.getInstance(this)
+        
+        // Cancel existing work
+        workManager.cancelUniqueWork(DailyDueItemCheckWorker.WORK_NAME)
+        
+        // Schedule new daily work
+        val dailyWork = PeriodicWorkRequest.Builder(
+            DailyDueItemCheckWorker::class.java,
+            1, TimeUnit.DAYS
+        ).build()
+        
+        workManager.enqueueUniquePeriodicWork(
+            DailyDueItemCheckWorker.WORK_NAME,
+            androidx.work.ExistingPeriodicWorkPolicy.REPLACE,
+            dailyWork
+        )
     }
 }
