@@ -107,4 +107,16 @@
     <string name="floating_button_settings">הגדרות כפתור צף</string>
     <string name="allow_moving_fab">אפשר הזזת כפתור צף</string>
     <string name="reset_fab_positions">איפוס מיקום כפתורים</string>
+    <string name="items_due">פריטים לטיפול</string>
+    <string name="select_date">בחר תאריך</string>
+    <string name="today">היום</string>
+    <string name="yesterday">אתמול</string>
+    <string name="tomorrow">מחר</string>
+    <string name="no_items_due_on">אין פריטים לטיפול ב%1$s</string>
+    <string name="section_number_format">מדור #%1$d</string>
+    <string name="shelf_number_format">מדף #%1$s</string>
+    <string name="shelf_section_format_simple">%1$s - %2$s</string>
+    <string name="entry_prefix">כניסה: %1$s</string>
+    <string name="not_available">לא זמין</string>
+    <string name="alarm_set">🔔 תזכורת מוגדרת</string>
 </resources>

@@ -1,7 +1,6 @@
 package com.awindyendprod.storage_manager.ui.components
 
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FloatingActionButton
@@ -30,25 +29,51 @@ fun DraggableFloatingActionButton(
 ) {
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
-    
-    val screenWidth = configuration.screenWidthDp.dp
-    val screenHeight = configuration.screenHeightDp.dp
     val fabSize = 56.dp
     
-    // Calculate default position (bottom-right with margin)
+    // Get screen dimensions but use a reasonable estimate for content area
+    // In traditional layout, we need to account for typical system bar heights
+    val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
+    
+    // Estimate system bar heights for traditional layout
+    val estimatedNavBarHeight = 48.dp // Typical navigation bar height
+    val estimatedStatusBarHeight = 24.dp // Typical status bar height
+    val availableHeight = screenHeight - estimatedNavBarHeight - estimatedStatusBarHeight
+    
+    // Calculate default position within estimated content area
     val defaultPosition = with(density) {
         Offset(
             x = (screenWidth - fabSize - 16.dp).toPx(),
-            y = (screenHeight - fabSize - 16.dp).toPx()
+            y = (availableHeight - fabSize - 16.dp).toPx()
         )
     }
     
-    var position by remember { mutableStateOf(initialPosition ?: defaultPosition) }
+    var position by remember(defaultPosition) { 
+        mutableStateOf(
+            // Use saved position if available and valid, otherwise use default
+            if (initialPosition != null) {
+                val maxX = with(density) { (screenWidth - fabSize).toPx() }
+                val maxY = with(density) { (availableHeight - fabSize).toPx() }
+                Offset(
+                    x = initialPosition.x.coerceIn(0f, maxX),
+                    y = initialPosition.y.coerceIn(0f, maxY)
+                )
+            } else defaultPosition
+        )
+    }
     var isDragging by remember { mutableStateOf(false) }
 
     LaunchedEffect(initialPosition, defaultPosition) {
         if (!isDragging) {
-            position = initialPosition ?: defaultPosition
+            position = if (initialPosition != null) {
+                val maxX = with(density) { (screenWidth - fabSize).toPx() }
+                val maxY = with(density) { (availableHeight - fabSize).toPx() }
+                Offset(
+                    x = initialPosition.x.coerceIn(0f, maxX),
+                    y = initialPosition.y.coerceIn(0f, maxY)
+                )
+            } else defaultPosition
         }
     }
     
@@ -76,9 +101,8 @@ fun DraggableFloatingActionButton(
                         }
                     ) { _, dragAmount ->
                         val newPosition = position + dragAmount
-
                         val maxX = with(density) { (screenWidth - fabSize).toPx() }
-                        val maxY = with(density) { (screenHeight - fabSize).toPx() }
+                        val maxY = with(density) { (availableHeight - fabSize).toPx() }
 
                         position = Offset(
                             x = newPosition.x.coerceIn(0f, maxX),

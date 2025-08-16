@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +28,8 @@ fun SideBar(
     onSettingsClick: () -> Unit,
     isEditMode: Boolean,
     onEditModeToggle: () -> Unit,
-    onHelpClick: () -> Unit
+    onHelpClick: () -> Unit,
+    onAllDueClick: () -> Unit
 ) {
     Log.d("SideBar", "SideBar is being displayed")
     Column(
@@ -45,6 +47,9 @@ fun SideBar(
         }
         IconButton(onClick = onSearchClick) {
             Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search))
+        }
+        IconButton(onClick = onAllDueClick) {
+            Icon(Icons.Default.Today, contentDescription = stringResource(R.string.items_due))
         }
         IconButton(onClick = onSettingsClick) {
             Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))

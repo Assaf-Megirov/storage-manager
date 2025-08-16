@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -73,7 +74,8 @@ fun StorageManagerMainScreen(
     settingsViewModel: SettingsViewModel,
     onSectionClick: (String, String) -> Unit,
     onSearchClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onAllDueClick: () -> Unit
 ) {
     var isEditMode by remember { mutableStateOf(false) }
     var selectedShelf by remember { mutableStateOf<Shelf?>(null) }
@@ -116,7 +118,8 @@ fun StorageManagerMainScreen(
                 onSettingsClick = onSettingsClick,
                 isEditMode = isEditMode,
                 onEditModeToggle = { isEditMode = !isEditMode },
-                onHelpClick = { showHelpDialog = true }
+                onHelpClick = { showHelpDialog = true },
+                onAllDueClick = onAllDueClick
             )
         }
 
@@ -124,12 +127,23 @@ fun StorageManagerMainScreen(
             topBar = if (!isLandscape) {
                 {
                     TopAppBar(
-                        title = { Text(stringResource(R.string.app_name)) },
+                        title = { 
+                            Text(
+                                text = stringResource(R.string.app_name),
+                                style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp)
+                            )
+                        },
                         actions = {
                             IconButton(onClick = onSearchClick) {
                                 Icon(
                                     Icons.Default.Search,
                                     contentDescription = stringResource(R.string.search)
+                                )
+                            }
+                            IconButton(onClick = onAllDueClick) {
+                                Icon(
+                                    Icons.Default.Today,
+                                    contentDescription = stringResource(R.string.items_due)
                                 )
                             }
                             IconButton(onClick = onSettingsClick) {
@@ -401,7 +415,15 @@ fun DatePickerField(
     settings: Settings
 ) {
     val context = LocalContext.current
-    val dateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+    val dateFormatter = remember(settings.language) {
+        val locale = when (settings.language) {
+            com.awindyendprod.storage_manager.model.AppLanguage.SYSTEM -> Locale.getDefault()
+            com.awindyendprod.storage_manager.model.AppLanguage.ENGLISH -> Locale("en")
+            com.awindyendprod.storage_manager.model.AppLanguage.HEBREW -> Locale("he")
+            com.awindyendprod.storage_manager.model.AppLanguage.RUSSIAN -> Locale("ru")
+        }
+        SimpleDateFormat("yyyy-MM-dd HH:mm", locale)
+    }
     val calendar = remember { Calendar.getInstance() }
 
     var dateText by remember { mutableStateOf(dateFormatter.format(selectedDate)) }
@@ -730,6 +752,9 @@ fun SectionView(
         val bottomPadding = 34.dp
         val availableSpace = (settings.sectionHeight.dp - (4.dp + bottomPadding))
         val maxVisibleItems = (availableSpace.value / itemHeight.value).toInt()
+        
+        // Calculate if we'll have "+X items" text
+        val hasMoreItems = section.items.size > maxVisibleItems
 
         Column(
             modifier = Modifier
@@ -772,14 +797,6 @@ fun SectionView(
                     )
                 }
             }
-
-            if (section.items.size > maxVisibleItems) {
-                Text(
-                    text = stringResource(R.string.more_items, section.items.size - maxVisibleItems),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-            }
         }
 
         if (isEditMode) {
@@ -800,8 +817,32 @@ fun SectionView(
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
                 }
             }
-        }
-        else{
+        } else if (hasMoreItems) {
+            // Show "+X items" text with inline + button at bottom
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(bottomPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.more_items, section.items.size - maxVisibleItems),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                IconButton(
+                    onClick = onAddItem,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Add, 
+                        contentDescription = stringResource(R.string.add_item),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        } else {
+            // Show + button at bottom only when there are no "+X items" text
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1124,6 +1165,9 @@ fun StorageManagerApp(
                 },
                 onSettingsClick = {
                     navController.navigate("settings")
+                },
+                onAllDueClick = {
+                    navController.navigate("allDue")
                 }
             )
         }
@@ -1180,6 +1224,19 @@ fun StorageManagerApp(
                 sectionId = backStackEntry.arguments?.getString("sectionId") ?: "",
                 itemId = backStackEntry.arguments?.getString("itemId") ?: "",
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "allDue"
+        ) {
+            AllDueScreen(
+                viewModel = viewModel,
+                settingsViewModel = settingsViewModel,
+                onBackClick = { navController.popBackStack() },
+                onItemClick = { shelfId, sectionId ->
+                    navController.navigate("section_details/$shelfId/$sectionId")
+                }
             )
         }
     }

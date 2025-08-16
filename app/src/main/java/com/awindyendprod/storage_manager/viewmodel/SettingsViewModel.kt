@@ -62,7 +62,8 @@ class SettingsViewModel(
             fabPositionMainScreenX = prefs.getFloat("fabPositionMainScreenX", Float.MIN_VALUE),
             fabPositionMainScreenY = prefs.getFloat("fabPositionMainScreenY", Float.MIN_VALUE),
             fabPositionSectionScreenX = prefs.getFloat("fabPositionSectionScreenX", Float.MIN_VALUE),
-            fabPositionSectionScreenY = prefs.getFloat("fabPositionSectionScreenY", Float.MIN_VALUE)
+            fabPositionSectionScreenY = prefs.getFloat("fabPositionSectionScreenY", Float.MIN_VALUE),
+            hasSeenLongPressHint = prefs.getBoolean("hasSeenLongPressHint", false)
         )
     }
 
@@ -81,6 +82,7 @@ class SettingsViewModel(
             putFloat("fabPositionMainScreenY", settings.fabPositionMainScreenY)
             putFloat("fabPositionSectionScreenX", settings.fabPositionSectionScreenX)
             putFloat("fabPositionSectionScreenY", settings.fabPositionSectionScreenY)
+            putBoolean("hasSeenLongPressHint", settings.hasSeenLongPressHint)
             apply()
         }
     }
@@ -173,6 +175,11 @@ class SettingsViewModel(
             fabPositionSectionScreenX = Float.MIN_VALUE,
             fabPositionSectionScreenY = Float.MIN_VALUE
         )
+        saveSettings(_settings.value)
+    }
+
+    fun updateHasSeenLongPressHint(hasSeen: Boolean) {
+        _settings.value = _settings.value.copy(hasSeenLongPressHint = hasSeen)
         saveSettings(_settings.value)
     }
 

@@ -314,7 +314,8 @@ fun SettingsScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.allow_moving_fab),
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 8.dp)
                     )
                     Switch(
                         checked = settings.fabDragEnabled,

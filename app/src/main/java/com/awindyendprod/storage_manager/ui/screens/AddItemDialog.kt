@@ -148,15 +148,29 @@ fun AddItemDialog(
                     ) {
                         TextButton(
                             onClick = onDismiss,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                                horizontal = 8.dp,
+                                vertical = 4.dp
+                            )
                         ) {
-                            Text(stringResource(R.string.cancel))
+                            Text(
+                                text = stringResource(R.string.cancel),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
                         Button(
                             onClick = onAddItem,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                                horizontal = 8.dp,
+                                vertical = 4.dp
+                            )
                         ) {
-                            Text(stringResource(R.string.add))
+                            Text(
+                                text = stringResource(R.string.add),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
                     }
                 }

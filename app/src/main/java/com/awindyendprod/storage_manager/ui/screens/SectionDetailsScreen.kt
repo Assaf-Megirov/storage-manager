@@ -63,8 +63,6 @@ import com.awindyendprod.storage_manager.services.toDisplayFormat
 import com.awindyendprod.storage_manager.viewmodel.SettingsViewModel
 import com.awindyendprod.storage_manager.viewmodel.StorageTrackerViewModel
 import java.util.Date
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -78,8 +76,6 @@ fun SectionDetailsScreen(
 ) {
     val settings by settingsViewModel.settings.collectAsState()
     val section by viewModel.getSectionById(shelfId, sectionId).collectAsState()
-    
-    val detailsDateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
 
     val iconSize = when (settings.fontSize) {
         FontSize.SMALL -> 14.dp
@@ -144,8 +140,18 @@ fun SectionDetailsScreen(
                     }
                 )
             }else{
+                val shelf = shelves.find { it.id == shelfId }
+                val sectionNumber = shelf?.sections?.indexOfFirst { it.id == sectionId }?.plus(1) ?: 1
+                val shelfName = shelf?.name ?: ""
+                
                 TopAppBar(
-                    title = { Text(stringResource(R.string.section_details)) },
+                    title = { 
+                        Text(stringResource(
+                            R.string.shelf_section_format_simple,
+                            stringResource(R.string.shelf_number_format, shelfName),
+                            stringResource(R.string.section_number_format, sectionNumber)
+                        ))
+                    },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -170,7 +176,7 @@ fun SectionDetailsScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-            if(!selectionMode){
+            if(!selectionMode && !settings.hasSeenLongPressHint){
                 Text(
                     text = stringResource(R.string.long_press_hint),
                     style = MaterialTheme.typography.bodySmall, // smaller text
@@ -199,6 +205,7 @@ fun SectionDetailsScreen(
                                         }
                                     },
                                     onLongClick = {
+                                        settingsViewModel.updateHasSeenLongPressHint(true)
                                         selectionMode = true
                                         selectedItems = listOf(item)
                                     }
@@ -481,8 +488,17 @@ fun SelectionTopAppBar(
         modifier = modifier,
         title = { Text("$selectedCount "+stringResource(R.string.items_selected), style = MaterialTheme.typography.titleSmall, modifier = Modifier.offset(-16.dp).wrapContentWidth(Alignment.Start, unbounded = true)) },
         navigationIcon = {
-            IconButton(onClick = onCancelClick) {
-                Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.cancel_selection))
+            IconButton(
+                onClick = onCancelClick,
+                modifier = Modifier
+                    .offset(x = (-8).dp)
+                    .size(40.dp)
+            ) {
+                Icon(
+                    Icons.Filled.Clear, 
+                    contentDescription = stringResource(R.string.cancel_selection),
+                    modifier = Modifier.size(20.dp)
+                )
             }
         },
         actions = {//select all

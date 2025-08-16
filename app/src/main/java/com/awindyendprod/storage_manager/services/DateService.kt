@@ -22,3 +22,47 @@ fun Date.toDisplayFormat(settings: Settings): String {
 
     return dateFormat.format(this)
 }
+
+fun Date.toShortDisplayFormat(settings: Settings): String {
+    val locale = when (settings.language) {
+        AppLanguage.SYSTEM -> Locale.getDefault()
+        AppLanguage.ENGLISH -> Locale("en")
+        AppLanguage.HEBREW -> Locale("he")
+        AppLanguage.RUSSIAN -> Locale("ru")
+    }
+    
+    return SimpleDateFormat("MMM dd", locale).format(this)
+}
+
+fun Date.toLongDisplayFormat(settings: Settings): String {
+    val locale = when (settings.language) {
+        AppLanguage.SYSTEM -> Locale.getDefault()
+        AppLanguage.ENGLISH -> Locale("en")
+        AppLanguage.HEBREW -> Locale("he")
+        AppLanguage.RUSSIAN -> Locale("ru")
+    }
+    
+    return SimpleDateFormat("MMM dd, yyyy", locale).format(this)
+}
+
+fun Date.toDateTimeFormat(settings: Settings): String {
+    val locale = when (settings.language) {
+        AppLanguage.SYSTEM -> Locale.getDefault()
+        AppLanguage.ENGLISH -> Locale("en")
+        AppLanguage.HEBREW -> Locale("he")
+        AppLanguage.RUSSIAN -> Locale("ru")
+    }
+    
+    return SimpleDateFormat("yyyy-MM-dd HH:mm", locale).format(this)
+}
+
+fun Date.toFullDateFormat(settings: Settings): String {
+    val locale = when (settings.language) {
+        AppLanguage.SYSTEM -> Locale.getDefault()
+        AppLanguage.ENGLISH -> Locale("en")
+        AppLanguage.HEBREW -> Locale("he")
+        AppLanguage.RUSSIAN -> Locale("ru")
+    }
+    
+    return SimpleDateFormat("dd/MM/yyyy", locale).format(this)
+}

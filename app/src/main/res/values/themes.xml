@@ -11,6 +11,10 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- Navigation bar color. -->
+        <item name="android:navigationBarColor">@android:color/black</item>
+        <!-- Ensure content doesn't go behind system bars -->
+        <item name="android:fitsSystemWindows">true</item>
         <!-- Customize your theme here. -->
     </style>
 </resources>

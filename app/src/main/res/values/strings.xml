@@ -108,4 +108,16 @@
     <string name="floating_button_settings">Floating Button Settings</string>
     <string name="allow_moving_fab">Allow moving floating button</string>
     <string name="reset_fab_positions">Reset button positions</string>
+    <string name="items_due">Items Due</string>
+    <string name="select_date">Select date</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="no_items_due_on">No items due on %1$s</string>
+    <string name="section_number_format">Section #%1$d</string>
+    <string name="shelf_number_format">Shelf #%1$s</string>
+    <string name="shelf_section_format_simple">%1$s - %2$s</string>
+    <string name="entry_prefix">Entry: %1$s</string>
+    <string name="not_available">N/A</string>
+    <string name="alarm_set">🔔 Alarm set</string>
 </resources>

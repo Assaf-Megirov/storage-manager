@@ -42,5 +42,6 @@ data class Settings(
     val fabPositionMainScreenX: Float = Float.MIN_VALUE, // Use MIN_VALUE to indicate default position
     val fabPositionMainScreenY: Float = Float.MIN_VALUE,
     val fabPositionSectionScreenX: Float = Float.MIN_VALUE,
-    val fabPositionSectionScreenY: Float = Float.MIN_VALUE
+    val fabPositionSectionScreenY: Float = Float.MIN_VALUE,
+    val hasSeenLongPressHint: Boolean = false
 ) 

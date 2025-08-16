@@ -6,11 +6,13 @@ import android.content.res.Resources
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.awindyendprod.storage_manager.model.AppLanguage
 import com.awindyendprod.storage_manager.ui.screens.StorageManagerApp
@@ -68,6 +70,9 @@ class MainActivity : ComponentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Ensure traditional layout where content doesn't go behind system bars
+        WindowCompat.setDecorFitsSystemWindows(window, true)
 
         lifecycleScope.launch {
             settingsViewModel.recreateActivity.collect { shouldRecreate ->

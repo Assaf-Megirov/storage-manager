@@ -55,7 +55,8 @@ fun StorageManagerTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            // Note: We don't use WindowCompat.getInsetsController() in traditional layout mode
+            // as it can interfere with proper system bar handling
         }
     }
 
