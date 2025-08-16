@@ -57,7 +57,12 @@ class SettingsViewModel(
             sectionWidth = prefs.getInt("sectionWidth", 300),
             theme = Theme.valueOf(
                 prefs.getString("theme", Theme.SYSTEM.name)!!
-            )
+            ),
+            fabDragEnabled = prefs.getBoolean("fabDragEnabled", true),
+            fabPositionMainScreenX = prefs.getFloat("fabPositionMainScreenX", Float.MIN_VALUE),
+            fabPositionMainScreenY = prefs.getFloat("fabPositionMainScreenY", Float.MIN_VALUE),
+            fabPositionSectionScreenX = prefs.getFloat("fabPositionSectionScreenX", Float.MIN_VALUE),
+            fabPositionSectionScreenY = prefs.getFloat("fabPositionSectionScreenY", Float.MIN_VALUE)
         )
     }
 
@@ -71,6 +76,11 @@ class SettingsViewModel(
             putInt("sectionHeight", settings.sectionHeight)
             putInt("sectionWidth", settings.sectionWidth)
             putString("theme", settings.theme.name)
+            putBoolean("fabDragEnabled", settings.fabDragEnabled)
+            putFloat("fabPositionMainScreenX", settings.fabPositionMainScreenX)
+            putFloat("fabPositionMainScreenY", settings.fabPositionMainScreenY)
+            putFloat("fabPositionSectionScreenX", settings.fabPositionSectionScreenX)
+            putFloat("fabPositionSectionScreenY", settings.fabPositionSectionScreenY)
             apply()
         }
     }
@@ -132,6 +142,37 @@ class SettingsViewModel(
 
     fun updateTheme(theme: Theme) {
         _settings.value = _settings.value.copy(theme = theme)
+        saveSettings(_settings.value)
+    }
+
+    fun updateFabDragEnabled(enabled: Boolean) {
+        _settings.value = _settings.value.copy(fabDragEnabled = enabled)
+        saveSettings(_settings.value)
+    }
+
+    fun updateFabPositionMainScreen(x: Float, y: Float) {
+        _settings.value = _settings.value.copy(
+            fabPositionMainScreenX = x,
+            fabPositionMainScreenY = y
+        )
+        saveSettings(_settings.value)
+    }
+
+    fun updateFabPositionSectionScreen(x: Float, y: Float) {
+        _settings.value = _settings.value.copy(
+            fabPositionSectionScreenX = x,
+            fabPositionSectionScreenY = y
+        )
+        saveSettings(_settings.value)
+    }
+
+    fun resetFabPositions() {
+        _settings.value = _settings.value.copy(
+            fabPositionMainScreenX = Float.MIN_VALUE,
+            fabPositionMainScreenY = Float.MIN_VALUE,
+            fabPositionSectionScreenX = Float.MIN_VALUE,
+            fabPositionSectionScreenY = Float.MIN_VALUE
+        )
         saveSettings(_settings.value)
     }
 

@@ -2,6 +2,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -52,6 +53,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.geometry.Offset
+import com.awindyendprod.storage_manager.ui.components.DraggableFloatingActionButton
 import com.awindyendprod.storage_manager.R
 import com.awindyendprod.storage_manager.model.FontSize
 import com.awindyendprod.storage_manager.model.Item
@@ -152,16 +155,21 @@ fun SectionDetailsScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { isAddItemDialogVisible = true }) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
+            if (!settings.fabDragEnabled) {
+                // Use default position only when drag is disabled
+                FloatingActionButton(onClick = { isAddItemDialogVisible = true }) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
+                }
             }
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Content with padding
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
             if(!selectionMode){
                 Text(
                     text = stringResource(R.string.long_press_hint),
@@ -433,6 +441,26 @@ fun SectionDetailsScreen(
                     initialShelfId = shelfId,
                     initialSectionId = sectionId
                 )
+            }
+            }
+            
+            // Custom positioned FAB or draggable FAB (positioned absolutely on screen)
+            if (settings.fabDragEnabled) {
+                val savedPosition = if (settings.fabPositionSectionScreenX != Float.MIN_VALUE && 
+                                       settings.fabPositionSectionScreenY != Float.MIN_VALUE) {
+                    Offset(settings.fabPositionSectionScreenX, settings.fabPositionSectionScreenY)
+                } else null
+                
+                DraggableFloatingActionButton(
+                    onClick = { isAddItemDialogVisible = true },
+                    isDragEnabled = settings.fabDragEnabled,
+                    initialPosition = savedPosition,
+                    onPositionChanged = { newPosition ->
+                        settingsViewModel.updateFabPositionSectionScreen(newPosition.x, newPosition.y)
+                    }
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
+                }
             }
         }
     }

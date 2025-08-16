@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.material3.TopAppBarDefaults.smallTopAppBarColors
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -296,6 +297,40 @@ fun SettingsScreen(
                 valueRange = 100f..300f,
                 valueText  = stringResource(R.string.width_in_dp)
             )
+
+            // FAB Settings
+            Column {
+                Text(
+                    text = stringResource(R.string.floating_button_settings),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.allow_moving_fab),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Switch(
+                        checked = settings.fabDragEnabled,
+                        onCheckedChange = { viewModel.updateFabDragEnabled(it) }
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Button(
+                    onClick = { viewModel.resetFabPositions() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.reset_fab_positions))
+                }
+            }
 
             // Shelf Preview
             Text(

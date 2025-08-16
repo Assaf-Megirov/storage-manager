@@ -37,5 +37,10 @@ data class Settings(
     val fontSize: FontSize = FontSize.MEDIUM,
     val sectionHeight: Int = 210,
     val sectionWidth: Int = 300,
-    val theme: Theme = Theme.SYSTEM
+    val theme: Theme = Theme.SYSTEM,
+    val fabDragEnabled: Boolean = true,
+    val fabPositionMainScreenX: Float = Float.MIN_VALUE, // Use MIN_VALUE to indicate default position
+    val fabPositionMainScreenY: Float = Float.MIN_VALUE,
+    val fabPositionSectionScreenX: Float = Float.MIN_VALUE,
+    val fabPositionSectionScreenY: Float = Float.MIN_VALUE
 ) 

@@ -105,4 +105,7 @@
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+    <string name="floating_button_settings">Floating Button Settings</string>
+    <string name="allow_moving_fab">Allow moving floating button</string>
+    <string name="reset_fab_positions">Reset button positions</string>
 </resources>

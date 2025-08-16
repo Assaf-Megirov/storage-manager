@@ -55,6 +55,8 @@ import android.net.Uri
 import androidx.compose.foundation.border
 import com.awindyendprod.storage_manager.ui.components.ImportConfirmationDialog
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.awindyendprod.storage_manager.ui.components.DraggableFloatingActionButton
+import androidx.compose.ui.geometry.Offset
 
 @Composable
 fun isLandscape(): Boolean {
@@ -155,7 +157,7 @@ fun StorageManagerMainScreen(
                 {}
             },
             floatingActionButton = {
-                if (isEditMode) {
+                if (isEditMode && !settings.fabDragEnabled) {
                     FloatingActionButton(
                         onClick = { viewModel.addShelf() }
                     ) {
@@ -164,9 +166,10 @@ fun StorageManagerMainScreen(
                 }
             }
         ) { padding ->
-            Box(modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()) {
                 
                 if (shelves.isEmpty()) {
                     Box(
@@ -271,6 +274,25 @@ fun StorageManagerMainScreen(
                             }
                         }
                     )
+                }
+                }
+
+                if (isEditMode && settings.fabDragEnabled) {
+                    val savedPosition = if (settings.fabPositionMainScreenX != Float.MIN_VALUE && 
+                                           settings.fabPositionMainScreenY != Float.MIN_VALUE) {
+                        Offset(settings.fabPositionMainScreenX, settings.fabPositionMainScreenY)
+                    } else null
+                    
+                    DraggableFloatingActionButton(
+                        onClick = { viewModel.addShelf() },
+                        isDragEnabled = settings.fabDragEnabled,
+                        initialPosition = savedPosition,
+                        onPositionChanged = { newPosition ->
+                            settingsViewModel.updateFabPositionMainScreen(newPosition.x, newPosition.y)
+                        }
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_shelf))
+                    }
                 }
             }
         }

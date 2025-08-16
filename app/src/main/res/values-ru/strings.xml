@@ -99,4 +99,11 @@
     <string name="move_warning">Переместить %1$d предметов в:</string>
     <string name="long_press_hint">Подсказка: нажмите и удерживайте предмет, чтобы выбрать несколько предметов</string>
     <string name="deselect_all">Отменить выбор всех</string>
+    <string name="theme">Тема</string>
+    <string name="theme_system">Системная</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Темная</string>
+    <string name="floating_button_settings">Настройки плавающей кнопки</string>
+    <string name="allow_moving_fab">Разрешить перемещение плавающей кнопки</string>
+    <string name="reset_fab_positions">Сбросить позиции кнопок</string>
 </resources> 

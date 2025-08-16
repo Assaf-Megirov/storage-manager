@@ -100,4 +100,11 @@
     <string name="move_warning">העבר %1$d פריטים ל:</string>
     <string name="long_press_hint">רמז: לחץ לחיצה ארוכה על פריט על מנת לבחור מספר פריטים</string>
     <string name="deselect_all">הסר הכל</string>
+    <string name="theme">ערכת נושא</string>
+    <string name="theme_system">מערכת</string>
+    <string name="theme_light">בהיר</string>
+    <string name="theme_dark">כהה</string>
+    <string name="floating_button_settings">הגדרות כפתור צף</string>
+    <string name="allow_moving_fab">אפשר הזזת כפתור צף</string>
+    <string name="reset_fab_positions">איפוס מיקום כפתורים</string>
 </resources>
