@@ -133,4 +133,18 @@
     <string name="notification_days_before">Days before due date</string>
     <string name="notification_max_items">Alert threshold (items)</string>
     <string name="dismiss">Dismiss</string>
+    
+    <!-- Profile System -->
+    <string name="profiles">Profiles</string>
+    <string name="select_profile">Select Profile</string>
+    <string name="add_profile">Add Profile</string>
+    <string name="create_new_profile">Create New Profile</string>
+    <string name="profile_name">Profile Name</string>
+    <string name="profile_name_required">Profile name is required</string>
+    <string name="create">Create</string>
+    <string name="rename_profile">Rename Profile</string>
+    <string name="delete_profile">Delete Profile</string>
+    <string name="profile_dropdown">Profile Dropdown</string>
+    <string name="save_profile_name">Save Profile Name</string>
+    <string name="cancel_rename">Cancel Rename</string>
 </resources>

@@ -46,5 +46,6 @@ data class Settings(
     val hasSeenLongPressHint: Boolean = false,
     val notificationDaysBefore: Int = 1,
     val notificationMaxItems: Int = 10,
-    val dailyNotificationsEnabled: Boolean = true
+    val dailyNotificationsEnabled: Boolean = true,
+    val currentProfileId: String? = null
 ) 

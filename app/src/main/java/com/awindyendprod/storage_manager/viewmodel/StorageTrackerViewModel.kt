@@ -24,15 +24,29 @@ class StorageTrackerViewModel(
     private val persistenceService: StorageTrackerPersistenceService
 ) : ViewModel() {
     private val applicationContext = context.applicationContext
-    private val _shelves = MutableStateFlow<List<Shelf>>(persistenceService.loadData())
+    private var currentProfileId: String? = null
+    private val _shelves = MutableStateFlow<List<Shelf>>(emptyList())
     val shelves: StateFlow<List<Shelf>> = _shelves.asStateFlow()
 
     fun reloadData() {
-        _shelves.value = persistenceService.loadData()
+        if (currentProfileId != null) {
+            _shelves.value = persistenceService.loadData(currentProfileId!!)
+        } else {
+            _shelves.value = persistenceService.loadData() // Legacy fallback
+        }
+    }
+
+    fun reloadDataForProfile(profileId: String) {
+        currentProfileId = profileId
+        _shelves.value = persistenceService.loadData(profileId)
     }
 
     private fun saveData() {
-        persistenceService.saveData(_shelves.value)
+        if (currentProfileId != null) {
+            persistenceService.saveData(_shelves.value, currentProfileId!!)
+        } else {
+            persistenceService.saveData(_shelves.value) // Legacy fallback
+        }
     }
 
     fun getSectionById(shelfId: String, sectionId: String): StateFlow<ShelfSection?> = shelves.map { shelvesList ->

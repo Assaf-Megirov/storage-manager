@@ -25,24 +25,37 @@ import androidx.core.view.WindowCompat
 import com.awindyendprod.storage_manager.R
 import com.awindyendprod.storage_manager.model.*
 import com.awindyendprod.storage_manager.ui.components.SettingsSlider
+import com.awindyendprod.storage_manager.ui.components.ProfileDropdown
+import com.awindyendprod.storage_manager.ui.components.NewProfileDialog
 import com.awindyendprod.storage_manager.viewmodel.SettingsViewModel
+import com.awindyendprod.storage_manager.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    profileViewModel: ProfileViewModel,
     onBack: () -> Unit
 ) {
     val settings by viewModel.settings.collectAsState()
+    val profiles by profileViewModel.profiles.collectAsState()
+    val currentProfileId by profileViewModel.currentProfileId.collectAsState()
     val exportFilePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
-    ) { uri -> uri?.let { viewModel.exportData(it) } }
+    ) { uri -> uri?.let { viewModel.exportData(it, profiles, currentProfileId) } }
 
     val importFilePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
-    ) { uri -> uri?.let { viewModel.importData(it) } }
+    ) { uri -> uri?.let { viewModel.importData(it) { importedProfiles, importedCurrentProfileId ->
+        // Update profiles in ProfileViewModel
+        profileViewModel.loadProfiles()
+        if (importedCurrentProfileId != null) {
+            profileViewModel.switchProfile(importedCurrentProfileId)
+        }
+    } } }
 
     var showExportMenu by remember { mutableStateOf(false) }
+    var showNewProfileDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -207,6 +220,35 @@ fun SettingsScreen(
                     }
                 }
             }
+            
+            // Profile Management
+            Column {
+                Text(
+                    text = stringResource(R.string.profiles),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                ProfileDropdown(
+                    profiles = profiles,
+                    currentProfileId = currentProfileId,
+                    onProfileSelected = { profileId ->
+                        profileViewModel.switchProfile(profileId)
+                    },
+                    onAddProfile = {
+                        showNewProfileDialog = true
+                    },
+                    onProfileRename = { profileId, newName ->
+                        profileViewModel.updateProfileName(profileId, newName)
+                    },
+                    onProfileDelete = { profileId ->
+                        profileViewModel.deleteProfile(profileId)
+                    },
+                    settings = settings,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            
             // Theme Selection
 
             Column {
@@ -452,7 +494,7 @@ fun SettingsScreen(
                         text = { Text(stringResource(R.string.share)) },
                         onClick = {
                             showExportMenu = false
-                            viewModel.shareData()
+                            viewModel.shareData(profiles, currentProfileId)
                         },
                         leadingIcon = {
                             Icon(Icons.Default.Share, contentDescription = null)
@@ -473,5 +515,15 @@ fun SettingsScreen(
                 Text(stringResource(R.string.import_data))
             }
         }
+    }
+
+    // Profile management dialogs
+    if (showNewProfileDialog) {
+        NewProfileDialog(
+            onDismiss = { showNewProfileDialog = false },
+            onConfirm = { profileName ->
+                profileViewModel.createProfile(profileName)
+            }
+        )
     }
 }

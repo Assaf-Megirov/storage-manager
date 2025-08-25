@@ -1,7 +1,8 @@
 package com.awindyendprod.storage_manager.model
 
-data class ExportData (
-    val settings: Settings,
-    val shelves: List<Shelf>,
+data class ExportData(
+    val globalSettings: Settings, // App-wide settings (language, theme, etc.)
+    val profiles: List<ProfileData>,
+    val currentProfileId: String?,
     val version: Int
 )

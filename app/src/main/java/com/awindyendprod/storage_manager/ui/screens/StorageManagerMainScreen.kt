@@ -41,6 +41,7 @@ import com.awindyendprod.storage_manager.model.ShelfSection
 import com.awindyendprod.storage_manager.services.toDisplayFormat
 import com.awindyendprod.storage_manager.viewmodel.StorageTrackerViewModel
 import com.awindyendprod.storage_manager.viewmodel.SettingsViewModel
+import com.awindyendprod.storage_manager.viewmodel.ProfileViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -57,6 +58,8 @@ import androidx.compose.foundation.border
 import com.awindyendprod.storage_manager.ui.components.ImportConfirmationDialog
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.awindyendprod.storage_manager.ui.components.DraggableFloatingActionButton
+import com.awindyendprod.storage_manager.ui.components.ProfileDropdown
+import com.awindyendprod.storage_manager.ui.components.NewProfileDialog
 import androidx.compose.ui.geometry.Offset
 
 @Composable
@@ -72,11 +75,13 @@ fun isLandscape(): Boolean {
 fun StorageManagerMainScreen(
     viewModel: StorageTrackerViewModel,
     settingsViewModel: SettingsViewModel,
+    profileViewModel: ProfileViewModel,
     onSectionClick: (String, String) -> Unit,
     onSearchClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onAllDueClick: () -> Unit
 ) {
+    var showNewProfileDialog by remember { mutableStateOf(false) }
     var isEditMode by remember { mutableStateOf(false) }
     var selectedShelf by remember { mutableStateOf<Shelf?>(null) }
     var selectedShelfId by remember { mutableStateOf<String?>(null) }
@@ -91,6 +96,8 @@ fun StorageManagerMainScreen(
     var newItemAlarmDate by remember { mutableStateOf<Date?>(null) }
     
     val settings by settingsViewModel.settings.collectAsState()
+    val profiles by profileViewModel.profiles.collectAsState()
+    val currentProfileId by profileViewModel.currentProfileId.collectAsState()
     val isLandscape = isLandscape()
     val shelves by viewModel.shelves.collectAsState()
 
@@ -119,7 +126,22 @@ fun StorageManagerMainScreen(
                 isEditMode = isEditMode,
                 onEditModeToggle = { isEditMode = !isEditMode },
                 onHelpClick = { showHelpDialog = true },
-                onAllDueClick = onAllDueClick
+                onAllDueClick = onAllDueClick,
+                profiles = profiles,
+                currentProfileId = currentProfileId,
+                onProfileSelected = { profileId ->
+                    profileViewModel.switchProfile(profileId)
+                },
+                onAddProfile = {
+                    showNewProfileDialog = true
+                },
+                onProfileRename = { profileId, newName ->
+                    profileViewModel.updateProfileName(profileId, newName)
+                },
+                onProfileDelete = { profileId ->
+                    profileViewModel.deleteProfile(profileId)
+                },
+                settings = settings
             )
         }
 
@@ -128,10 +150,26 @@ fun StorageManagerMainScreen(
                 {
                     TopAppBar(
                         title = { 
-                            Text(
-                                text = stringResource(R.string.app_name),
-                                style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp)
-                            )
+                            Column {
+                                ProfileDropdown(
+                                    profiles = profiles,
+                                    currentProfileId = currentProfileId,
+                                    onProfileSelected = { profileId ->
+                                        profileViewModel.switchProfile(profileId)
+                                    },
+                                    onAddProfile = {
+                                        showNewProfileDialog = true
+                                    },
+                                    onProfileRename = { profileId, newName ->
+                                        profileViewModel.updateProfileName(profileId, newName)
+                                    },
+                                    onProfileDelete = { profileId ->
+                                        profileViewModel.deleteProfile(profileId)
+                                    },
+                                    settings = settings,
+                                    modifier = Modifier.width(200.dp)
+                                )
+                            }
                         },
                         actions = {
                             IconButton(onClick = onSearchClick) {
@@ -286,6 +324,15 @@ fun StorageManagerMainScreen(
                             TextButton(onClick = { showHelpDialog = false }) {
                                 Text(stringResource(R.string.close))
                             }
+                        }
+                    )
+                }
+
+                if (showNewProfileDialog) {
+                    NewProfileDialog(
+                        onDismiss = { showNewProfileDialog = false },
+                        onConfirm = { profileName ->
+                            profileViewModel.createProfile(profileName)
                         }
                     )
                 }
@@ -1127,6 +1174,7 @@ fun EditItemScreen(
 fun StorageManagerApp(
     viewModel: StorageTrackerViewModel,
     settingsViewModel: SettingsViewModel,
+    profileViewModel: ProfileViewModel,
     importUri: Uri? = null
 ) {
     val navController = rememberNavController()
@@ -1143,7 +1191,13 @@ fun StorageManagerApp(
     if (showImportDialog) {
         ImportConfirmationDialog(
             onConfirm = {
-                importUri?.let { settingsViewModel.importData(it) }
+                importUri?.let { settingsViewModel.importData(it) { importedProfiles, importedCurrentProfileId ->
+                    // Update profiles in ProfileViewModel
+                    profileViewModel.loadProfiles()
+                    if (importedCurrentProfileId != null) {
+                        profileViewModel.switchProfile(importedCurrentProfileId)
+                    }
+                } }
                 showImportDialog = false
             },
             onDismiss = {
@@ -1157,6 +1211,7 @@ fun StorageManagerApp(
             StorageManagerMainScreen(
                 viewModel = viewModel,
                 settingsViewModel = settingsViewModel,
+                profileViewModel = profileViewModel,
                 onSectionClick = { shelfId, sectionId ->
                     navController.navigate("section_details/$shelfId/$sectionId")
                 },
@@ -1194,6 +1249,7 @@ fun StorageManagerApp(
         composable("settings") {
             SettingsScreen(
                 viewModel = settingsViewModel,
+                profileViewModel = profileViewModel,
                 onBack = { navController.popBackStack() }
             )
         }

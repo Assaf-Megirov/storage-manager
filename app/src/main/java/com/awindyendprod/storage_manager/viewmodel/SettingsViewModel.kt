@@ -22,6 +22,8 @@ import com.awindyendprod.storage_manager.services.StorageTrackerPersistenceServi
 import android.content.Intent
 import androidx.core.content.FileProvider
 import com.awindyendprod.storage_manager.model.Theme
+import com.awindyendprod.storage_manager.model.ProfileData
+
 import java.io.File
 
 class SettingsViewModel(
@@ -29,6 +31,7 @@ class SettingsViewModel(
     private val persistenceService: StorageTrackerPersistenceService,
     private val storageTrackerViewModel: StorageTrackerViewModel
 ) : ViewModel() {
+
     private val appContext = context.applicationContext
     private val prefs = appContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
     
@@ -37,6 +40,8 @@ class SettingsViewModel(
 
     private val _recreateActivity = MutableStateFlow(false)
     val recreateActivity: StateFlow<Boolean> = _recreateActivity.asStateFlow()
+
+
 
     private fun loadSettings(): Settings {
         return Settings(
@@ -66,7 +71,7 @@ class SettingsViewModel(
             hasSeenLongPressHint = prefs.getBoolean("hasSeenLongPressHint", false),
             notificationDaysBefore = prefs.getInt("notificationDaysBefore", 1),
             notificationMaxItems = prefs.getInt("notificationMaxItems", 10),
-            dailyNotificationsEnabled = prefs.getBoolean("dailyNotificationsEnabled", true)
+                         dailyNotificationsEnabled = prefs.getBoolean("dailyNotificationsEnabled", true)
         )
     }
 
@@ -212,6 +217,8 @@ class SettingsViewModel(
         _recreateActivity.value = false
     }
 
+
+
     class Factory(
         private val context: Context,
         private val persistenceService: StorageTrackerPersistenceService,
@@ -230,10 +237,10 @@ class SettingsViewModel(
         }
     }
 
-    fun exportData(uri: Uri) {
+    fun exportData(uri: Uri, profiles: List<ProfileData>, currentProfileId: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                persistenceService.exportToFile(uri, settings.value)
+                persistenceService.exportToFile(uri, settings.value, profiles, currentProfileId)
             } catch (e: Exception) {
                 Log.e("SettingsViewModel", "Error exporting data", e)
                 //TODO: Handle error
@@ -241,13 +248,16 @@ class SettingsViewModel(
         }
     }
 
-    fun importData(uri: Uri) {
+    fun importData(uri: Uri, onProfilesImported: (List<ProfileData>, String?) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val importedData = persistenceService.importFromFile(uri)
-                updateSettings(importedData.settings)
-                persistenceService.saveData(importedData.shelves)
-                storageTrackerViewModel.reloadData()
+                
+                // Update global settings
+                updateSettings(importedData.globalSettings)
+                
+                // Notify about imported profiles (to be handled by ProfileViewModel)
+                onProfilesImported(importedData.profiles, importedData.currentProfileId)
             } catch (e: Exception) {
                 Log.e("SettingsViewModel", "Error importing data", e)
                 //TODO: Handle error
@@ -262,12 +272,12 @@ class SettingsViewModel(
         _recreateActivity.value = true
     }
 
-    fun shareData() {
+    fun shareData(profiles: List<ProfileData>, currentProfileId: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val tempFile = File(appContext.cacheDir, "storage_manager_backup.json")
                 tempFile.createNewFile()
-                persistenceService.exportToFile(tempFile, settings.value)
+                persistenceService.exportToFile(tempFile, settings.value, profiles, currentProfileId)
 
                 val contentUri = FileProvider.getUriForFile(
                     appContext,

@@ -19,6 +19,7 @@ import com.awindyendprod.storage_manager.ui.screens.StorageManagerApp
 import com.awindyendprod.storage_manager.viewmodel.SettingsViewModel
 import com.awindyendprod.storage_manager.viewmodel.StorageTrackerViewModel
 import com.awindyendprod.storage_manager.viewmodel.StorageTrackerViewModelFactory
+import com.awindyendprod.storage_manager.viewmodel.ProfileViewModel
 import kotlinx.coroutines.launch
 import java.util.Locale
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import com.awindyendprod.storage_manager.ui.theme.StorageManagerTheme
 import com.awindyendprod.storage_manager.services.StorageTrackerPersistenceService
+import com.awindyendprod.storage_manager.services.ProfileMigrationService
+import com.awindyendprod.storage_manager.services.ProfilePersistenceService
 import com.awindyendprod.storage_manager.ui.components.DueItemsAlertDialog
 import android.content.Intent
 import androidx.work.OneTimeWorkRequest
@@ -42,12 +45,24 @@ class MainActivity : ComponentActivity() {
         StorageTrackerPersistenceService(this)
     }
 
+    private val profilePersistenceService by lazy {
+        ProfilePersistenceService(this)
+    }
+
+    private val profileMigrationService by lazy {
+        ProfileMigrationService(this, profilePersistenceService, persistenceService)
+    }
+
     private val storageTrackerViewModel: StorageTrackerViewModel by viewModels {
         StorageTrackerViewModelFactory.provide(this, persistenceService)
     }
 
     private val settingsViewModel: SettingsViewModel by viewModels {
         SettingsViewModel.Factory(this, persistenceService, storageTrackerViewModel)
+    }
+
+    private val profileViewModel: ProfileViewModel by viewModels {
+        ProfileViewModel.Factory(this, profilePersistenceService, storageTrackerViewModel)
     }
     
     override fun attachBaseContext(newBase: Context) {
@@ -83,6 +98,15 @@ class MainActivity : ComponentActivity() {
         
         // Ensure traditional layout where content doesn't go behind system bars
         WindowCompat.setDecorFitsSystemWindows(window, true)
+
+        // Migrate existing data to profiles if needed
+        lifecycleScope.launch {
+            val currentProfileId = profileMigrationService.migrateExistingDataIfNeeded()
+            profileViewModel.loadProfiles()
+            if (currentProfileId != null) {
+                storageTrackerViewModel.reloadDataForProfile(currentProfileId)
+            }
+        }
 
         lifecycleScope.launch {
             settingsViewModel.recreateActivity.collect { shouldRecreate ->
@@ -126,6 +150,7 @@ class MainActivity : ComponentActivity() {
                     StorageManagerApp(
                         viewModel = storageTrackerViewModel,
                         settingsViewModel = settingsViewModel,
+                        profileViewModel = profileViewModel,
                         importUri = importUri
                     )
 

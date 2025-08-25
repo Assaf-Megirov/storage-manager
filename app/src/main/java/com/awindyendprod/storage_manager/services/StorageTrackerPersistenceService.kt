@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.awindyendprod.storage_manager.model.ExportData
+import com.awindyendprod.storage_manager.model.ProfileData
 import com.awindyendprod.storage_manager.model.Settings
 import com.awindyendprod.storage_manager.model.Shelf
 import com.google.gson.Gson
@@ -14,6 +15,19 @@ class StorageTrackerPersistenceService(private val context: Context) {
     private val prefs = context.getSharedPreferences("StorageTrackerPrefs", Context.MODE_PRIVATE)
     private val gson = Gson()
 
+    fun saveData(shelves: List<Shelf>, profileId: String) {
+        val shelvesJson = gson.toJson(shelves)
+        prefs.edit().putString("shelves_$profileId", shelvesJson).apply()
+    }
+
+    fun loadData(profileId: String): List<Shelf> {
+        val shelvesJson = prefs.getString("shelves_$profileId", null)
+        return shelvesJson?.let {
+            gson.fromJson(it, object : TypeToken<List<Shelf>>() {}.type)
+        } ?: emptyList()
+    }
+
+    // Legacy method for backward compatibility
     fun saveData(shelves: List<Shelf>) {
         val shelvesJson = gson.toJson(shelves)
         prefs.edit().putString("shelves", shelvesJson).apply()
@@ -26,11 +40,12 @@ class StorageTrackerPersistenceService(private val context: Context) {
         } ?: emptyList()
     }
 
-    fun exportToFile(file: File, settings: Settings) {
+    fun exportToFile(file: File, globalSettings: Settings, profiles: List<ProfileData>, currentProfileId: String?) {
         try {
             val exportData = ExportData(
-                settings = settings,
-                shelves = loadData(),
+                globalSettings = globalSettings,
+                profiles = profiles,
+                currentProfileId = currentProfileId,
                 version = 1
             )
             val jsonString = gson.toJson(exportData)
@@ -41,16 +56,20 @@ class StorageTrackerPersistenceService(private val context: Context) {
         }
     }
 
-    @Deprecated("Use the version with settings parameter instead")
+    @Deprecated("Use the version with settings, profiles, and currentProfileId parameters instead")
     fun exportToFile(file: File) {
-        exportToFile(file, loadSettings())
+        val settings = loadSettings()
+        val profiles = loadProfiles()
+        val currentProfileId = loadCurrentProfileId()
+        exportToFile(file, settings, profiles, currentProfileId)
     }
 
-    fun exportToFile(uri: Uri, settings: Settings) {
+    fun exportToFile(uri: Uri, globalSettings: Settings, profiles: List<ProfileData>, currentProfileId: String?) {
         try {
             val exportData = ExportData(
-                settings = settings,
-                shelves = loadData(),
+                globalSettings = globalSettings,
+                profiles = profiles,
+                currentProfileId = currentProfileId,
                 version = 1
             )
             val jsonString = gson.toJson(exportData)
@@ -81,5 +100,16 @@ class StorageTrackerPersistenceService(private val context: Context) {
         return settingsJson?.let {
             gson.fromJson(it, Settings::class.java)
         } ?: Settings()
+    }
+
+    private fun loadProfiles(): List<ProfileData> {
+        val profilesJson = prefs.getString("profiles", null)
+        return profilesJson?.let {
+            gson.fromJson(it, object : TypeToken<List<ProfileData>>() {}.type)
+        } ?: emptyList()
+    }
+
+    private fun loadCurrentProfileId(): String? {
+        return prefs.getString("currentProfileId", null)
     }
 }
