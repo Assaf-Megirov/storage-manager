@@ -131,4 +131,36 @@
     <string name="notification_days_before">Дней до срока возврата</string>
     <string name="notification_max_items">Порог предупреждения (предметов)</string>
     <string name="dismiss">Отклонить</string>
+    
+    <!-- Profile System -->
+    <string name="profiles">Профили</string>
+    <string name="select_profile">Выбрать профиль</string>
+    <string name="add_profile">Добавить профиль</string>
+    <string name="create_new_profile">Создать новый профиль</string>
+    <string name="profile_name">Имя профиля</string>
+    <string name="profile_name_required">Имя профиля обязательно</string>
+    <string name="create">Создать</string>
+    <string name="rename_profile">Переименовать профиль</string>
+    <string name="delete_profile">Удалить профиль</string>
+    <string name="confirm_delete_profile">Вы уверены, что хотите удалить этот профиль?</string>
+    <string name="profile_delete_warning">Это навсегда удалит профиль и все связанные с ним данные (полки, секции и предметы).</string>
+    <string name="profile_dropdown">Выпадающий список профилей</string>
+    <string name="save_profile_name">Сохранить имя профиля</string>
+    <string name="cancel_rename">Отменить переименование</string>
+    
+    <!-- Notification and Alarm -->
+    <string name="item_return_reminder">Напоминание о возврате предмета</string>
+    <string name="item_due_return_message">%1$s должен быть возвращен</string>
+    <string name="permission_required">Требуется разрешение</string>
+    <string name="permission_required_message">Для установки будильника необходимо включить разрешение на точный будильник. Пожалуйста, перейдите в настройки и включите его.</string>
+    <string name="ok">ОК</string>
+    
+    <!-- UI Elements -->
+    <string name="ascending">По возрастанию</string>
+    <string name="descending">По убыванию</string>
+    <string name="add_section">Добавить секцию</string>
+    <string name="remove_shelf">Удалить полку</string>
+    <string name="remove_section">Удалить секцию</string>
+    <string name="switch_to_abc">Переключиться на ABC</string>
+    <string name="default_profile_name">По умолчанию</string>
 </resources> 

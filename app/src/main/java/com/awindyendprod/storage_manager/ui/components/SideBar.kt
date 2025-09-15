@@ -175,6 +175,7 @@ fun ProfileSelectionItem(
     onProfileDelete: (String) -> Unit
 ) {
     var showRenameDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     
     Row(
         modifier = Modifier
@@ -205,7 +206,7 @@ fun ProfileSelectionItem(
             
             if (!profile.profile.isDefault) {
                 IconButton(
-                    onClick = { onProfileDelete(profile.profile.id) },
+                    onClick = { showDeleteDialog = true },
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
@@ -226,6 +227,34 @@ fun ProfileSelectionItem(
             onConfirm = { newName ->
                 onProfileRename(profile.profile.id, newName)
                 showRenameDialog = false
+            }
+        )
+    }
+
+    // Delete Confirmation Dialog
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(stringResource(R.string.confirm_delete_profile)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.profile_delete_warning))
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onProfileDelete(profile.profile.id)
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
         )
     }

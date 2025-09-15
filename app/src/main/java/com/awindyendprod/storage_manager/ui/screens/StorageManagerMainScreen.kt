@@ -660,7 +660,7 @@ fun ShelfView(
                                 ) {
                                     Icon(
                                         Icons.Default.Add,
-                                        contentDescription = "Add Section",
+                                        contentDescription = stringResource(R.string.add_section),
                                         modifier = Modifier.size(32.dp)
                                     )
                                 }
@@ -670,7 +670,7 @@ fun ShelfView(
                                         .size(48.dp)
                                         .align(Alignment.CenterEnd)
                                 ) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Remove Shelf")
+                                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.remove_shelf))
                                 }
                             }
                         } else {
@@ -679,10 +679,10 @@ fun ShelfView(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 IconButton(onClick = { onAddSection(shelf.id, "#"+(shelf.sections.size+1)) }) {
-                                    Icon(Icons.Default.Add, contentDescription = "Add Section")
+                                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_section))
                                 }
                                 IconButton(onClick = { showDeleteShelfDialog = true }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Remove Shelf")
+                                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.remove_shelf))
                                 }
                             }
                         }
@@ -856,7 +856,7 @@ fun SectionView(
                 IconButton(
                     onClick = { showDeleteSectionDialog = true }
                 ) {
-                    Icon(Icons.Default.Delete, contentDescription = "Remove Section")
+                                                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.remove_section))
                 }
                 IconButton(
                     onClick = onAddItem
@@ -869,7 +869,8 @@ fun SectionView(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(bottomPadding),
+                    .height(bottomPadding)
+                    .padding(10.dp,0.dp,0.dp,0.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {

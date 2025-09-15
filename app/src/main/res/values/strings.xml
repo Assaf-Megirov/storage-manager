@@ -144,7 +144,25 @@
     <string name="create">Create</string>
     <string name="rename_profile">Rename Profile</string>
     <string name="delete_profile">Delete Profile</string>
+    <string name="confirm_delete_profile">Are you sure you want to delete this profile?</string>
+    <string name="profile_delete_warning">This will permanently delete the profile and all its associated data (shelves, sections, and items).</string>
     <string name="profile_dropdown">Profile Dropdown</string>
     <string name="save_profile_name">Save Profile Name</string>
     <string name="cancel_rename">Cancel Rename</string>
+    
+    <!-- Notification and Alarm -->
+    <string name="item_return_reminder">Item Return Reminder</string>
+    <string name="item_due_return_message">%1$s is due to be returned</string>
+    <string name="permission_required">Permission Required</string>
+    <string name="permission_required_message">To set the alarm, you need to enable the exact alarm permission. Please go to settings and enable it.</string>
+    <string name="ok">OK</string>
+    
+    <!-- UI Elements -->
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
+    <string name="add_section">Add Section</string>
+    <string name="remove_shelf">Remove Shelf</string>
+    <string name="remove_section">Remove Section</string>
+    <string name="switch_to_abc">Switch to ABC</string>
+    <string name="default_profile_name">Default</string>
 </resources>

@@ -2,6 +2,7 @@ package com.awindyendprod.storage_manager.services
 
 import android.content.Context
 import android.util.Log
+import com.awindyendprod.storage_manager.R
 import com.awindyendprod.storage_manager.model.Profile
 import com.awindyendprod.storage_manager.model.ProfileData
 import com.google.gson.Gson
@@ -35,7 +36,7 @@ class ProfilePersistenceService(private val context: Context) {
     fun createDefaultProfile(): Profile {
         return Profile(
             id = UUID.randomUUID().toString(),
-            name = "Default",
+            name = context.getString(R.string.default_profile_name),
             isDefault = true
         )
     }

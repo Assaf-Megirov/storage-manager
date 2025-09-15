@@ -14,8 +14,8 @@ class ReturnAlarmReceiver : BroadcastReceiver() {
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notification = NotificationCompat.Builder(context, "StorageTrackerChannel")
-            .setContentTitle("Item Return Reminder")
-            .setContentText("$itemName is due to be returned")
+            .setContentTitle(context.getString(R.string.item_return_reminder))
+            .setContentText(context.getString(R.string.item_due_return_message, itemName))
             .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()

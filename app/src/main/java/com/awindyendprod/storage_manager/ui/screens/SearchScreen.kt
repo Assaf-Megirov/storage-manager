@@ -369,7 +369,7 @@ private fun SortChip(
                 if (isSelected) {
                     Icon(
                         imageVector = if (isAscending) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = if (isAscending) "Ascending" else "Descending",
+                        contentDescription = if (isAscending) stringResource(R.string.ascending) else stringResource(R.string.descending),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.onPrimary
                     )

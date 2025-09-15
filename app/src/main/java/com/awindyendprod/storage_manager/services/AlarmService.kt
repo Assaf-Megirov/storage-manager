@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import com.awindyendprod.storage_manager.R
 import com.awindyendprod.storage_manager.model.Item
 import com.awindyendprod.storage_manager.recievers.ReturnAlarmReceiver
 
@@ -51,9 +52,9 @@ class AlarmService(private val context: Context) {
 
     private fun showPermissionRequiredMessage() {
         AlertDialog.Builder(context)
-            .setTitle("Permission Required")
-            .setMessage("To set the alarm, you need to enable the exact alarm permission. Please go to settings and enable it.")
-            .setPositiveButton("OK", null)
+            .setTitle(context.getString(R.string.permission_required))
+            .setMessage(context.getString(R.string.permission_required_message))
+            .setPositiveButton(context.getString(R.string.ok), null)
             .show()
     }
 }
