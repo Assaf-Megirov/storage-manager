@@ -71,7 +71,8 @@ class SettingsViewModel(
             hasSeenLongPressHint = prefs.getBoolean("hasSeenLongPressHint", false),
             notificationDaysBefore = prefs.getInt("notificationDaysBefore", 1),
             notificationMaxItems = prefs.getInt("notificationMaxItems", 10),
-                         dailyNotificationsEnabled = prefs.getBoolean("dailyNotificationsEnabled", true)
+                         dailyNotificationsEnabled = prefs.getBoolean("dailyNotificationsEnabled", true),
+            showProfilesButton = prefs.getBoolean("showProfilesButton", true)
         )
     }
 
@@ -94,6 +95,7 @@ class SettingsViewModel(
             putInt("notificationDaysBefore", settings.notificationDaysBefore)
             putInt("notificationMaxItems", settings.notificationMaxItems)
             putBoolean("dailyNotificationsEnabled", settings.dailyNotificationsEnabled)
+            putBoolean("showProfilesButton", settings.showProfilesButton)
             apply()
         }
     }
@@ -210,6 +212,11 @@ class SettingsViewModel(
 
     fun updateDailyNotificationsEnabled(enabled: Boolean) {
         _settings.value = _settings.value.copy(dailyNotificationsEnabled = enabled)
+        saveSettings(_settings.value)
+    }
+
+    fun updateShowProfilesButton(enabled: Boolean) {
+        _settings.value = _settings.value.copy(showProfilesButton = enabled)
         saveSettings(_settings.value)
     }
 

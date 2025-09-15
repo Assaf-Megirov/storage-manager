@@ -47,5 +47,6 @@ data class Settings(
     val notificationDaysBefore: Int = 1,
     val notificationMaxItems: Int = 10,
     val dailyNotificationsEnabled: Boolean = true,
-    val currentProfileId: String? = null
+    val currentProfileId: String? = null,
+    val showProfilesButton: Boolean = true
 ) 

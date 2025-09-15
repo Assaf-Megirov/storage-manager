@@ -68,8 +68,10 @@ fun SideBar(
             .padding(4.dp, top=24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        IconButton(onClick = { showProfileDialog = true }) {
-            Icon(Icons.Default.Person, contentDescription = stringResource(R.string.profiles))
+        if (settings.showProfilesButton) {
+            IconButton(onClick = { showProfileDialog = true }) {
+                Icon(Icons.Default.Person, contentDescription = stringResource(R.string.profiles))
+            }
         }
         IconButton(onClick = onEditModeToggle) {
             Icon(

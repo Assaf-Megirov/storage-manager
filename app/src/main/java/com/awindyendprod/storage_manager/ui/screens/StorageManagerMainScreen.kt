@@ -1,9 +1,6 @@
 package com.awindyendprod.storage_manager.ui.screens
 
-import AddItemDialog
 import SectionDetailsScreen
-import SectionDropdown
-import ShelfDropdown
 import android.app.TimePickerDialog
 import android.app.DatePickerDialog
 import android.content.res.Configuration
@@ -151,24 +148,26 @@ fun StorageManagerMainScreen(
                     TopAppBar(
                         title = { 
                             Column {
-                                ProfileDropdown(
-                                    profiles = profiles,
-                                    currentProfileId = currentProfileId,
-                                    onProfileSelected = { profileId ->
-                                        profileViewModel.switchProfile(profileId)
-                                    },
-                                    onAddProfile = {
-                                        showNewProfileDialog = true
-                                    },
-                                    onProfileRename = { profileId, newName ->
-                                        profileViewModel.updateProfileName(profileId, newName)
-                                    },
-                                    onProfileDelete = { profileId ->
-                                        profileViewModel.deleteProfile(profileId)
-                                    },
-                                    settings = settings,
-                                    modifier = Modifier.width(200.dp)
-                                )
+                                if (settings.showProfilesButton) {
+                                    ProfileDropdown(
+                                        profiles = profiles,
+                                        currentProfileId = currentProfileId,
+                                        onProfileSelected = { profileId ->
+                                            profileViewModel.switchProfile(profileId)
+                                        },
+                                        onAddProfile = {
+                                            showNewProfileDialog = true
+                                        },
+                                        onProfileRename = { profileId, newName ->
+                                            profileViewModel.updateProfileName(profileId, newName)
+                                        },
+                                        onProfileDelete = { profileId ->
+                                            profileViewModel.deleteProfile(profileId)
+                                        },
+                                        settings = settings,
+                                        modifier = Modifier.width(200.dp)
+                                    )
+                                }
                             }
                         },
                         actions = {
@@ -338,12 +337,12 @@ fun StorageManagerMainScreen(
                 }
                 }
 
-                if (isEditMode && settings.fabDragEnabled) {
+                if (isEditMode) {
                     val savedPosition = if (settings.fabPositionMainScreenX != Float.MIN_VALUE && 
                                            settings.fabPositionMainScreenY != Float.MIN_VALUE) {
                         Offset(settings.fabPositionMainScreenX, settings.fabPositionMainScreenY)
                     } else null
-                    
+
                     DraggableFloatingActionButton(
                         onClick = { viewModel.addShelf() },
                         isDragEnabled = settings.fabDragEnabled,

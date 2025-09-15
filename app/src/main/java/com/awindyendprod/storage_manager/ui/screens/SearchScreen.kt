@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
@@ -26,7 +26,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -126,7 +125,7 @@ fun SearchScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 modifier = Modifier.height(70.dp)
@@ -217,7 +216,7 @@ fun SearchOptions(
             .fillMaxWidth()
             .padding(12.dp)
     ) {
-        OutlinedTextField(
+        SmartTextField(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
             modifier = Modifier
@@ -230,7 +229,8 @@ fun SearchOptions(
                 ) 
             },
             textStyle = MaterialTheme.typography.bodyMedium,
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            startWithNumbers = true
         )
 
         FlowRow(
@@ -407,7 +407,8 @@ private fun SearchItemCard(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = searchItem.item.clientName?.ifEmpty { stringResource(R.string.unknown_client) } ?: stringResource(R.string.unknown_client),
+                        text = (searchItem.item.clientName?.ifEmpty { null }
+                            ?: stringResource(R.string.unknown_client)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -434,7 +435,7 @@ private fun SearchItemCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ExitToApp,
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                         contentDescription = stringResource(R.string.entry_date_label),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.primary
@@ -449,7 +450,7 @@ private fun SearchItemCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.return_date_label),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.primary

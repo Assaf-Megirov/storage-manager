@@ -60,6 +60,9 @@ import com.awindyendprod.storage_manager.model.FontSize
 import com.awindyendprod.storage_manager.model.Item
 import com.awindyendprod.storage_manager.model.Shelf
 import com.awindyendprod.storage_manager.services.toDisplayFormat
+import com.awindyendprod.storage_manager.ui.screens.AddItemDialog
+import com.awindyendprod.storage_manager.ui.screens.SectionDropdown
+import com.awindyendprod.storage_manager.ui.screens.ShelfDropdown
 import com.awindyendprod.storage_manager.viewmodel.SettingsViewModel
 import com.awindyendprod.storage_manager.viewmodel.StorageTrackerViewModel
 import java.util.Date
@@ -160,14 +163,7 @@ fun SectionDetailsScreen(
                 )
             }
         },
-        floatingActionButton = {
-            if (!settings.fabDragEnabled) {
-                // Use default position only when drag is disabled
-                FloatingActionButton(onClick = { isAddItemDialogVisible = true }) {
-                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
-                }
-            }
-        }
+        floatingActionButton = {}
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             // Content with padding
@@ -451,23 +447,21 @@ fun SectionDetailsScreen(
             }
             }
             
-            // Custom positioned FAB or draggable FAB (positioned absolutely on screen)
-            if (settings.fabDragEnabled) {
-                val savedPosition = if (settings.fabPositionSectionScreenX != Float.MIN_VALUE && 
-                                       settings.fabPositionSectionScreenY != Float.MIN_VALUE) {
-                    Offset(settings.fabPositionSectionScreenX, settings.fabPositionSectionScreenY)
-                } else null
-                
-                DraggableFloatingActionButton(
-                    onClick = { isAddItemDialogVisible = true },
-                    isDragEnabled = settings.fabDragEnabled,
-                    initialPosition = savedPosition,
-                    onPositionChanged = { newPosition ->
-                        settingsViewModel.updateFabPositionSectionScreen(newPosition.x, newPosition.y)
-                    }
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
+            // Always render FAB at saved or default position; drag toggled by setting
+            val savedPosition = if (settings.fabPositionSectionScreenX != Float.MIN_VALUE && 
+                                   settings.fabPositionSectionScreenY != Float.MIN_VALUE) {
+                Offset(settings.fabPositionSectionScreenX, settings.fabPositionSectionScreenY)
+            } else null
+
+            DraggableFloatingActionButton(
+                onClick = { isAddItemDialogVisible = true },
+                isDragEnabled = settings.fabDragEnabled,
+                initialPosition = savedPosition,
+                onPositionChanged = { newPosition ->
+                    settingsViewModel.updateFabPositionSectionScreen(newPosition.x, newPosition.y)
                 }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
             }
         }
     }

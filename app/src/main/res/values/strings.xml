@@ -108,6 +108,7 @@
     <string name="floating_button_settings">Floating Button Settings</string>
     <string name="allow_moving_fab">Allow moving floating button</string>
     <string name="reset_fab_positions">Reset button positions</string>
+    <string name="show_profiles_button">Show profiles button</string>
     <string name="items_due">Items Due</string>
     <string name="select_date">Select date</string>
     <string name="today">Today</string>

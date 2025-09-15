@@ -1,3 +1,5 @@
+package com.awindyendprod.storage_manager.ui.screens
+
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
@@ -51,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -68,7 +71,10 @@ import java.util.Date
 fun SmartTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: @Composable () -> Unit,
+    label: (@Composable () -> Unit)? = null,
+    placeholder: (@Composable () -> Unit)? = null,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     modifier: Modifier = Modifier,
     startWithNumbers: Boolean = false
 ) {
@@ -82,7 +88,9 @@ fun SmartTextField(
             value = value,
             onValueChange = onValueChange,
             label = label,
-            textStyle = MaterialTheme.typography.bodyMedium,
+            placeholder = placeholder,
+            leadingIcon = leadingIcon,
+            textStyle = textStyle,
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyboardType,
                 imeAction = if (keyboardType == KeyboardType.Number) ImeAction.Next else ImeAction.Done
@@ -507,7 +515,7 @@ fun SectionDropdown(
         modifier = modifier
     ) {
         OutlinedTextField(
-            value = selectedSectionIndex.toString() ?: stringResource(R.string.section),
+            value = if (sections.isNotEmpty()) selectedSectionIndex.toString() else stringResource(R.string.section),
             onValueChange = {},
             readOnly = true,
             label = { Text(stringResource(R.string.section)) },

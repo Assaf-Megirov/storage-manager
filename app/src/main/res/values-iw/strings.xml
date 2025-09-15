@@ -107,6 +107,7 @@
     <string name="floating_button_settings">הגדרות כפתור צף</string>
     <string name="allow_moving_fab">אפשר הזזת כפתור צף</string>
     <string name="reset_fab_positions">איפוס מיקום כפתורים</string>
+    <string name="show_profiles_button">הצג כפתור פרופילים</string>
     <string name="items_due">פריטים לטיפול</string>
     <string name="select_date">בחר תאריך</string>
     <string name="today">היום</string>

@@ -229,6 +229,21 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.show_profiles_button),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 8.dp)
+                    )
+                    Switch(
+                        checked = settings.showProfilesButton,
+                        onCheckedChange = { viewModel.updateShowProfilesButton(it) }
+                    )
+                }
                 ProfileDropdown(
                     profiles = profiles,
                     currentProfileId = currentProfileId,

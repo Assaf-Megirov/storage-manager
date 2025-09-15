@@ -106,6 +106,7 @@
     <string name="floating_button_settings">Настройки плавающей кнопки</string>
     <string name="allow_moving_fab">Разрешить перемещение плавающей кнопки</string>
     <string name="reset_fab_positions">Сбросить позиции кнопок</string>
+    <string name="show_profiles_button">Показывать кнопку профилей</string>
     <string name="items_due">Предметы к возврату</string>
     <string name="select_date">Выберите дату</string>
     <string name="today">Сегодня</string>
