@@ -51,12 +51,17 @@ import androidx.compose.ui.res.stringResource
 import com.awindyendprod.storage_manager.model.FontSize
 import com.awindyendprod.storage_manager.ui.components.SideBar
 import android.net.Uri
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.awindyendprod.storage_manager.viewmodel.DataTransferResult
 import androidx.compose.foundation.border
 import com.awindyendprod.storage_manager.ui.components.ImportConfirmationDialog
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.awindyendprod.storage_manager.ui.components.DraggableFloatingActionButton
 import com.awindyendprod.storage_manager.ui.components.ProfileDropdown
 import com.awindyendprod.storage_manager.ui.components.NewProfileDialog
+import com.awindyendprod.storage_manager.ui.components.PhoneActionMenu
+import com.awindyendprod.storage_manager.services.PhoneNumberService
 import androidx.compose.ui.geometry.Offset
 
 @Composable
@@ -825,13 +830,22 @@ fun SectionView(
                                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                             )
                         )
-                        Text(
-                            text = item.clientName.ifEmpty { stringResource(R.string.unknown_client) },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = item.clientName.ifEmpty { stringResource(R.string.unknown_client) },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                            val phone = remember(item) {
+                                PhoneNumberService.detectPhoneNumber(item.clientName, item.note)
+                            }
+                            if (phone != null) {
+                                PhoneActionMenu(phone)
+                            }
+                        }
                     }
                     
                     Text(
@@ -1180,6 +1194,22 @@ fun StorageManagerApp(
     val navController = rememberNavController()
     var showImportDialog by remember { mutableStateOf(false) }
     var handledUri by remember { mutableStateOf<Uri?>(null) }
+    val context = LocalContext.current
+    val dataTransferResult by settingsViewModel.dataTransferResult.collectAsState()
+
+    LaunchedEffect(dataTransferResult) {
+        when (dataTransferResult) {
+            DataTransferResult.Success -> {
+                Toast.makeText(context, context.getString(R.string.import_success), Toast.LENGTH_SHORT).show()
+                settingsViewModel.clearDataTransferResult()
+            }
+            DataTransferResult.Failed -> {
+                Toast.makeText(context, context.getString(R.string.import_failed), Toast.LENGTH_SHORT).show()
+                settingsViewModel.clearDataTransferResult()
+            }
+            null -> Unit
+        }
+    }
 
     LaunchedEffect(importUri) {
         if (importUri != null && importUri != handledUri) {
@@ -1191,13 +1221,11 @@ fun StorageManagerApp(
     if (showImportDialog) {
         ImportConfirmationDialog(
             onConfirm = {
-                importUri?.let { settingsViewModel.importData(it) { importedProfiles, importedCurrentProfileId ->
-                    // Update profiles in ProfileViewModel
-                    profileViewModel.loadProfiles()
-                    if (importedCurrentProfileId != null) {
-                        profileViewModel.switchProfile(importedCurrentProfileId)
+                importUri?.let {
+                    settingsViewModel.importData(it) { importedProfiles, importedCurrentProfileId ->
+                        profileViewModel.importProfiles(importedProfiles, importedCurrentProfileId)
                     }
-                } }
+                }
                 showImportDialog = false
             },
             onDismiss = {
@@ -1222,7 +1250,7 @@ fun StorageManagerApp(
                     navController.navigate("settings")
                 },
                 onAllDueClick = {
-                    navController.navigate("allDue")
+                    navController.navigate("calendar")
                 }
             )
         }
@@ -1284,14 +1312,30 @@ fun StorageManagerApp(
         }
 
         composable(
-            route = "allDue"
-        ) {
+            route = "allDue/{date}",
+            arguments = listOf(
+                navArgument("date") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val dateArg = backStackEntry.arguments?.getString("date")
             AllDueScreen(
                 viewModel = viewModel,
                 settingsViewModel = settingsViewModel,
                 onBackClick = { navController.popBackStack() },
                 onItemClick = { shelfId, sectionId ->
                     navController.navigate("section_details/$shelfId/$sectionId")
+                },
+                dateIso = dateArg
+            )
+        }
+
+        composable("calendar") {
+            CalendarScreen(
+                viewModel = viewModel,
+                settingsViewModel = settingsViewModel,
+                onBack = { navController.popBackStack() },
+                onDaySelected = { isoDate ->
+                    navController.navigate("allDue/$isoDate")
                 }
             )
         }

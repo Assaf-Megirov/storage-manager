@@ -1,10 +1,11 @@
 package com.awindyendprod.storage_manager.model
 
+import com.google.gson.annotations.SerializedName
 import java.util.Date
 
 data class Profile(
-    val id: String,
-    val name: String,
-    val createdAt: Date = Date(),
-    val isDefault: Boolean = false
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("createdAt") val createdAt: Date = Date(),
+    @SerializedName("isDefault") val isDefault: Boolean = false
 )

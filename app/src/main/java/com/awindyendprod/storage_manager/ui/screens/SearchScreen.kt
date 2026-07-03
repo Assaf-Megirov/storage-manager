@@ -41,7 +41,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.awindyendprod.storage_manager.R
 import com.awindyendprod.storage_manager.model.Item
+import com.awindyendprod.storage_manager.services.PhoneNumberService
 import com.awindyendprod.storage_manager.services.toDisplayFormat
+import com.awindyendprod.storage_manager.ui.components.PhoneActionMenu
 import com.awindyendprod.storage_manager.viewmodel.StorageTrackerViewModel
 import com.awindyendprod.storage_manager.viewmodel.SettingsViewModel
 import androidx.compose.runtime.collectAsState
@@ -406,12 +408,21 @@ private fun SearchItemCard(
                         text = searchItem.item.name,
                         style = MaterialTheme.typography.titleMedium
                     )
-                    Text(
-                        text = (searchItem.item.clientName?.ifEmpty { null }
-                            ?: stringResource(R.string.unknown_client)),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = (searchItem.item.clientName?.ifEmpty { null }
+                                ?: stringResource(R.string.unknown_client)),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        val phone = remember(searchItem.item) {
+                            PhoneNumberService.detectPhoneNumber(searchItem.item.clientName, searchItem.item.note)
+                        }
+                        if (phone != null) {
+                            PhoneActionMenu(phone)
+                        }
+                    }
                 }
                 Text(
                     text = stringResource(

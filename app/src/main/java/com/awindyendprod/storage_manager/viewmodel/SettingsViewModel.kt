@@ -2,7 +2,7 @@ package com.awindyendprod.storage_manager.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +15,6 @@ import java.util.*
 import com.awindyendprod.storage_manager.model.FontSize
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import com.awindyendprod.storage_manager.services.StorageTrackerPersistenceService
@@ -23,61 +22,122 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import com.awindyendprod.storage_manager.model.Theme
 import com.awindyendprod.storage_manager.model.ProfileData
+import com.awindyendprod.storage_manager.services.ProfileSettingsStore
+import com.awindyendprod.storage_manager.services.SettingsPartition
+import kotlinx.coroutines.withContext
 
 import java.io.File
+
+enum class DataTransferResult {
+    Success,
+    Failed
+}
 
 class SettingsViewModel(
     context: Context,
     private val persistenceService: StorageTrackerPersistenceService,
-    private val storageTrackerViewModel: StorageTrackerViewModel
+    private val storageTrackerViewModel: StorageTrackerViewModel,
+    private val profileSettingsStore: ProfileSettingsStore,
 ) : ViewModel() {
 
     private val appContext = context.applicationContext
-    private val prefs = appContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    
-    private val _settings = MutableStateFlow(loadSettings())
+
+    /** Never reassigned; mirrors the active profile's settings for workers and cold-start locale detection that don't have a profile ID to key off of. */
+    private val globalPrefs = appContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    private var prefs = globalPrefs
+
+    private val _settings = MutableStateFlow(loadSettingsFromPrefs(prefs))
     val settings: StateFlow<Settings> = _settings.asStateFlow()
 
     private val _recreateActivity = MutableStateFlow(false)
     val recreateActivity: StateFlow<Boolean> = _recreateActivity.asStateFlow()
 
+    private val _dataTransferResult = MutableStateFlow<DataTransferResult?>(null)
+    val dataTransferResult: StateFlow<DataTransferResult?> = _dataTransferResult.asStateFlow()
 
+    /** Profile whose settings are shown and edited in the UI. */
+    private var activeProfileId: String? = null
 
-    private fun loadSettings(): Settings {
+    fun clearDataTransferResult() {
+        _dataTransferResult.value = null
+    }
+
+    /**
+     * Save the profile we are leaving, then load [profileId]'s settings into the UI.
+     */
+    fun switchToProfile(profileId: String) {
+        persistActiveProfileSettings()
+        activeProfileId = profileId
+        prefs = profileSettingsStore.getProfilePrefs(profileId)
+        val loaded = loadSettingsFromPrefs(prefs)
+        applySettingsInternal(loaded.copy(currentProfileId = profileId), recreateForLanguage = true)
+    }
+
+    /** Seed a new profile's store entry (e.g. copy current settings). */
+    fun seedProfileSettings(profileId: String, settings: Settings) {
+        val profilePrefs = profileSettingsStore.getProfilePrefs(profileId)
+        saveSettingsToPrefs(settings, profilePrefs)
+        profileSettingsStore.save(profileId, settings)
+    }
+
+    fun persistActiveProfileSettings() {
+        val profileId = activeProfileId ?: return
+        saveSettingsToPrefs(_settings.value, prefs)
+        profileSettingsStore.save(profileId, _settings.value)
+    }
+
+    private fun applySettingsInternal(settings: Settings, recreateForLanguage: Boolean) {
+        val previousLanguage = _settings.value.language
+        _settings.value = settings
+        saveSettingsToPrefs(settings, prefs)
+        saveSettingsToPrefs(settings, globalPrefs)
+        if (recreateForLanguage && settings.language != previousLanguage) {
+            updateLocale(settings.language)
+            _recreateActivity.value = true
+        }
+    }
+
+    private fun afterSettingChanged() {
+        saveSettingsToPrefs(_settings.value, prefs)
+        saveSettingsToPrefs(_settings.value, globalPrefs)
+        persistActiveProfileSettings()
+    }
+
+    private fun loadSettingsFromPrefs(preferences: android.content.SharedPreferences): Settings {
         return Settings(
             sectionDateType = SectionDateType.valueOf(
-                prefs.getString("sectionDateType", SectionDateType.ENTRY_DATE.name)!!
+                preferences.getString("sectionDateType", SectionDateType.ENTRY_DATE.name)!!
             ),
             dateDisplayFormat = DateDisplayFormat.valueOf(
-                prefs.getString("dateDisplayFormat", DateDisplayFormat.NUMERIC.name)!!
+                preferences.getString("dateDisplayFormat", DateDisplayFormat.NUMERIC.name)!!
             ),
-            defaultReturnDateDays = prefs.getInt("defaultReturnDateDays", 14),
+            defaultReturnDateDays = preferences.getInt("defaultReturnDateDays", 14),
             language = AppLanguage.valueOf(
-                prefs.getString("language", AppLanguage.SYSTEM.name)!!
+                preferences.getString("language", AppLanguage.SYSTEM.name)!!
             ),
             fontSize = FontSize.valueOf(
-                prefs.getString("fontSize", FontSize.MEDIUM.name)!!
+                preferences.getString("fontSize", FontSize.MEDIUM.name)!!
             ),
-            sectionHeight = prefs.getInt("sectionHeight", 210),
-            sectionWidth = prefs.getInt("sectionWidth", 300),
+            sectionHeight = preferences.getInt("sectionHeight", 210),
+            sectionWidth = preferences.getInt("sectionWidth", 300),
             theme = Theme.valueOf(
-                prefs.getString("theme", Theme.SYSTEM.name)!!
+                preferences.getString("theme", Theme.SYSTEM.name)!!
             ),
-            fabDragEnabled = prefs.getBoolean("fabDragEnabled", true),
-            fabPositionMainScreenX = prefs.getFloat("fabPositionMainScreenX", Float.MIN_VALUE),
-            fabPositionMainScreenY = prefs.getFloat("fabPositionMainScreenY", Float.MIN_VALUE),
-            fabPositionSectionScreenX = prefs.getFloat("fabPositionSectionScreenX", Float.MIN_VALUE),
-            fabPositionSectionScreenY = prefs.getFloat("fabPositionSectionScreenY", Float.MIN_VALUE),
-            hasSeenLongPressHint = prefs.getBoolean("hasSeenLongPressHint", false),
-            notificationDaysBefore = prefs.getInt("notificationDaysBefore", 1),
-            notificationMaxItems = prefs.getInt("notificationMaxItems", 10),
-                         dailyNotificationsEnabled = prefs.getBoolean("dailyNotificationsEnabled", true),
-            showProfilesButton = prefs.getBoolean("showProfilesButton", true)
+            fabDragEnabled = preferences.getBoolean("fabDragEnabled", true),
+            fabPositionMainScreenX = preferences.getFloat("fabPositionMainScreenX", Float.MIN_VALUE),
+            fabPositionMainScreenY = preferences.getFloat("fabPositionMainScreenY", Float.MIN_VALUE),
+            fabPositionSectionScreenX = preferences.getFloat("fabPositionSectionScreenX", Float.MIN_VALUE),
+            fabPositionSectionScreenY = preferences.getFloat("fabPositionSectionScreenY", Float.MIN_VALUE),
+            hasSeenLongPressHint = preferences.getBoolean("hasSeenLongPressHint", false),
+            notificationDaysBefore = preferences.getInt("notificationDaysBefore", 1),
+            notificationMaxItems = preferences.getInt("notificationMaxItems", 10),
+            dailyNotificationsEnabled = preferences.getBoolean("dailyNotificationsEnabled", true),
+            showProfilesButton = preferences.getBoolean("showProfilesButton", true)
         )
     }
 
-    private fun saveSettings(settings: Settings) {
-        prefs.edit().apply {
+    private fun saveSettingsToPrefs(settings: Settings, preferences: android.content.SharedPreferences) {
+        preferences.edit().apply {
             putString("sectionDateType", settings.sectionDateType.name)
             putString("dateDisplayFormat", settings.dateDisplayFormat.name)
             putInt("defaultReturnDateDays", settings.defaultReturnDateDays)
@@ -96,48 +156,48 @@ class SettingsViewModel(
             putInt("notificationMaxItems", settings.notificationMaxItems)
             putBoolean("dailyNotificationsEnabled", settings.dailyNotificationsEnabled)
             putBoolean("showProfilesButton", settings.showProfilesButton)
-            apply()
+            commit()
         }
     }
 
     fun updateSectionDateType(type: SectionDateType) {
         _settings.value = _settings.value.copy(sectionDateType = type)
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun updateDateDisplayFormat(format: DateDisplayFormat) {
         _settings.value = _settings.value.copy(dateDisplayFormat = format)
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun updateDefaultReturnDateDays(days: Int) {
         _settings.value = _settings.value.copy(defaultReturnDateDays = days)
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun updateLanguage(language: AppLanguage) {
         _settings.value = _settings.value.copy(language = language)
-        saveSettings(_settings.value)
+        afterSettingChanged()
         updateLocale(language)
         _recreateActivity.value = true
     }
 
     fun updateFontSize(fontSize: FontSize) {
         _settings.value = _settings.value.copy(fontSize = fontSize)
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun updateSectionHeight(height: Int) {
         if (height in 100..500) {
             _settings.value = _settings.value.copy(sectionHeight = height)
-            saveSettings(_settings.value)
+            afterSettingChanged()
         }
     }
 
     fun updateSectionWidth(width: Int) {
         if (width in 100..500) {
             _settings.value = _settings.value.copy(sectionWidth = width)
-            saveSettings(_settings.value)
+            afterSettingChanged()
         }
     }
 
@@ -148,7 +208,7 @@ class SettingsViewModel(
             AppLanguage.HEBREW -> Locale("iw")
             AppLanguage.RUSSIAN -> Locale("ru")
         }
-        
+
         val config = appContext.resources.configuration
         config.setLocale(locale)
         appContext.createConfigurationContext(config)
@@ -157,12 +217,12 @@ class SettingsViewModel(
 
     fun updateTheme(theme: Theme) {
         _settings.value = _settings.value.copy(theme = theme)
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun updateFabDragEnabled(enabled: Boolean) {
         _settings.value = _settings.value.copy(fabDragEnabled = enabled)
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun updateFabPositionMainScreen(x: Float, y: Float) {
@@ -170,7 +230,7 @@ class SettingsViewModel(
             fabPositionMainScreenX = x,
             fabPositionMainScreenY = y
         )
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun updateFabPositionSectionScreen(x: Float, y: Float) {
@@ -178,7 +238,7 @@ class SettingsViewModel(
             fabPositionSectionScreenX = x,
             fabPositionSectionScreenY = y
         )
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun resetFabPositions() {
@@ -188,103 +248,88 @@ class SettingsViewModel(
             fabPositionSectionScreenX = Float.MIN_VALUE,
             fabPositionSectionScreenY = Float.MIN_VALUE
         )
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun updateHasSeenLongPressHint(hasSeen: Boolean) {
         _settings.value = _settings.value.copy(hasSeenLongPressHint = hasSeen)
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun updateNotificationDaysBefore(days: Int) {
         if (days in 0..7) {
             _settings.value = _settings.value.copy(notificationDaysBefore = days)
-            saveSettings(_settings.value)
+            afterSettingChanged()
         }
     }
 
     fun updateNotificationMaxItems(maxItems: Int) {
         if (maxItems in 1..100) {
             _settings.value = _settings.value.copy(notificationMaxItems = maxItems)
-            saveSettings(_settings.value)
+            afterSettingChanged()
         }
     }
 
     fun updateDailyNotificationsEnabled(enabled: Boolean) {
         _settings.value = _settings.value.copy(dailyNotificationsEnabled = enabled)
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun updateShowProfilesButton(enabled: Boolean) {
         _settings.value = _settings.value.copy(showProfilesButton = enabled)
-        saveSettings(_settings.value)
+        afterSettingChanged()
     }
 
     fun onActivityRecreated() {
         _recreateActivity.value = false
     }
 
-
-
-    class Factory(
-        private val context: Context,
-        private val persistenceService: StorageTrackerPersistenceService,
-        private val storageTrackerViewModel: StorageTrackerViewModel
-    ) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
-                return SettingsViewModel(
-                    context.applicationContext,
-                    persistenceService,
-                    storageTrackerViewModel
-                ) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
-
     fun exportData(uri: Uri, profiles: List<ProfileData>, currentProfileId: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                persistenceService.exportToFile(uri, settings.value, profiles, currentProfileId)
+                persistActiveProfileSettings()
+                val withSettings = profileSettingsStore.attachSettingsToProfiles(profiles)
+                val withShelves = persistenceService.attachShelvesToProfiles(withSettings)
+                persistenceService.exportToFile(uri, settings.value, withShelves, currentProfileId)
             } catch (e: Exception) {
                 Log.e("SettingsViewModel", "Error exporting data", e)
-                //TODO: Handle error
             }
         }
     }
 
-    fun importData(uri: Uri, onProfilesImported: (List<ProfileData>, String?) -> Unit) {
+    fun importData(
+        uri: Uri,
+        onProfilesImported: (List<ProfileData>, String?) -> Boolean
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val importedData = persistenceService.importFromFile(uri)
-                
-                // Update global settings
-                updateSettings(importedData.globalSettings)
-                
-                // Notify about imported profiles (to be handled by ProfileViewModel)
-                onProfilesImported(importedData.profiles, importedData.currentProfileId)
+                withContext(Dispatchers.Main) {
+                    val applied = onProfilesImported(importedData.profiles, importedData.currentProfileId)
+                    _dataTransferResult.value = if (applied) {
+                        DataTransferResult.Success
+                    } else {
+                        DataTransferResult.Failed
+                    }
+                }
             } catch (e: Exception) {
                 Log.e("SettingsViewModel", "Error importing data", e)
-                //TODO: Handle error
+                withContext(Dispatchers.Main) {
+                    _dataTransferResult.value = DataTransferResult.Failed
+                }
             }
         }
-    }
-
-    private fun updateSettings(newSettings: Settings) {
-        _settings.value = newSettings
-        saveSettings(newSettings)
-        updateLocale(newSettings.language)
-        _recreateActivity.value = true
     }
 
     fun shareData(profiles: List<ProfileData>, currentProfileId: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                persistActiveProfileSettings()
+                val withSettings = profileSettingsStore.attachSettingsToProfiles(profiles)
+                val withShelves = persistenceService.attachShelvesToProfiles(withSettings)
                 val tempFile = File(appContext.cacheDir, "storage_manager_backup.json")
                 tempFile.createNewFile()
-                persistenceService.exportToFile(tempFile, settings.value, profiles, currentProfileId)
+                persistenceService.exportToFile(tempFile, settings.value, withShelves, currentProfileId)
 
                 val contentUri = FileProvider.getUriForFile(
                     appContext,
@@ -306,4 +351,4 @@ class SettingsViewModel(
             }
         }
     }
-} 
+}

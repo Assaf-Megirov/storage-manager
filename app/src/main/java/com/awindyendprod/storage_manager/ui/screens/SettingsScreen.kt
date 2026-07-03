@@ -29,6 +29,9 @@ import com.awindyendprod.storage_manager.ui.components.ProfileDropdown
 import com.awindyendprod.storage_manager.ui.components.NewProfileDialog
 import com.awindyendprod.storage_manager.viewmodel.SettingsViewModel
 import com.awindyendprod.storage_manager.viewmodel.ProfileViewModel
+import com.awindyendprod.storage_manager.viewmodel.DataTransferResult
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -46,13 +49,29 @@ fun SettingsScreen(
 
     val importFilePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
-    ) { uri -> uri?.let { viewModel.importData(it) { importedProfiles, importedCurrentProfileId ->
-        // Update profiles in ProfileViewModel
-        profileViewModel.loadProfiles()
-        if (importedCurrentProfileId != null) {
-            profileViewModel.switchProfile(importedCurrentProfileId)
+    ) { uri ->
+        uri?.let {
+            viewModel.importData(it) { importedProfiles, importedCurrentProfileId ->
+                profileViewModel.importProfiles(importedProfiles, importedCurrentProfileId)
+            }
         }
-    } } }
+    }
+
+    val context = LocalContext.current
+    val dataTransferResult by viewModel.dataTransferResult.collectAsState()
+    LaunchedEffect(dataTransferResult) {
+        when (dataTransferResult) {
+            DataTransferResult.Success -> {
+                Toast.makeText(context, context.getString(R.string.import_success), Toast.LENGTH_SHORT).show()
+                viewModel.clearDataTransferResult()
+            }
+            DataTransferResult.Failed -> {
+                Toast.makeText(context, context.getString(R.string.import_failed), Toast.LENGTH_SHORT).show()
+                viewModel.clearDataTransferResult()
+            }
+            null -> Unit
+        }
+    }
 
     var showExportMenu by remember { mutableStateOf(false) }
     var showNewProfileDialog by remember { mutableStateOf(false) }

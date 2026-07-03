@@ -15,18 +15,17 @@ class ProfilePersistenceService(private val context: Context) {
 
     fun saveProfiles(profiles: List<ProfileData>) {
         val profilesJson = gson.toJson(profiles)
-        prefs.edit().putString("profiles", profilesJson).apply()
+        prefs.edit().putString("profiles", profilesJson).commit()
     }
 
     fun loadProfiles(): List<ProfileData> {
-        val profilesJson = prefs.getString("profiles", null)
-        return profilesJson?.let {
-            gson.fromJson(it, object : TypeToken<List<ProfileData>>() {}.type)
-        } ?: emptyList()
+        val profilesJson = prefs.getString("profiles", null) ?: return emptyList()
+        val normalized = BackupJsonCompat.normalizeProfilesJson(profilesJson)
+        return gson.fromJson(normalized, object : TypeToken<List<ProfileData>>() {}.type)
     }
 
     fun saveCurrentProfileId(profileId: String) {
-        prefs.edit().putString("currentProfileId", profileId).apply()
+        prefs.edit().putString("currentProfileId", profileId).commit()
     }
 
     fun getCurrentProfileId(): String? {

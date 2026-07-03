@@ -2,55 +2,84 @@ package com.awindyendprod.storage_manager.services
 
 import android.content.Context
 import android.util.Log
-import com.awindyendprod.storage_manager.model.Profile
 import com.awindyendprod.storage_manager.model.ProfileData
 import com.awindyendprod.storage_manager.model.Settings
 
 class ProfileMigrationService(
     private val context: Context,
     private val profilePersistenceService: ProfilePersistenceService,
-    private val storageTrackerPersistenceService: StorageTrackerPersistenceService
+    private val storageTrackerPersistenceService: StorageTrackerPersistenceService,
+    private val profileSettingsStore: ProfileSettingsStore
 ) {
-    
+
     fun migrateExistingDataIfNeeded(): String {
         val profiles = profilePersistenceService.loadProfiles()
-        
-        // If profiles already exist, return current profile ID
+
         if (profiles.isNotEmpty()) {
+            val globalSettings = loadExistingSettings()
             val currentProfileId = profilePersistenceService.getCurrentProfileId()
+            profileSettingsStore.migrateFromLegacyStorage(profiles, globalSettings, currentProfileId)
+            migratePerProfileSettingsInProfileDataIfNeeded()
             return currentProfileId ?: profiles.first().profile.id
         }
-        
-        // Check if there's existing data to migrate
+
         val existingShelves = storageTrackerPersistenceService.loadData()
         val existingSettings = loadExistingSettings()
-        
-        // Create default profile
+
         val defaultProfile = profilePersistenceService.createDefaultProfile()
-        
-        // Create profile data with existing data
+
         val profileData = ProfileData(
             profile = defaultProfile,
             shelves = existingShelves,
             settings = existingSettings.copy(currentProfileId = defaultProfile.id)
         )
-        
-        // Save the default profile
+
         profilePersistenceService.saveProfiles(listOf(profileData))
         profilePersistenceService.saveCurrentProfileId(defaultProfile.id)
-        
-        // Also save the shelves data for the profile
+
         val storageService = StorageTrackerPersistenceService(context)
         storageService.saveData(existingShelves, defaultProfile.id)
-        
+
+        profileSettingsStore.migrateFromLegacyStorage(
+            listOf(profileData),
+            existingSettings,
+            defaultProfile.id
+        )
+        migratePerProfileSettingsInProfileDataIfNeeded()
+
         Log.d("ProfileMigration", "Migrated existing data to default profile: ${defaultProfile.id}")
-        
+
         return defaultProfile.id
     }
-    
+
+    /** Keeps [ProfileData.settings] aligned with [ProfileSettingsStore] for export. */
+    private fun migratePerProfileSettingsInProfileDataIfNeeded() {
+        val migrationPrefs = context.getSharedPreferences("ProfilePrefs", Context.MODE_PRIVATE)
+        if (migrationPrefs.getBoolean("per_profile_settings_full_v2", false)) {
+            return
+        }
+
+        val profiles = profilePersistenceService.loadProfiles()
+        if (profiles.isEmpty()) {
+            migrationPrefs.edit()
+                .putBoolean("per_profile_settings_v1", true)
+                .putBoolean("per_profile_settings_full_v2", true)
+                .commit()
+            return
+        }
+
+        val synced = profileSettingsStore.attachSettingsToProfiles(profiles)
+        profilePersistenceService.saveProfiles(synced)
+        migrationPrefs.edit()
+            .putBoolean("per_profile_settings_v1", true)
+            .putBoolean("per_profile_settings_full_v2", true)
+            .commit()
+        Log.d("ProfileMigration", "Synced profile data settings for ${synced.size} profile(s)")
+    }
+
     private fun loadExistingSettings(): Settings {
         val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        
+
         return Settings(
             sectionDateType = com.awindyendprod.storage_manager.model.SectionDateType.valueOf(
                 prefs.getString("sectionDateType", com.awindyendprod.storage_manager.model.SectionDateType.ENTRY_DATE.name)!!
@@ -78,7 +107,8 @@ class ProfileMigrationService(
             hasSeenLongPressHint = prefs.getBoolean("hasSeenLongPressHint", false),
             notificationDaysBefore = prefs.getInt("notificationDaysBefore", 1),
             notificationMaxItems = prefs.getInt("notificationMaxItems", 10),
-            dailyNotificationsEnabled = prefs.getBoolean("dailyNotificationsEnabled", true)
+            dailyNotificationsEnabled = prefs.getBoolean("dailyNotificationsEnabled", true),
+            showProfilesButton = prefs.getBoolean("showProfilesButton", true)
         )
     }
 }

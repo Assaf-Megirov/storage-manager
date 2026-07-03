@@ -27,6 +27,10 @@ class StorageTrackerPersistenceService(private val context: Context) {
         } ?: emptyList()
     }
 
+    /** [ProfileData.shelves] is a stale snapshot; refresh it from the live per-profile store before export. */
+    fun attachShelvesToProfiles(profiles: List<ProfileData>): List<ProfileData> =
+        profiles.map { profileData -> profileData.copy(shelves = loadData(profileData.profile.id)) }
+
     // Legacy method for backward compatibility
     fun saveData(shelves: List<Shelf>) {
         val shelvesJson = gson.toJson(shelves)
@@ -86,7 +90,8 @@ class StorageTrackerPersistenceService(private val context: Context) {
         try {
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 val jsonString = inputStream.bufferedReader().use { it.readText() }
-                return gson.fromJson(jsonString, ExportData::class.java)
+                val normalized = BackupJsonCompat.normalizeExportJson(jsonString)
+                return gson.fromJson(normalized, ExportData::class.java)
             }
             throw IllegalStateException("Could not open input stream")
         } catch (e: Exception) {

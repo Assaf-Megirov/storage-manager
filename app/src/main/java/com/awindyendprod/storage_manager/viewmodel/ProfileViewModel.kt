@@ -2,72 +2,104 @@ package com.awindyendprod.storage_manager.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import com.awindyendprod.storage_manager.model.ProfileData
+import com.awindyendprod.storage_manager.model.Settings
+import com.awindyendprod.storage_manager.model.Shelf
+import com.awindyendprod.storage_manager.services.ProfilePersistenceService
+import com.awindyendprod.storage_manager.services.ProfileSettingsStore
+import com.awindyendprod.storage_manager.services.SettingsPartition
+import com.awindyendprod.storage_manager.services.StorageTrackerPersistenceService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.awindyendprod.storage_manager.model.ProfileData
-import com.awindyendprod.storage_manager.services.ProfilePersistenceService
-import com.awindyendprod.storage_manager.services.StorageTrackerPersistenceService
 
 class ProfileViewModel(
     context: Context,
     private val profilePersistenceService: ProfilePersistenceService,
-    private val storageTrackerViewModel: StorageTrackerViewModel
+    private val profileSettingsStore: ProfileSettingsStore,
+    private val storageTrackerPersistenceService: StorageTrackerPersistenceService,
+    private val storageTrackerViewModel: StorageTrackerViewModel,
+    private val settingsViewModel: SettingsViewModel,
 ) : ViewModel() {
-    
+
     private val _profiles = MutableStateFlow<List<ProfileData>>(emptyList())
     val profiles: StateFlow<List<ProfileData>> = _profiles.asStateFlow()
 
     private val _currentProfileId = MutableStateFlow<String?>(null)
     val currentProfileId: StateFlow<String?> = _currentProfileId.asStateFlow()
 
-    init {
+    fun initializeAfterMigration() {
         loadProfiles()
+        val profileId = _currentProfileId.value ?: return
+        settingsViewModel.switchToProfile(profileId)
+        storageTrackerViewModel.reloadDataForProfile(profileId)
     }
 
     fun loadProfiles() {
-        _profiles.value = profilePersistenceService.loadProfiles()
+        val loaded = profilePersistenceService.loadProfiles()
+        _profiles.value = profileSettingsStore.attachSettingsToProfiles(loaded)
         _currentProfileId.value = profilePersistenceService.getCurrentProfileId()
     }
 
     fun createProfile(name: String) {
+        val previousId = _currentProfileId.value
+        if (previousId != null) {
+            settingsViewModel.persistActiveProfileSettings()
+            syncProfileSettingsToProfileData(previousId, settingsViewModel.settings.value)
+        }
+
         val newProfile = profilePersistenceService.createProfile(name)
+        val newSettings = SettingsPartition.forProfileStorage(
+            settingsViewModel.settings.value,
+            newProfile.id
+        )
+        settingsViewModel.seedProfileSettings(newProfile.id, newSettings)
+
         val newProfileData = ProfileData(
             profile = newProfile,
             shelves = emptyList(),
-            settings = com.awindyendprod.storage_manager.model.Settings(currentProfileId = newProfile.id)
+            settings = newSettings
         )
-        
+
         val updatedProfiles = _profiles.value.toMutableList()
         updatedProfiles.add(newProfileData)
-        _profiles.value = updatedProfiles
-        
-        profilePersistenceService.saveProfiles(updatedProfiles)
-        
-        // Automatically switch to the newly created profile
+        syncProfilesToDisk(updatedProfiles)
+
         switchProfile(newProfile.id)
     }
 
     fun switchProfile(profileId: String) {
+        if (_currentProfileId.value == profileId) {
+            return
+        }
+
+        val leavingId = _currentProfileId.value
+        if (leavingId != null) {
+            settingsViewModel.persistActiveProfileSettings()
+            syncProfileSettingsToProfileData(leavingId, settingsViewModel.settings.value)
+        }
+
         _currentProfileId.value = profileId
         profilePersistenceService.saveCurrentProfileId(profileId)
-        
-        // Reload data for the new profile
+        settingsViewModel.switchToProfile(profileId)
         storageTrackerViewModel.reloadDataForProfile(profileId)
+
+        profileSettingsStore.load(profileId)?.let { stored ->
+            refreshProfileSettingsInList(profileId, stored)
+        }
     }
 
     fun deleteProfile(profileId: String): Boolean {
         if (_profiles.value.size <= 1) {
-            return false // Don't delete the last profile
+            return false
         }
-        
+
         val success = profilePersistenceService.deleteProfile(profileId)
         if (success) {
+            profileSettingsStore.remove(profileId)
             val updatedProfiles = _profiles.value.filter { it.profile.id != profileId }
             _profiles.value = updatedProfiles
-            
-            // If we deleted the current profile, switch to the first available profile
+
             if (_currentProfileId.value == profileId) {
                 val newCurrentProfileId = updatedProfiles.firstOrNull()?.profile?.id
                 if (newCurrentProfileId != null) {
@@ -81,7 +113,7 @@ class ProfileViewModel(
     fun updateProfileName(profileId: String, newName: String): Boolean {
         val success = profilePersistenceService.updateProfileName(profileId, newName)
         if (success) {
-            loadProfiles() // Reload profiles to get updated names
+            loadProfiles()
         }
         return success
     }
@@ -90,21 +122,54 @@ class ProfileViewModel(
         return _profiles.value.find { it.profile.id == _currentProfileId.value }
     }
 
-    class Factory(
-        private val context: Context,
-        private val profilePersistenceService: ProfilePersistenceService,
-        private val storageTrackerViewModel: StorageTrackerViewModel
-    ) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
-                return ProfileViewModel(
-                    context.applicationContext,
-                    profilePersistenceService,
-                    storageTrackerViewModel
-                ) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
+    fun importProfiles(profiles: List<ProfileData>, currentProfileId: String?): Boolean {
+        if (profiles.isEmpty()) {
+            return false
         }
+
+        profiles.forEach { profileData ->
+            profileSettingsStore.save(profileData.profile.id, profileData.settings)
+        }
+
+        val withSettings = profileSettingsStore.attachSettingsToProfiles(profiles)
+        profilePersistenceService.saveProfiles(withSettings)
+        withSettings.forEach { profileData ->
+            storageTrackerPersistenceService.saveData(profileData.shelves, profileData.profile.id)
+        }
+        _profiles.value = withSettings
+
+        val targetId = currentProfileId?.takeIf { id ->
+            withSettings.any { it.profile.id == id }
+        } ?: withSettings.first().profile.id
+
+        _currentProfileId.value = targetId
+        profilePersistenceService.saveCurrentProfileId(targetId)
+        settingsViewModel.switchToProfile(targetId)
+        storageTrackerViewModel.reloadDataForProfile(targetId)
+        return true
+    }
+
+    private fun syncProfileSettingsToProfileData(profileId: String, mergedSettings: Settings) {
+        val storedSettings = SettingsPartition.forProfileStorage(mergedSettings, profileId)
+        refreshProfileSettingsInList(profileId, storedSettings)
+        val index = _profiles.value.indexOfFirst { it.profile.id == profileId }
+        if (index == -1) return
+        val updated = _profiles.value.toMutableList()
+        updated[index] = updated[index].copy(settings = storedSettings)
+        profilePersistenceService.saveProfiles(updated)
+        _profiles.value = updated
+    }
+
+    private fun refreshProfileSettingsInList(profileId: String, storedSettings: Settings) {
+        val index = _profiles.value.indexOfFirst { it.profile.id == profileId }
+        if (index == -1) return
+        val updated = _profiles.value.toMutableList()
+        updated[index] = updated[index].copy(settings = storedSettings)
+        _profiles.value = updated
+    }
+
+    private fun syncProfilesToDisk(profiles: List<ProfileData>) {
+        _profiles.value = profiles
+        profilePersistenceService.saveProfiles(profiles)
     }
 }

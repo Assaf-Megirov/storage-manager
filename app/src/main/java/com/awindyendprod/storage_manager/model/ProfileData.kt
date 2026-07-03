@@ -1,7 +1,9 @@
 package com.awindyendprod.storage_manager.model
 
+import com.google.gson.annotations.SerializedName
+
 data class ProfileData(
-    val profile: Profile,
-    val shelves: List<Shelf>,
-    val settings: Settings
+    @SerializedName("profile") val profile: Profile,
+    @SerializedName("shelves") val shelves: List<Shelf>,
+    @SerializedName("settings") val settings: Settings
 )

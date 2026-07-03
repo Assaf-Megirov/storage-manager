@@ -55,10 +55,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.geometry.Offset
 import com.awindyendprod.storage_manager.ui.components.DraggableFloatingActionButton
+import com.awindyendprod.storage_manager.ui.components.PhoneActionMenu
 import com.awindyendprod.storage_manager.R
 import com.awindyendprod.storage_manager.model.FontSize
 import com.awindyendprod.storage_manager.model.Item
 import com.awindyendprod.storage_manager.model.Shelf
+import com.awindyendprod.storage_manager.services.PhoneNumberService
 import com.awindyendprod.storage_manager.services.toDisplayFormat
 import com.awindyendprod.storage_manager.ui.screens.AddItemDialog
 import com.awindyendprod.storage_manager.ui.screens.SectionDropdown
@@ -228,11 +230,20 @@ fun SectionDetailsScreen(
                                     overflow = TextOverflow.Ellipsis
                                 )
 
-                                Text(
-                                    text = item.clientName.ifEmpty { stringResource(R.string.unknown_client) },
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = item.clientName.ifEmpty { stringResource(R.string.unknown_client) },
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.weight(1f, fill = false)
+                                    )
+                                    val phone = remember(item) {
+                                        PhoneNumberService.detectPhoneNumber(item.clientName, item.note)
+                                    }
+                                    if (phone != null) {
+                                        PhoneActionMenu(phone)
+                                    }
+                                }
                             }
 
                             Row(

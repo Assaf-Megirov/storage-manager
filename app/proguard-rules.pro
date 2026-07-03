@@ -25,6 +25,8 @@
 -keep class com.google.gson.reflect.TypeToken
 -keep class com.awindyendprod.storage_manager.model.Item {*;}
 -keep class com.awindyendprod.storage_manager.model.ExportData {*;}
+-keep class com.awindyendprod.storage_manager.model.Profile {*;}
+-keep class com.awindyendprod.storage_manager.model.ProfileData {*;}
 -keep class com.awindyendprod.storage_manager.model.Settings {*;}
 -keep class com.awindyendprod.storage_manager.model.Shelf {*;}
 -keep class com.awindyendprod.storage_manager.model.ShelfSection {*;}

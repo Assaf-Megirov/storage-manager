@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,6 +24,8 @@ import com.awindyendprod.storage_manager.viewmodel.StorageTrackerViewModel
 import com.awindyendprod.storage_manager.services.toDisplayFormat
 import com.awindyendprod.storage_manager.services.toShortDisplayFormat
 import com.awindyendprod.storage_manager.services.toLongDisplayFormat
+import com.awindyendprod.storage_manager.services.PhoneNumberService
+import com.awindyendprod.storage_manager.ui.components.PhoneActionMenu
 import com.awindyendprod.storage_manager.R
 import androidx.compose.ui.res.stringResource
 import java.util.*
@@ -41,13 +44,22 @@ fun AllDueScreen(
     viewModel: StorageTrackerViewModel,
     settingsViewModel: SettingsViewModel,
     onBackClick: () -> Unit,
-    onItemClick: (String, String) -> Unit
+    onItemClick: (String, String) -> Unit,
+    dateIso: String? = null
 ) {
     val settings by settingsViewModel.settings.collectAsState()
     val shelves by viewModel.shelves.collectAsState()
     
     // State for date selection
-    var selectedDate by remember { mutableStateOf(Date()) }
+    var selectedDate by remember(dateIso) {
+        mutableStateOf(
+            dateIso?.let {
+                try {
+                    java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.ROOT).parse(it)
+                } catch (e: Exception) { null }
+            } ?: Date()
+        )
+    }
     var showDateDropdown by remember { mutableStateOf(false) }
     
     // Generate date options (today ±7 days)
@@ -101,6 +113,20 @@ fun AllDueScreen(
                     }
                 },
                 actions = {
+                    // Past-day indicator
+                    val isPastDay = remember(selectedDate) {
+                        val today = Calendar.getInstance()
+                        val sel = Calendar.getInstance().apply { time = selectedDate }
+                        sel.get(Calendar.YEAR) < today.get(Calendar.YEAR) ||
+                        (sel.get(Calendar.YEAR) == today.get(Calendar.YEAR) && sel.get(Calendar.DAY_OF_YEAR) < today.get(Calendar.DAY_OF_YEAR))
+                    }
+                    if (isPastDay) {
+                        Icon(
+                            imageVector = Icons.Default.History,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                     // Date picker dropdown
                     Box {
                         Row(
@@ -242,13 +268,22 @@ fun DueItemCard(
                 )
                 
                 if (dueItemInfo.item.clientName.isNotBlank()) {
-                    Text(
-                        text = dueItemInfo.item.clientName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = dueItemInfo.item.clientName,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        val phone = remember(dueItemInfo.item) {
+                            PhoneNumberService.detectPhoneNumber(dueItemInfo.item.clientName, dueItemInfo.item.note)
+                        }
+                        if (phone != null) {
+                            PhoneActionMenu(phone)
+                        }
+                    }
                 }
                 
                 Row(

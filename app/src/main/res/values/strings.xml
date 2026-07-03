@@ -21,6 +21,9 @@
     <string name="default_return_date">Default Return Date</string>
     <string name="days_after_entry">Days after entry date</string>
     <string name="unknown_client">Unknown Client</string>
+    <string name="phone_actions">Phone actions</string>
+    <string name="message_on_whatsapp">Message on WhatsApp</string>
+    <string name="call">Call</string>
     <string name="shelf">Shelf</string>
     <string name="section">Section</string>
     <string name="system_language">System</string>
@@ -80,6 +83,8 @@
     <string name="import_confirmation">Import Data</string>
     <string name="import_confirmation_message">Do you want to import data from this file? This will replace your current data.</string>
     <string name="import_string">Import</string>
+    <string name="import_success">Data imported successfully</string>
+    <string name="import_failed">Import failed. Check that the file is a valid backup.</string>
     <!-- Help -->
     <string name="help">Help</string>
     <string name="close">Close</string>
@@ -166,4 +171,6 @@
     <string name="remove_section">Remove Section</string>
     <string name="switch_to_abc">Switch to ABC</string>
     <string name="default_profile_name">Default</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
 </resources>
