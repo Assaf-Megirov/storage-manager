@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.awindyendprod.storage_manager.services.StorageTrackerPersistenceService
+import com.awindyendprod.storage_manager.services.TombstoneStore
 
 class StorageTrackerViewModelFactory(
     private val context: Context,
@@ -12,7 +13,11 @@ class StorageTrackerViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(StorageTrackerViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return StorageTrackerViewModel(context.applicationContext, persistenceService) as T
+            return StorageTrackerViewModel(
+                context.applicationContext,
+                persistenceService,
+                TombstoneStore(context.applicationContext)
+            ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

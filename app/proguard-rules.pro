@@ -34,6 +34,8 @@
 -keep class com.awindyendprod.storage_manager.model.DateDisplayFormat {*;}
 -keep class com.awindyendprod.storage_manager.model.FontSize {*;}
 -keep class com.awindyendprod.storage_manager.model.SectionDateType {*;}
+-keep class com.awindyendprod.storage_manager.model.Tombstone {*;}
+-keep class com.awindyendprod.storage_manager.model.TombstoneEntityType {*;}
 -keep class com.google.gson.reflect.TypeToken { *; }
 -keep class * extends com.google.gson.reflect.TypeToken
 -keep,allowobfuscation class com.google.gson.TypeAdapter

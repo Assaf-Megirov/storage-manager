@@ -6,12 +6,12 @@ import android.content.res.Resources
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.awindyendprod.storage_manager.model.AppLanguage
 import com.awindyendprod.storage_manager.ui.screens.StorageManagerApp
@@ -19,6 +19,7 @@ import com.awindyendprod.storage_manager.viewmodel.AppViewModelFactory
 import com.awindyendprod.storage_manager.viewmodel.SettingsViewModel
 import com.awindyendprod.storage_manager.viewmodel.StorageTrackerViewModel
 import com.awindyendprod.storage_manager.viewmodel.ProfileViewModel
+import com.awindyendprod.storage_manager.viewmodel.SyncViewModel
 import kotlinx.coroutines.launch
 import java.util.Locale
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import com.awindyendprod.storage_manager.ui.theme.StorageManagerTheme
 import com.awindyendprod.storage_manager.services.ProfileMigrationService
+import com.awindyendprod.storage_manager.services.TombstoneStore
 import com.awindyendprod.storage_manager.ui.components.DueItemsAlertDialog
 import android.content.Intent
 import androidx.work.PeriodicWorkRequest
@@ -46,6 +48,8 @@ class MainActivity : ComponentActivity() {
 
     private val profileViewModel: ProfileViewModel by viewModels { viewModelFactory }
 
+    private val syncViewModel: SyncViewModel by viewModels { viewModelFactory }
+
     private val profileMigrationService by lazy {
         ProfileMigrationService(
             this,
@@ -60,7 +64,11 @@ class MainActivity : ComponentActivity() {
         val settings = SettingsViewModel(
             newBase.applicationContext,
             factory.persistenceServiceInstance,
-            StorageTrackerViewModel(newBase.applicationContext, factory.persistenceServiceInstance),
+            StorageTrackerViewModel(
+                newBase.applicationContext,
+                factory.persistenceServiceInstance,
+                TombstoneStore(newBase.applicationContext)
+            ),
             factory.profileSettingsStoreInstance
         ).settings.value
         val locale = when (settings.language) {
@@ -85,7 +93,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        enableEdgeToEdge()
 
         profileMigrationService.migrateExistingDataIfNeeded()
         profileViewModel.initializeAfterMigration()
@@ -130,6 +138,7 @@ class MainActivity : ComponentActivity() {
                         viewModel = storageTrackerViewModel,
                         settingsViewModel = settingsViewModel,
                         profileViewModel = profileViewModel,
+                        syncViewModel = syncViewModel,
                         importUri = importUri
                     )
 
@@ -150,6 +159,18 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        syncViewModel.onAppForegrounded()
+        syncViewModel.startPeriodicSync()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        syncViewModel.stopPeriodicSync()
+        syncViewModel.flushPendingSync()
     }
 
     private fun checkForPendingAlert(onAlert: (Int, Int) -> Unit) {

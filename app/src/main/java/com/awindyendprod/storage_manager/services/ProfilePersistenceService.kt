@@ -7,6 +7,7 @@ import com.awindyendprod.storage_manager.model.Profile
 import com.awindyendprod.storage_manager.model.ProfileData
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.util.Date
 import java.util.UUID
 
 class ProfilePersistenceService(private val context: Context) {
@@ -34,16 +35,18 @@ class ProfilePersistenceService(private val context: Context) {
 
     fun createDefaultProfile(): Profile {
         return Profile(
-            id = UUID.randomUUID().toString(),
+            id = DEFAULT_PROFILE_ID,
             name = context.getString(R.string.default_profile_name),
-            isDefault = true
+            isDefault = true,
+            updatedAt = Date()
         )
     }
 
     fun createProfile(name: String): Profile {
         return Profile(
             id = UUID.randomUUID().toString(),
-            name = name
+            name = name,
+            updatedAt = Date()
         )
     }
 
@@ -61,11 +64,15 @@ class ProfilePersistenceService(private val context: Context) {
         val profileIndex = profiles.indexOfFirst { it.profile.id == profileId }
         if (profileIndex != -1) {
             val profileData = profiles[profileIndex]
-            val updatedProfile = profileData.profile.copy(name = newName)
+            val updatedProfile = profileData.profile.copy(name = newName, updatedAt = Date())
             profiles[profileIndex] = profileData.copy(profile = updatedProfile)
             saveProfiles(profiles)
             return true
         }
         return false
+    }
+
+    companion object {
+        const val DEFAULT_PROFILE_ID = "default-profile"
     }
 }

@@ -42,7 +42,6 @@ class SettingsViewModel(
 
     private val appContext = context.applicationContext
 
-    /** Never reassigned; mirrors the active profile's settings for workers and cold-start locale detection that don't have a profile ID to key off of. */
     private val globalPrefs = appContext.getSharedPreferences("settings", Context.MODE_PRIVATE)
     private var prefs = globalPrefs
 
@@ -55,16 +54,12 @@ class SettingsViewModel(
     private val _dataTransferResult = MutableStateFlow<DataTransferResult?>(null)
     val dataTransferResult: StateFlow<DataTransferResult?> = _dataTransferResult.asStateFlow()
 
-    /** Profile whose settings are shown and edited in the UI. */
     private var activeProfileId: String? = null
 
     fun clearDataTransferResult() {
         _dataTransferResult.value = null
     }
 
-    /**
-     * Save the profile we are leaving, then load [profileId]'s settings into the UI.
-     */
     fun switchToProfile(profileId: String) {
         persistActiveProfileSettings()
         activeProfileId = profileId
@@ -73,7 +68,6 @@ class SettingsViewModel(
         applySettingsInternal(loaded.copy(currentProfileId = profileId), recreateForLanguage = true)
     }
 
-    /** Seed a new profile's store entry (e.g. copy current settings). */
     fun seedProfileSettings(profileId: String, settings: Settings) {
         val profilePrefs = profileSettingsStore.getProfilePrefs(profileId)
         saveSettingsToPrefs(settings, profilePrefs)

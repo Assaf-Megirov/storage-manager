@@ -11,5 +11,6 @@ data class Item(
     val returnDate: Date? = null,
     val hasAlarm: Boolean = false,
     val alarmDate: Date? = null,
-    val note: String = ""
+    val note: String = "",
+    val updatedAt: Date? = null
 )

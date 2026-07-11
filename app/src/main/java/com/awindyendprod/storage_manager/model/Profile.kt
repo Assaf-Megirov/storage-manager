@@ -7,5 +7,6 @@ data class Profile(
     @SerializedName("id") val id: String,
     @SerializedName("name") val name: String,
     @SerializedName("createdAt") val createdAt: Date = Date(),
-    @SerializedName("isDefault") val isDefault: Boolean = false
+    @SerializedName("isDefault") val isDefault: Boolean = false,
+    @SerializedName("updatedAt") val updatedAt: Date? = null
 )

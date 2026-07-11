@@ -7,7 +7,8 @@ data class ShelfSection(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
     val number: Int = 0,
-    val items: List<Item> = emptyList()
+    val items: List<Item> = emptyList(),
+    val updatedAt: Date? = null
 ) {
     fun getLatestEntryDate(): Date? {
         return items.mapNotNull { it.entryDate }

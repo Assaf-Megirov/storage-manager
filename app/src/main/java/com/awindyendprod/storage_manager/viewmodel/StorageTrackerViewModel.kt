@@ -6,7 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.awindyendprod.storage_manager.model.Item
 import com.awindyendprod.storage_manager.model.Shelf
 import com.awindyendprod.storage_manager.model.ShelfSection
+import com.awindyendprod.storage_manager.model.Tombstone
+import com.awindyendprod.storage_manager.model.TombstoneEntityType
 import com.awindyendprod.storage_manager.services.StorageTrackerPersistenceService
+import com.awindyendprod.storage_manager.services.TombstoneStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,18 +18,22 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import androidx.work.*
 import com.awindyendprod.storage_manager.services.ItemNotificationWorker
+import java.util.Date
 import java.util.concurrent.TimeUnit
 import androidx.work.Data.Builder
 import com.awindyendprod.storage_manager.model.AppLanguage
 
 class StorageTrackerViewModel(
     context: Context,
-    private val persistenceService: StorageTrackerPersistenceService
+    private val persistenceService: StorageTrackerPersistenceService,
+    private val tombstoneStore: TombstoneStore
 ) : ViewModel() {
     private val applicationContext = context.applicationContext
     private var currentProfileId: String? = null
     private val _shelves = MutableStateFlow<List<Shelf>>(emptyList())
     val shelves: StateFlow<List<Shelf>> = _shelves.asStateFlow()
+
+    var onDataChanged: () -> Unit = {}
 
     fun reloadData() {
         if (currentProfileId != null) {
@@ -47,6 +54,7 @@ class StorageTrackerViewModel(
         } else {
             persistenceService.saveData(_shelves.value) // Legacy fallback
         }
+        onDataChanged()
     }
 
     fun getSectionById(shelfId: String, sectionId: String): StateFlow<ShelfSection?> = shelves.map { shelvesList ->
@@ -75,18 +83,19 @@ class StorageTrackerViewModel(
 
     private fun updateShelfNames() {
         _shelves.value = _shelves.value.mapIndexed { index, shelf ->
-            shelf.copy(name = (index + 1).toString())
+            shelf.copy(name = (index + 1).toString(), updatedAt = Date())
         }
     }
 
     fun addShelf() {
-        _shelves.value = _shelves.value + Shelf(name = (_shelves.value.size + 1).toString())
+        _shelves.value = _shelves.value + Shelf(name = (_shelves.value.size + 1).toString(), updatedAt = Date())
         saveData()
     }
 
     fun removeShelf(shelfId: String) {
         _shelves.value = _shelves.value.filter { it.id != shelfId }
         updateShelfNames()
+        tombstoneStore.append(Tombstone(id = shelfId, entityType = TombstoneEntityType.SHELF, deletedAt = Date()))
         saveData()
     }
 
@@ -95,7 +104,7 @@ class StorageTrackerViewModel(
             if (shelf.id == shelfId) {
                 shelf.copy(sections = mutableListOf<ShelfSection>().also { newList ->
                     newList.addAll(shelf.sections)
-                    newList.add(ShelfSection(name = sectionName))
+                    newList.add(ShelfSection(name = sectionName, updatedAt = Date()))
                 })
             } else shelf
         }
@@ -112,6 +121,7 @@ class StorageTrackerViewModel(
                 shelf
             }
         }
+        tombstoneStore.append(Tombstone(id = sectionId, entityType = TombstoneEntityType.SECTION, deletedAt = Date()))
         saveData()
     }
 
@@ -148,6 +158,7 @@ class StorageTrackerViewModel(
     }
 
     fun addItemToSection(shelfId: String, sectionId: String, item: Item) {
+        val stampedItem = item.copy(updatedAt = Date())
         _shelves.value = _shelves.value.map { shelf ->
             if (shelf.id == shelfId) {
                 shelf.copy(sections = mutableListOf<ShelfSection>().also { newSections ->
@@ -156,7 +167,7 @@ class StorageTrackerViewModel(
                             newSections.add(section.copy(
                                 items = mutableListOf<Item>().also { newItems ->
                                     newItems.addAll(section.items)
-                                    newItems.add(item)
+                                    newItems.add(stampedItem)
                                 }
                             ))
                         } else {
@@ -167,10 +178,12 @@ class StorageTrackerViewModel(
             } else shelf
         }
         saveData()
-        scheduleNotification(item)
+        scheduleNotification(stampedItem)
     }
 
     fun updateItem(newShelfId: String, newSectionId: String, itemId: String, updatedItem: Item) {
+        val stampedItem = updatedItem.copy(updatedAt = Date())
+
         //remove old item
         val shelvesWithItemRemoved = _shelves.value.map { shelf ->
             shelf.copy(sections = shelf.sections.map { section ->
@@ -183,7 +196,7 @@ class StorageTrackerViewModel(
             if (shelf.id == newShelfId) {
                 shelf.copy(sections = shelf.sections.map { section ->
                     if (section.id == newSectionId) {
-                        section.copy(items = section.items + updatedItem)
+                        section.copy(items = section.items + stampedItem)
                     } else {
                         section
                     }
@@ -194,7 +207,7 @@ class StorageTrackerViewModel(
         }
 
         saveData()
-        scheduleNotification(updatedItem)
+        scheduleNotification(stampedItem)
     }
 
     fun removeItemFromSection(shelfId: String, sectionId: String, itemId: String) {
@@ -215,6 +228,7 @@ class StorageTrackerViewModel(
                 })
             } else shelf
         }
+        tombstoneStore.append(Tombstone(id = itemId, entityType = TombstoneEntityType.ITEM, deletedAt = Date()))
         saveData()
     }
 }

@@ -1,9 +1,11 @@
 package com.awindyendprod.storage_manager.ui.screens
 
 import android.app.Activity
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.awindyendprod.storage_manager.R
@@ -30,14 +33,20 @@ import com.awindyendprod.storage_manager.ui.components.NewProfileDialog
 import com.awindyendprod.storage_manager.viewmodel.SettingsViewModel
 import com.awindyendprod.storage_manager.viewmodel.ProfileViewModel
 import com.awindyendprod.storage_manager.viewmodel.DataTransferResult
+import com.awindyendprod.storage_manager.viewmodel.SyncViewModel
+import com.awindyendprod.storage_manager.viewmodel.SyncResultUi
+import com.awindyendprod.storage_manager.viewmodel.MainDeviceStatus
 import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
+
+private const val TAPS_TO_REVEAL_DANGER_ZONE = 7
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     profileViewModel: ProfileViewModel,
+    syncViewModel: SyncViewModel,
     onBack: () -> Unit
 ) {
     val settings by viewModel.settings.collectAsState()
@@ -73,8 +82,55 @@ fun SettingsScreen(
         }
     }
 
+    val syncUiState by syncViewModel.uiState.collectAsState()
+    val syncResult by syncViewModel.syncResult.collectAsState()
+    val showAdoptConfirmation by syncViewModel.showAdoptConfirmation.collectAsState()
+    val signInLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result -> syncViewModel.handleSignInResult(result.data) }
+
+    if (showAdoptConfirmation) {
+        AlertDialog(
+            onDismissRequest = { syncViewModel.confirmAdopt(false) },
+            title = { Text(stringResource(R.string.adopt_main_device_data_title)) },
+            text = { Text(stringResource(R.string.adopt_main_device_data_message)) },
+            confirmButton = {
+                TextButton(onClick = { syncViewModel.confirmAdopt(true) }) {
+                    Text(stringResource(R.string.adopt_main_device_data_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { syncViewModel.confirmAdopt(false) }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    LaunchedEffect(syncResult) {
+        val messageRes = when (syncResult) {
+            SyncResultUi.Success -> R.string.sync_success
+            SyncResultUi.AuthRequired -> R.string.sync_auth_required
+            SyncResultUi.NetworkUnavailable -> R.string.sync_network_unavailable
+            SyncResultUi.Failed -> R.string.sync_failed
+            SyncResultUi.SignInFailed -> R.string.sign_in_failed
+            SyncResultUi.MainClaimRejected -> R.string.main_device_claim_rejected
+            null -> null
+        }
+        messageRes?.let {
+            Toast.makeText(context, context.getString(it), Toast.LENGTH_SHORT).show()
+            syncViewModel.clearSyncResult()
+        }
+    }
+
     var showExportMenu by remember { mutableStateOf(false) }
     var showNewProfileDialog by remember { mutableStateOf(false) }
+
+    var aboutTapCount by remember { mutableStateOf(0) }
+    var showDangerZone by remember { mutableStateOf(false) }
+    var showCleanSlateDialog by remember { mutableStateOf(false) }
+    var cleanSlateConfirmationText by remember { mutableStateOf("") }
+    val resetInProgress by syncViewModel.resetInProgress.collectAsState()
 
     Scaffold(
         topBar = {
@@ -491,6 +547,117 @@ fun SettingsScreen(
                 }
             }
 
+            Column {
+                Text(
+                    text = stringResource(R.string.sync),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.enable_sync),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f).padding(end = 8.dp)
+                    )
+                    Switch(
+                        checked = syncUiState.syncEnabled,
+                        onCheckedChange = { syncViewModel.setSyncEnabled(it) }
+                    )
+                }
+
+                if (syncUiState.syncEnabled) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    if (syncUiState.signedInAccountEmail == null) {
+                        Button(
+                            onClick = { signInLauncher.launch(syncViewModel.buildSignInIntent()) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.sign_in_with_google))
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = syncUiState.signedInAccountEmail.orEmpty(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f).padding(end = 8.dp)
+                            )
+                            TextButton(onClick = { syncViewModel.signOut() }) {
+                                Text(stringResource(R.string.sign_out))
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = syncUiState.lastSyncedAtMillis?.let {
+                                stringResource(
+                                    R.string.last_synced_at,
+                                    android.text.format.DateFormat.getMediumDateFormat(context).format(java.util.Date(it)),
+                                    android.text.format.DateFormat.getTimeFormat(context).format(java.util.Date(it))
+                                )
+                            } ?: stringResource(R.string.never_synced),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Button(
+                            onClick = { syncViewModel.syncNow(interactive = true) },
+                            enabled = !syncUiState.syncInProgress,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (syncUiState.syncInProgress) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(stringResource(R.string.sync_now))
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.mark_as_main_device),
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.weight(1f).padding(end = 8.dp)
+                            )
+                            Switch(
+                                checked = syncUiState.mainDeviceStatus == MainDeviceStatus.THIS_DEVICE,
+                                onCheckedChange = { syncViewModel.setMainDevice(it) }
+                            )
+                        }
+                        Text(
+                            text = when (syncUiState.mainDeviceStatus) {
+                                MainDeviceStatus.THIS_DEVICE -> stringResource(R.string.this_is_main_device)
+                                MainDeviceStatus.OTHER_DEVICE -> stringResource(R.string.main_device_is_elsewhere)
+                                MainDeviceStatus.UNSET -> stringResource(R.string.no_main_device_set)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             // Data Management
             Text(
                 text = stringResource(R.string.data_management),
@@ -548,6 +715,49 @@ fun SettingsScreen(
                 )
                 Text(stringResource(R.string.import_data))
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = stringResource(R.string.app_name),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        if (!showDangerZone) {
+                            aboutTapCount++
+                            val remaining = TAPS_TO_REVEAL_DANGER_ZONE - aboutTapCount
+                            when {
+                                remaining <= 0 -> {
+                                    showDangerZone = true
+                                    Toast.makeText(context, context.getString(R.string.danger_zone), Toast.LENGTH_SHORT).show()
+                                }
+                                remaining <= 3 ->
+                                    Toast.makeText(context, "$remaining more tap(s)", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                    .padding(vertical = 16.dp)
+            )
+
+            if (showDangerZone) {
+                Text(
+                    text = stringResource(R.string.danger_zone),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Button(
+                    onClick = { showCleanSlateDialog = true },
+                    enabled = !resetInProgress,
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.clean_slate))
+                }
+            }
         }
     }
 
@@ -560,4 +770,63 @@ fun SettingsScreen(
             }
         )
     }
+
+    if (showCleanSlateDialog) {
+        val confirmationWord = stringResource(R.string.clean_slate_confirmation_word)
+        AlertDialog(
+            onDismissRequest = {
+                showCleanSlateDialog = false
+                cleanSlateConfirmationText = ""
+            },
+            title = { Text(stringResource(R.string.clean_slate_dialog_title)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.clean_slate_dialog_message, confirmationWord))
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = cleanSlateConfirmationText,
+                        onValueChange = { cleanSlateConfirmationText = it },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showCleanSlateDialog = false
+                        cleanSlateConfirmationText = ""
+                        syncViewModel.resetAllData { remoteDeleted ->
+                            if (!remoteDeleted) {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.clean_slate_remote_delete_failed),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            restartApp(context)
+                        }
+                    },
+                    enabled = cleanSlateConfirmationText == confirmationWord && !resetInProgress
+                ) {
+                    Text(stringResource(R.string.clean_slate_confirm_button))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showCleanSlateDialog = false
+                    cleanSlateConfirmationText = ""
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+}
+
+private fun restartApp(context: android.content.Context) {
+    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+    intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+    intent?.let { context.startActivity(it) }
+    Runtime.getRuntime().exit(0)
 }

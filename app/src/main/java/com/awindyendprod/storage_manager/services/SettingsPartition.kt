@@ -2,16 +2,11 @@ package com.awindyendprod.storage_manager.services
 
 import com.awindyendprod.storage_manager.model.Settings
 
-/**
- * Each profile stores a full [Settings] snapshot in [ProfileData.settings].
- * SharedPreferences "settings" holds the active profile's values for workers and cold start.
- */
 object SettingsPartition {
 
     fun forProfileStorage(settings: Settings, profileId: String): Settings =
         settings.copy(currentProfileId = profileId)
 
-    /** True when only [Settings.currentProfileId] differs from factory defaults. */
     fun isPristineProfileSettings(settings: Settings): Boolean {
         val defaults = Settings()
         return settings.sectionDateType == defaults.sectionDateType &&
@@ -34,7 +29,6 @@ object SettingsPartition {
             settings.showProfilesButton == defaults.showProfilesButton
     }
 
-    /** Used when upgrading from the partial v1 migration (theme/language were still global-only). */
     fun fillDefaultsFromGlobal(stored: Settings, global: Settings): Settings {
         val defaults = Settings()
         return stored.copy(

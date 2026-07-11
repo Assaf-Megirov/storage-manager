@@ -5,10 +5,6 @@ import com.awindyendprod.storage_manager.model.ProfileData
 import com.awindyendprod.storage_manager.model.Settings
 import com.google.gson.Gson
 
-/**
- * Canonical per-profile settings storage (separate from the in-memory [ProfileData] list).
- * Uses [commit] so a profile switch always reads what was just saved.
- */
 class ProfileSettingsStore(private val context: Context) {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val gson = Gson()
@@ -55,10 +51,6 @@ class ProfileSettingsStore(private val context: Context) {
         prefs.edit().remove(settingsKey(profileId)).commit()
     }
 
-    /**
-     * Seeds per-profile keys from [ProfileData.settings] / global prefs when missing.
-     * Does not overwrite keys that already exist (safe for upgrades).
-     */
     fun migrateFromLegacyStorage(
         profiles: List<ProfileData>,
         globalSettings: Settings,
@@ -82,7 +74,6 @@ class ProfileSettingsStore(private val context: Context) {
         prefs.edit().putInt(KEY_STORE_MIGRATION_VERSION, STORE_MIGRATION_VERSION).commit()
     }
 
-    /** Keep [ProfileData.settings] in sync for export. */
     fun attachSettingsToProfiles(profiles: List<ProfileData>): List<ProfileData> =
         profiles.map { profileData ->
             val stored = load(profileData.profile.id) ?: profileData.settings

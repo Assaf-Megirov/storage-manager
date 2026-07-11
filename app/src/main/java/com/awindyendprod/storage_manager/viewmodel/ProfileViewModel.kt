@@ -5,19 +5,24 @@ import androidx.lifecycle.ViewModel
 import com.awindyendprod.storage_manager.model.ProfileData
 import com.awindyendprod.storage_manager.model.Settings
 import com.awindyendprod.storage_manager.model.Shelf
+import com.awindyendprod.storage_manager.model.Tombstone
+import com.awindyendprod.storage_manager.model.TombstoneEntityType
 import com.awindyendprod.storage_manager.services.ProfilePersistenceService
 import com.awindyendprod.storage_manager.services.ProfileSettingsStore
 import com.awindyendprod.storage_manager.services.SettingsPartition
 import com.awindyendprod.storage_manager.services.StorageTrackerPersistenceService
+import com.awindyendprod.storage_manager.services.TombstoneStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.util.Date
 
 class ProfileViewModel(
     context: Context,
     private val profilePersistenceService: ProfilePersistenceService,
     private val profileSettingsStore: ProfileSettingsStore,
     private val storageTrackerPersistenceService: StorageTrackerPersistenceService,
+    private val tombstoneStore: TombstoneStore,
     private val storageTrackerViewModel: StorageTrackerViewModel,
     private val settingsViewModel: SettingsViewModel,
 ) : ViewModel() {
@@ -27,6 +32,8 @@ class ProfileViewModel(
 
     private val _currentProfileId = MutableStateFlow<String?>(null)
     val currentProfileId: StateFlow<String?> = _currentProfileId.asStateFlow()
+
+    var onDataChanged: () -> Unit = {}
 
     fun initializeAfterMigration() {
         loadProfiles()
@@ -39,6 +46,11 @@ class ProfileViewModel(
         val loaded = profilePersistenceService.loadProfiles()
         _profiles.value = profileSettingsStore.attachSettingsToProfiles(loaded)
         _currentProfileId.value = profilePersistenceService.getCurrentProfileId()
+    }
+
+    fun reloadAfterSync() {
+        loadProfiles()
+        _currentProfileId.value?.let { storageTrackerViewModel.reloadDataForProfile(it) }
     }
 
     fun createProfile(name: String) {
@@ -97,6 +109,9 @@ class ProfileViewModel(
         val success = profilePersistenceService.deleteProfile(profileId)
         if (success) {
             profileSettingsStore.remove(profileId)
+            tombstoneStore.append(
+                Tombstone(id = profileId, entityType = TombstoneEntityType.PROFILE, profileId = profileId, deletedAt = Date())
+            )
             val updatedProfiles = _profiles.value.filter { it.profile.id != profileId }
             _profiles.value = updatedProfiles
 
@@ -106,6 +121,7 @@ class ProfileViewModel(
                     switchProfile(newCurrentProfileId)
                 }
             }
+            onDataChanged()
         }
         return success
     }
@@ -114,6 +130,7 @@ class ProfileViewModel(
         val success = profilePersistenceService.updateProfileName(profileId, newName)
         if (success) {
             loadProfiles()
+            onDataChanged()
         }
         return success
     }
@@ -146,6 +163,7 @@ class ProfileViewModel(
         profilePersistenceService.saveCurrentProfileId(targetId)
         settingsViewModel.switchToProfile(targetId)
         storageTrackerViewModel.reloadDataForProfile(targetId)
+        onDataChanged()
         return true
     }
 
@@ -158,6 +176,7 @@ class ProfileViewModel(
         updated[index] = updated[index].copy(settings = storedSettings)
         profilePersistenceService.saveProfiles(updated)
         _profiles.value = updated
+        onDataChanged()
     }
 
     private fun refreshProfileSettingsInList(profileId: String, storedSettings: Settings) {
@@ -171,5 +190,6 @@ class ProfileViewModel(
     private fun syncProfilesToDisk(profiles: List<ProfileData>) {
         _profiles.value = profiles
         profilePersistenceService.saveProfiles(profiles)
+        onDataChanged()
     }
 }

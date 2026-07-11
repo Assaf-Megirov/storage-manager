@@ -75,12 +75,10 @@ fun CalendarScreen(
     var visibleMonth by remember { mutableStateOf(Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, 1) }.time) }
 
     val firstDayOfWeek = remember(locale) {
-        // Use locale first day (Calendar.getInstance with locale)
         Calendar.getInstance(locale).firstDayOfWeek
     }
 
     val daysGrid = remember(visibleMonth, firstDayOfWeek, locale) {
-        // Build a list of 42 dates covering the 6x7 grid for the visible month
         val cal = Calendar.getInstance(locale).apply {
             time = visibleMonth
             set(Calendar.DAY_OF_MONTH, 1)
@@ -104,7 +102,6 @@ fun CalendarScreen(
     val countsByIso = remember(shelves, daysGrid) {
         val counts = HashMap<String, Int>()
         if (shelves.isNotEmpty()) {
-            // Precompute range for quick contains check
             val first = daysGrid.second.first()
             val last = daysGrid.second.last()
             val firstCal = Calendar.getInstance(locale).apply { time = first; set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }
@@ -166,7 +163,6 @@ fun CalendarScreen(
                 .padding(padding)
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            // Weekday headers
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 val headers = weekdayHeaders(firstDayOfWeek, locale, weekdayFormatter)
                 headers.forEach { label ->
@@ -235,7 +231,6 @@ private fun DayCell(
         colors = CardDefaults.cardColors(containerColor = bgColor)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Day number centered
             Box(modifier = Modifier.align(Alignment.Center)) {
                 Text(
                     text = dayNumber,
@@ -243,7 +238,6 @@ private fun DayCell(
                     color = if (isOutOfMonth) MaterialTheme.colorScheme.onSurfaceVariant else contentColor
                 )
             }
-            // Simple badge at top end when count > 0
             if (count > 0) {
                 Box(
                     modifier = Modifier

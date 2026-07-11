@@ -39,6 +39,7 @@ import com.awindyendprod.storage_manager.services.toDisplayFormat
 import com.awindyendprod.storage_manager.viewmodel.StorageTrackerViewModel
 import com.awindyendprod.storage_manager.viewmodel.SettingsViewModel
 import com.awindyendprod.storage_manager.viewmodel.ProfileViewModel
+import com.awindyendprod.storage_manager.viewmodel.SyncViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -1189,6 +1190,7 @@ fun StorageManagerApp(
     viewModel: StorageTrackerViewModel,
     settingsViewModel: SettingsViewModel,
     profileViewModel: ProfileViewModel,
+    syncViewModel: SyncViewModel,
     importUri: Uri? = null
 ) {
     val navController = rememberNavController()
@@ -1278,6 +1280,7 @@ fun StorageManagerApp(
             SettingsScreen(
                 viewModel = settingsViewModel,
                 profileViewModel = profileViewModel,
+                syncViewModel = syncViewModel,
                 onBack = { navController.popBackStack() }
             )
         }

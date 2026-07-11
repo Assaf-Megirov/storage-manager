@@ -27,9 +27,12 @@ class StorageTrackerPersistenceService(private val context: Context) {
         } ?: emptyList()
     }
 
-    /** [ProfileData.shelves] is a stale snapshot; refresh it from the live per-profile store before export. */
     fun attachShelvesToProfiles(profiles: List<ProfileData>): List<ProfileData> =
         profiles.map { profileData -> profileData.copy(shelves = loadData(profileData.profile.id)) }
+
+    fun removeData(profileId: String) {
+        prefs.edit().remove("shelves_$profileId").apply()
+    }
 
     // Legacy method for backward compatibility
     fun saveData(shelves: List<Shelf>) {

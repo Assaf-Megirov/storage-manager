@@ -5,10 +5,6 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 
-/**
- * Normalizes JSON produced by R8-shrunk release builds (short field names) so Gson
- * can read backups and [ProfilePrefs] from older app versions.
- */
 object BackupJsonCompat {
 
     private val profileDataKeyMap = mapOf(

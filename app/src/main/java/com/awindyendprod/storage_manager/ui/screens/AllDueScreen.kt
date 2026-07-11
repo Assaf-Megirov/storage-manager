@@ -113,7 +113,6 @@ fun AllDueScreen(
                     }
                 },
                 actions = {
-                    // Past-day indicator
                     val isPastDay = remember(selectedDate) {
                         val today = Calendar.getInstance()
                         val sel = Calendar.getInstance().apply { time = selectedDate }

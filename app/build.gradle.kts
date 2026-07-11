@@ -19,8 +19,8 @@ android {
         applicationId = "com.awindyendprod.storage_manager"
         minSdk = 24
         targetSdk = 35
-        versionCode = 15
-        versionName = "1.1.5"
+        versionCode = 16
+        versionName = "1.1.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -75,4 +75,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.work.runtime)
+    implementation(libs.play.services.auth)
+    implementation(libs.okhttp)
 }

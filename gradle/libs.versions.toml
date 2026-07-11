@@ -22,6 +22,8 @@ compose-bom = "2024.03.00"
 
 # Utilities
 gson = "2.10.1"
+play-services-auth = "21.2.0"
+okhttp = "4.12.0"
 
 # Testing
 junit = "4.13.2"
@@ -56,6 +58,8 @@ material-icons-extended = { module = "androidx.compose.material:material-icons-e
 
 # Utilities
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
