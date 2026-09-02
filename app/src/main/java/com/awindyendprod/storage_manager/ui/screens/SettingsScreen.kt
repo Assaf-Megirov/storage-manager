@@ -573,7 +573,15 @@ fun SettingsScreen(
                 if (syncUiState.syncEnabled) {
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    if (syncUiState.signedInAccountEmail == null) {
+                    if (syncUiState.signedInAccountEmail == null || syncUiState.reauthRequired) {
+                        if (syncUiState.reauthRequired) {
+                            Text(
+                                text = stringResource(R.string.sync_auth_required),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
                         Button(
                             onClick = { signInLauncher.launch(syncViewModel.buildSignInIntent()) },
                             modifier = Modifier.fillMaxWidth()

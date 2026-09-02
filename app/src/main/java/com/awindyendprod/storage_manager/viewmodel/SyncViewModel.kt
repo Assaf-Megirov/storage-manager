@@ -31,6 +31,7 @@ data class SyncUiState(
     val syncInProgress: Boolean = false,
     val lastSyncedAtMillis: Long? = null,
     val mainDeviceStatus: MainDeviceStatus = MainDeviceStatus.UNSET,
+    val reauthRequired: Boolean = false,
 )
 
 enum class SyncResultUi {
@@ -107,7 +108,10 @@ class SyncViewModel(
             Log.e(TAG, "Google sign-in failed: ${GoogleSignInStatusCodes.getStatusCodeString(e.statusCode)}", e)
             null
         }
-        _uiState.value = _uiState.value.copy(signedInAccountEmail = account?.email)
+        _uiState.value = _uiState.value.copy(
+            signedInAccountEmail = account?.email,
+            reauthRequired = false
+        )
         if (account != null && _uiState.value.syncEnabled) {
             syncNow(interactive = true)
         } else if (account == null) {
@@ -117,7 +121,10 @@ class SyncViewModel(
 
     fun signOut() {
         googleAuthService.signOut {
-            _uiState.value = _uiState.value.copy(signedInAccountEmail = null)
+            _uiState.value = _uiState.value.copy(
+                signedInAccountEmail = null,
+                reauthRequired = false
+            )
         }
     }
 
@@ -178,7 +185,8 @@ class SyncViewModel(
             _uiState.value = _uiState.value.copy(
                 syncInProgress = false,
                 lastSyncedAtMillis = syncPreferencesStore.getLastSyncedAtMillis(),
-                mainDeviceStatus = computeMainDeviceStatus()
+                mainDeviceStatus = computeMainDeviceStatus(),
+                reauthRequired = outcome is SyncOutcome.AuthRequired
             )
             outcome.toUiResult()?.let { _syncResult.value = it }
         }

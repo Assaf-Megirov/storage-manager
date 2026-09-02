@@ -2,6 +2,7 @@ package com.awindyendprod.storage_manager.services
 
 import com.google.gson.Gson
 import com.google.gson.JsonParseException
+import com.google.gson.annotations.SerializedName
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -12,7 +13,10 @@ import java.io.IOException
 
 const val SYNC_FILE_NAME = "sync_data.json"
 
-data class DriveFileMeta(val id: String, val modifiedTime: String)
+data class DriveFileMeta(
+    @SerializedName("id") val id: String,
+    @SerializedName("modifiedTime") val modifiedTime: String
+)
 
 sealed class DriveResult<out T> {
     data class Success<T>(val value: T) : DriveResult<T>()
@@ -119,6 +123,6 @@ class DriveSyncService {
         }
     }
 
-    private data class FilesListResponse(val files: List<DriveFileMeta>?)
-    private data class CreatedFile(val id: String)
+    private data class FilesListResponse(@SerializedName("files") val files: List<DriveFileMeta>?)
+    private data class CreatedFile(@SerializedName("id") val id: String)
 }
