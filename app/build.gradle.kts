@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.awindyendprod.storage_manager"
-    compileSdk = 35
+    compileSdk = 36
 
     buildFeatures {
         compose = true
@@ -18,7 +18,7 @@ android {
     defaultConfig {
         applicationId = "com.awindyendprod.storage_manager"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 16
         versionName = "1.1.6"
 
