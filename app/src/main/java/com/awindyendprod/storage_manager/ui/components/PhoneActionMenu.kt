@@ -12,10 +12,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -23,10 +25,15 @@ import androidx.compose.ui.unit.dp
 import com.awindyendprod.storage_manager.R
 import com.awindyendprod.storage_manager.services.PhoneNumberService
 
+val LocalPresetMessage = compositionLocalOf { "" }
+val LocalOpenSettings = staticCompositionLocalOf<() -> Unit> { {} }
+
 @Composable
 fun PhoneActionMenu(phoneNumber: String, modifier: Modifier = Modifier) {
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val presetMessage = LocalPresetMessage.current
+    val openSettings = LocalOpenSettings.current
 
     Box(modifier) {
         IconButton(onClick = { expanded = true }, modifier = Modifier.size(20.dp)) {
@@ -45,6 +52,25 @@ fun PhoneActionMenu(phoneNumber: String, modifier: Modifier = Modifier) {
                         context.startActivity(
                             Intent(Intent.ACTION_VIEW, Uri.parse(PhoneNumberService.buildWhatsAppUrl(phoneNumber)))
                         )
+                    }
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.send_preset_message)) },
+                onClick = {
+                    expanded = false
+                    // Without a message there is nothing to send, so send the user to where it is set.
+                    if (presetMessage.isBlank()) {
+                        openSettings()
+                    } else {
+                        runCatching {
+                            context.startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse(PhoneNumberService.buildWhatsAppUrl(phoneNumber, presetMessage))
+                                )
+                            )
+                        }
                     }
                 }
             )

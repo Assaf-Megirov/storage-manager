@@ -126,7 +126,8 @@ class SettingsViewModel(
             notificationDaysBefore = preferences.getInt("notificationDaysBefore", 1),
             notificationMaxItems = preferences.getInt("notificationMaxItems", 10),
             dailyNotificationsEnabled = preferences.getBoolean("dailyNotificationsEnabled", true),
-            showProfilesButton = preferences.getBoolean("showProfilesButton", true)
+            showProfilesButton = preferences.getBoolean("showProfilesButton", true),
+            presetMessage = preferences.getString("presetMessage", "") ?: ""
         )
     }
 
@@ -150,8 +151,15 @@ class SettingsViewModel(
             putInt("notificationMaxItems", settings.notificationMaxItems)
             putBoolean("dailyNotificationsEnabled", settings.dailyNotificationsEnabled)
             putBoolean("showProfilesButton", settings.showProfilesButton)
+            putString("presetMessage", settings.presetMessage)
             commit()
         }
+    }
+
+    /** The message pre-filled when contacting a client; belongs to the active profile. */
+    fun updatePresetMessage(message: String) {
+        _settings.value = _settings.value.copy(presetMessage = message)
+        afterSettingChanged()
     }
 
     fun updateSectionDateType(type: SectionDateType) {

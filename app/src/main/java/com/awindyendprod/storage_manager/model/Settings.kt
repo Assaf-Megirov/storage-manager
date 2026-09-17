@@ -50,5 +50,6 @@ data class Settings(
     @SerializedName("notificationMaxItems") val notificationMaxItems: Int = 10,
     @SerializedName("dailyNotificationsEnabled") val dailyNotificationsEnabled: Boolean = true,
     @SerializedName("currentProfileId") val currentProfileId: String? = null,
-    @SerializedName("showProfilesButton") val showProfilesButton: Boolean = true
+    @SerializedName("showProfilesButton") val showProfilesButton: Boolean = true,
+    @SerializedName("presetMessage") val presetMessage: String = ""
 ) 

@@ -1,5 +1,7 @@
 package com.awindyendprod.storage_manager.services
 
+import java.net.URLEncoder
+
 object PhoneNumberService {
     fun detectPhoneNumber(clientName: String, note: String): String? {
         if (looksLikePhoneNumber(clientName)) return clientName
@@ -12,7 +14,12 @@ object PhoneNumberService {
         return digitCount in 7..15
     }
 
-    fun buildWhatsAppUrl(raw: String) = "https://wa.me/${toE164Digits(raw)}"
+    fun buildWhatsAppUrl(raw: String, text: String? = null): String {
+        val base = "https://wa.me/${toE164Digits(raw)}"
+        val body = text?.takeIf { it.isNotBlank() } ?: return base
+        // wa.me wants %20 for spaces; URLEncoder emits form encoding, which uses "+".
+        return "$base?text=${URLEncoder.encode(body, "UTF-8").replace("+", "%20")}"
+    }
 
     fun buildTelUri(raw: String) = "tel:${cleanDigits(raw)}"
 

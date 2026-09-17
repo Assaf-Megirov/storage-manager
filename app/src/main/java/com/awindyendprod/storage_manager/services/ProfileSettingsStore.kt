@@ -38,6 +38,7 @@ class ProfileSettingsStore(private val context: Context) {
             putInt("notificationMaxItems", settings.notificationMaxItems)
             putBoolean("dailyNotificationsEnabled", settings.dailyNotificationsEnabled)
             putBoolean("showProfilesButton", settings.showProfilesButton)
+            putString("presetMessage", settings.presetMessage)
             commit()
         }
     }

@@ -199,4 +199,11 @@
     <string name="default_profile_name">ברירת מחדל</string>
     <string name="previous">הקודם</string>
     <string name="next">הבא</string>
+
+    <!-- Preset message -->
+    <string name="preset_message">הודעה מוכנה מראש</string>
+    <string name="preset_message_hint_profile">ההודעה תתמלא אוטומטית כששולחים הודעת וואטסאפ ללקוח. היא נשמרת לפרופיל ״%1$s״ בלבד.</string>
+    <string name="preset_message_hint">ההודעה תתמלא אוטומטית כששולחים הודעת וואטסאפ ללקוח. היא נשמרת לפרופיל הנוכחי בלבד.</string>
+    <string name="preset_message_label">הודעה</string>
+    <string name="send_preset_message">שליחת הודעה מוכנה מראש</string>
 </resources>

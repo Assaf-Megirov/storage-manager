@@ -267,7 +267,8 @@ class SyncManager(
             notificationDaysBefore = prefs.getInt("notificationDaysBefore", 1),
             notificationMaxItems = prefs.getInt("notificationMaxItems", 10),
             dailyNotificationsEnabled = prefs.getBoolean("dailyNotificationsEnabled", true),
-            showProfilesButton = prefs.getBoolean("showProfilesButton", true)
+            showProfilesButton = prefs.getBoolean("showProfilesButton", true),
+            presetMessage = prefs.getString("presetMessage", "") ?: ""
         )
     }
 
