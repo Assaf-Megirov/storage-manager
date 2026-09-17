@@ -61,6 +61,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.awindyendprod.storage_manager.ui.components.DraggableFloatingActionButton
 import com.awindyendprod.storage_manager.ui.components.ProfileDropdown
 import com.awindyendprod.storage_manager.ui.components.NewProfileDialog
+import com.awindyendprod.storage_manager.ui.components.LocalOpenSettings
+import com.awindyendprod.storage_manager.ui.components.LocalPresetMessage
 import com.awindyendprod.storage_manager.ui.components.PhoneActionMenu
 import com.awindyendprod.storage_manager.services.PhoneNumberService
 import androidx.compose.ui.geometry.Offset
@@ -1198,6 +1200,7 @@ fun StorageManagerApp(
     var handledUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
     val dataTransferResult by settingsViewModel.dataTransferResult.collectAsState()
+    val appSettings by settingsViewModel.settings.collectAsState()
 
     LaunchedEffect(dataTransferResult) {
         when (dataTransferResult) {
@@ -1236,111 +1239,120 @@ fun StorageManagerApp(
         )
     }
 
-    NavHost(navController = navController, startDestination = "main") {
-        composable("main") {
-            StorageManagerMainScreen(
-                viewModel = viewModel,
-                settingsViewModel = settingsViewModel,
-                profileViewModel = profileViewModel,
-                onSectionClick = { shelfId, sectionId ->
-                    navController.navigate("section_details/$shelfId/$sectionId")
-                },
-                onSearchClick = {
-                    navController.navigate("search")
-                },
-                onSettingsClick = {
-                    navController.navigate("settings")
-                },
-                onAllDueClick = {
-                    navController.navigate("calendar")
-                }
-            )
-        }
+    // A fresh lambda each recomposition would be a new value for a static local, which recomposes
+    // the whole NavHost subtree, so its identity is kept stable.
+    val openSettings = remember(navController) { { navController.navigate("settings") } }
 
-        composable(
-            route = "section_details/{shelfId}/{sectionId}",
-            arguments = listOf(
-                navArgument("shelfId") { type = NavType.StringType },
-                navArgument("sectionId") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            SectionDetailsScreen(
-                viewModel = viewModel,
-                settingsViewModel = settingsViewModel,
-                shelfId = backStackEntry.arguments?.getString("shelfId") ?: "",
-                sectionId = backStackEntry.arguments?.getString("sectionId") ?: "",
-                onBack = { navController.popBackStack() },
-                onEditItem = { shelfId, sectionId, itemId ->
-                    navController.navigate("edit_item/$shelfId/$sectionId/$itemId")
-                }
-            )
-        }
+    CompositionLocalProvider(
+        LocalPresetMessage provides appSettings.presetMessage,
+        LocalOpenSettings provides openSettings
+    ) {
+        NavHost(navController = navController, startDestination = "main") {
+            composable("main") {
+                StorageManagerMainScreen(
+                    viewModel = viewModel,
+                    settingsViewModel = settingsViewModel,
+                    profileViewModel = profileViewModel,
+                    onSectionClick = { shelfId, sectionId ->
+                        navController.navigate("section_details/$shelfId/$sectionId")
+                    },
+                    onSearchClick = {
+                        navController.navigate("search")
+                    },
+                    onSettingsClick = {
+                        navController.navigate("settings")
+                    },
+                    onAllDueClick = {
+                        navController.navigate("calendar")
+                    }
+                )
+            }
 
-        composable("settings") {
-            SettingsScreen(
-                viewModel = settingsViewModel,
-                profileViewModel = profileViewModel,
-                syncViewModel = syncViewModel,
-                onBack = { navController.popBackStack() }
-            )
-        }
+            composable(
+                route = "section_details/{shelfId}/{sectionId}",
+                arguments = listOf(
+                    navArgument("shelfId") { type = NavType.StringType },
+                    navArgument("sectionId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                SectionDetailsScreen(
+                    viewModel = viewModel,
+                    settingsViewModel = settingsViewModel,
+                    shelfId = backStackEntry.arguments?.getString("shelfId") ?: "",
+                    sectionId = backStackEntry.arguments?.getString("sectionId") ?: "",
+                    onBack = { navController.popBackStack() },
+                    onEditItem = { shelfId, sectionId, itemId ->
+                        navController.navigate("edit_item/$shelfId/$sectionId/$itemId")
+                    }
+                )
+            }
 
-        composable("search") {
-            SearchScreen(
-                viewModel = viewModel,
-                settingsViewModel = settingsViewModel,
-                onBack = { navController.popBackStack() },
-                onItemClick = { shelfId, sectionId ->
-                    navController.navigate("section_details/$shelfId/$sectionId")
-                }
-            )
-        }
+            composable("settings") {
+                SettingsScreen(
+                    viewModel = settingsViewModel,
+                    profileViewModel = profileViewModel,
+                    syncViewModel = syncViewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
 
-        composable(
-            route = "edit_item/{shelfId}/{sectionId}/{itemId}",
-            arguments = listOf(
-                navArgument("shelfId") { type = NavType.StringType },
-                navArgument("sectionId") { type = NavType.StringType },
-                navArgument("itemId") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            EditItemScreen(
-                viewModel = viewModel,
-                settingsViewModel = settingsViewModel,
-                shelfId = backStackEntry.arguments?.getString("shelfId") ?: "",
-                sectionId = backStackEntry.arguments?.getString("sectionId") ?: "",
-                itemId = backStackEntry.arguments?.getString("itemId") ?: "",
-                onBack = { navController.popBackStack() }
-            )
-        }
+            composable("search") {
+                SearchScreen(
+                    viewModel = viewModel,
+                    settingsViewModel = settingsViewModel,
+                    onBack = { navController.popBackStack() },
+                    onItemClick = { shelfId, sectionId ->
+                        navController.navigate("section_details/$shelfId/$sectionId")
+                    }
+                )
+            }
 
-        composable(
-            route = "allDue/{date}",
-            arguments = listOf(
-                navArgument("date") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val dateArg = backStackEntry.arguments?.getString("date")
-            AllDueScreen(
-                viewModel = viewModel,
-                settingsViewModel = settingsViewModel,
-                onBackClick = { navController.popBackStack() },
-                onItemClick = { shelfId, sectionId ->
-                    navController.navigate("section_details/$shelfId/$sectionId")
-                },
-                dateIso = dateArg
-            )
-        }
+            composable(
+                route = "edit_item/{shelfId}/{sectionId}/{itemId}",
+                arguments = listOf(
+                    navArgument("shelfId") { type = NavType.StringType },
+                    navArgument("sectionId") { type = NavType.StringType },
+                    navArgument("itemId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                EditItemScreen(
+                    viewModel = viewModel,
+                    settingsViewModel = settingsViewModel,
+                    shelfId = backStackEntry.arguments?.getString("shelfId") ?: "",
+                    sectionId = backStackEntry.arguments?.getString("sectionId") ?: "",
+                    itemId = backStackEntry.arguments?.getString("itemId") ?: "",
+                    onBack = { navController.popBackStack() }
+                )
+            }
 
-        composable("calendar") {
-            CalendarScreen(
-                viewModel = viewModel,
-                settingsViewModel = settingsViewModel,
-                onBack = { navController.popBackStack() },
-                onDaySelected = { isoDate ->
-                    navController.navigate("allDue/$isoDate")
-                }
-            )
+            composable(
+                route = "allDue/{date}",
+                arguments = listOf(
+                    navArgument("date") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val dateArg = backStackEntry.arguments?.getString("date")
+                AllDueScreen(
+                    viewModel = viewModel,
+                    settingsViewModel = settingsViewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onItemClick = { shelfId, sectionId ->
+                        navController.navigate("section_details/$shelfId/$sectionId")
+                    },
+                    dateIso = dateArg
+                )
+            }
+
+            composable("calendar") {
+                CalendarScreen(
+                    viewModel = viewModel,
+                    settingsViewModel = settingsViewModel,
+                    onBack = { navController.popBackStack() },
+                    onDaySelected = { isoDate ->
+                        navController.navigate("allDue/$isoDate")
+                    }
+                )
+            }
         }
     }
 }

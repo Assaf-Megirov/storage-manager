@@ -198,4 +198,11 @@
     <string name="default_profile_name">По умолчанию</string>
     <string name="previous">Назад</string>
     <string name="next">Далее</string>
+
+    <!-- Preset message -->
+    <string name="preset_message">Готовое сообщение</string>
+    <string name="preset_message_hint_profile">Подставляется, когда вы пишете клиенту в WhatsApp. Сохраняется только для профиля «%1$s».</string>
+    <string name="preset_message_hint">Подставляется, когда вы пишете клиенту в WhatsApp. Сохраняется только для текущего профиля.</string>
+    <string name="preset_message_label">Сообщение</string>
+    <string name="send_preset_message">Отправить готовое сообщение</string>
 </resources> 

@@ -200,4 +200,11 @@
     <string name="default_profile_name">Default</string>
     <string name="previous">Previous</string>
     <string name="next">Next</string>
+
+    <!-- Preset message -->
+    <string name="preset_message">Preset message</string>
+    <string name="preset_message_hint_profile">Filled in for you when you send a client a WhatsApp message. Saved for the “%1$s” profile only.</string>
+    <string name="preset_message_hint">Filled in for you when you send a client a WhatsApp message. Saved for the current profile only.</string>
+    <string name="preset_message_label">Message</string>
+    <string name="send_preset_message">Send preset message</string>
 </resources>

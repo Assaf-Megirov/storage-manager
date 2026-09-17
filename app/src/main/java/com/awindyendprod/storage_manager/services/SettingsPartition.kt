@@ -26,7 +26,8 @@ object SettingsPartition {
             settings.notificationDaysBefore == defaults.notificationDaysBefore &&
             settings.notificationMaxItems == defaults.notificationMaxItems &&
             settings.dailyNotificationsEnabled == defaults.dailyNotificationsEnabled &&
-            settings.showProfilesButton == defaults.showProfilesButton
+            settings.showProfilesButton == defaults.showProfilesButton &&
+            settings.presetMessage == defaults.presetMessage
     }
 
     fun fillDefaultsFromGlobal(stored: Settings, global: Settings): Settings {
@@ -54,6 +55,11 @@ object SettingsPartition {
                 global.showProfilesButton
             } else {
                 stored.showProfilesButton
+            },
+            presetMessage = if (stored.presetMessage == defaults.presetMessage) {
+                global.presetMessage
+            } else {
+                stored.presetMessage
             }
         )
     }

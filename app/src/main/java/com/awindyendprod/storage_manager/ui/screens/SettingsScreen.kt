@@ -20,6 +20,7 @@ import androidx.compose.material3.TopAppBarDefaults.smallTopAppBarColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -125,6 +126,20 @@ fun SettingsScreen(
 
     var showExportMenu by remember { mutableStateOf(false) }
     var showNewProfileDialog by remember { mutableStateOf(false) }
+
+    // Saving a setting runs SharedPreferences.commit() three times over, so the preset message is
+    // edited as a draft and written on focus loss, on leaving the screen, or before a profile
+    // switch. The profile id is part of the key: two profiles often hold the same text, and
+    // without it a draft typed under one profile would be saved into the next one.
+    var presetDraft by remember(currentProfileId, settings.presetMessage) {
+        mutableStateOf(settings.presetMessage)
+    }
+    val latestPresetDraft by rememberUpdatedState(presetDraft)
+    val savedPresetMessage by rememberUpdatedState(settings.presetMessage)
+    val savePresetDraft = {
+        if (latestPresetDraft != savedPresetMessage) viewModel.updatePresetMessage(latestPresetDraft)
+    }
+    DisposableEffect(Unit) { onDispose { savePresetDraft() } }
 
     var aboutTapCount by remember { mutableStateOf(0) }
     var showDangerZone by remember { mutableStateOf(false) }
@@ -296,6 +311,46 @@ fun SettingsScreen(
                 }
             }
             
+            // Preset Message
+            Column {
+                Text(
+                    text = stringResource(R.string.preset_message),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                // The message is stored per profile, so say which one is being edited.
+                val activeProfileName = profiles
+                    .firstOrNull { it.profile.id == currentProfileId }
+                    ?.profile?.name
+                Text(
+                    text = if (activeProfileName != null) {
+                        stringResource(R.string.preset_message_hint_profile, activeProfileName)
+                    } else {
+                        stringResource(R.string.preset_message_hint)
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                OutlinedTextField(
+                    value = presetDraft,
+                    onValueChange = { presetDraft = it },
+                    label = { Text(stringResource(R.string.preset_message_label)) },
+                    minLines = 3,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { if (!it.isFocused) savePresetDraft() },
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedTextColor     = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor   = MaterialTheme.colorScheme.onSurfaceVariant,
+                        cursorColor           = MaterialTheme.colorScheme.primary,
+                        focusedBorderColor    = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor  = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                )
+            }
+
             // Profile Management
             Column {
                 Text(
@@ -323,6 +378,8 @@ fun SettingsScreen(
                     profiles = profiles,
                     currentProfileId = currentProfileId,
                     onProfileSelected = { profileId ->
+                        // Belongs to the profile being left, so write it before the switch.
+                        savePresetDraft()
                         profileViewModel.switchProfile(profileId)
                     },
                     onAddProfile = {
@@ -774,6 +831,7 @@ fun SettingsScreen(
         NewProfileDialog(
             onDismiss = { showNewProfileDialog = false },
             onConfirm = { profileName ->
+                savePresetDraft()
                 profileViewModel.createProfile(profileName)
             }
         )
