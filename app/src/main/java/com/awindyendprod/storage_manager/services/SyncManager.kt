@@ -185,6 +185,9 @@ class SyncManager(
         val profiles = profilePersistenceService.loadProfiles()
         val withSettings = profileSettingsStore.attachSettingsToProfiles(profiles)
         val withShelves = storageTrackerPersistenceService.attachShelvesToProfiles(withSettings)
+            // The archive stays on the device: keeping it out of the payload is what stops every
+            // sync from re-uploading the whole deletion history.
+            .map { it.copy(archivedItems = null) }
         return ExportData(
             globalSettings = loadGlobalSettings(),
             profiles = withShelves,
@@ -268,7 +271,9 @@ class SyncManager(
             notificationMaxItems = prefs.getInt("notificationMaxItems", 10),
             dailyNotificationsEnabled = prefs.getBoolean("dailyNotificationsEnabled", true),
             showProfilesButton = prefs.getBoolean("showProfilesButton", true),
-            presetMessage = prefs.getString("presetMessage", "") ?: ""
+            presetMessage = prefs.getString("presetMessage", "") ?: "",
+            archiveStructuralDeletes = prefs.getBoolean("archiveStructuralDeletes", false),
+            archiveRetentionDays = prefs.getInt("archiveRetentionDays", 180)
         )
     }
 

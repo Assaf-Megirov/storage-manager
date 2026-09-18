@@ -22,6 +22,7 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import com.awindyendprod.storage_manager.model.Theme
 import com.awindyendprod.storage_manager.model.ProfileData
+import com.awindyendprod.storage_manager.services.ArchiveStore
 import com.awindyendprod.storage_manager.services.ProfileSettingsStore
 import com.awindyendprod.storage_manager.services.SettingsPartition
 import kotlinx.coroutines.withContext
@@ -38,6 +39,7 @@ class SettingsViewModel(
     private val persistenceService: StorageTrackerPersistenceService,
     private val storageTrackerViewModel: StorageTrackerViewModel,
     private val profileSettingsStore: ProfileSettingsStore,
+    private val archiveStore: ArchiveStore,
 ) : ViewModel() {
 
     private val appContext = context.applicationContext
@@ -127,7 +129,9 @@ class SettingsViewModel(
             notificationMaxItems = preferences.getInt("notificationMaxItems", 10),
             dailyNotificationsEnabled = preferences.getBoolean("dailyNotificationsEnabled", true),
             showProfilesButton = preferences.getBoolean("showProfilesButton", true),
-            presetMessage = preferences.getString("presetMessage", "") ?: ""
+            presetMessage = preferences.getString("presetMessage", "") ?: "",
+            archiveStructuralDeletes = preferences.getBoolean("archiveStructuralDeletes", false),
+            archiveRetentionDays = preferences.getInt("archiveRetentionDays", 180)
         )
     }
 
@@ -152,6 +156,8 @@ class SettingsViewModel(
             putBoolean("dailyNotificationsEnabled", settings.dailyNotificationsEnabled)
             putBoolean("showProfilesButton", settings.showProfilesButton)
             putString("presetMessage", settings.presetMessage)
+            putBoolean("archiveStructuralDeletes", settings.archiveStructuralDeletes)
+            putInt("archiveRetentionDays", settings.archiveRetentionDays)
             commit()
         }
     }
@@ -159,6 +165,18 @@ class SettingsViewModel(
     /** The message pre-filled when contacting a client; belongs to the active profile. */
     fun updatePresetMessage(message: String) {
         _settings.value = _settings.value.copy(presetMessage = message)
+        afterSettingChanged()
+    }
+
+    /** Whether deleting a whole shelf or section also archives the items it held. */
+    fun updateArchiveStructuralDeletes(enabled: Boolean) {
+        _settings.value = _settings.value.copy(archiveStructuralDeletes = enabled)
+        afterSettingChanged()
+    }
+
+    /** How long archived items are kept; zero or less keeps them forever. */
+    fun updateArchiveRetentionDays(days: Int) {
+        _settings.value = _settings.value.copy(archiveRetentionDays = days.coerceIn(0, 3650))
         afterSettingChanged()
     }
 
@@ -292,7 +310,8 @@ class SettingsViewModel(
                 persistActiveProfileSettings()
                 val withSettings = profileSettingsStore.attachSettingsToProfiles(profiles)
                 val withShelves = persistenceService.attachShelvesToProfiles(withSettings)
-                persistenceService.exportToFile(uri, settings.value, withShelves, currentProfileId)
+                val withArchive = archiveStore.attachArchiveToProfiles(withShelves)
+                persistenceService.exportToFile(uri, settings.value, withArchive, currentProfileId)
             } catch (e: Exception) {
                 Log.e("SettingsViewModel", "Error exporting data", e)
             }
@@ -329,9 +348,10 @@ class SettingsViewModel(
                 persistActiveProfileSettings()
                 val withSettings = profileSettingsStore.attachSettingsToProfiles(profiles)
                 val withShelves = persistenceService.attachShelvesToProfiles(withSettings)
+                val withArchive = archiveStore.attachArchiveToProfiles(withShelves)
                 val tempFile = File(appContext.cacheDir, "storage_manager_backup.json")
                 tempFile.createNewFile()
-                persistenceService.exportToFile(tempFile, settings.value, withShelves, currentProfileId)
+                persistenceService.exportToFile(tempFile, settings.value, withArchive, currentProfileId)
 
                 val contentUri = FileProvider.getUriForFile(
                     appContext,

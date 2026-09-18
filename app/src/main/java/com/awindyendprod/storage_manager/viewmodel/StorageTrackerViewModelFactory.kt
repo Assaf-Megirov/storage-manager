@@ -3,6 +3,7 @@ package com.awindyendprod.storage_manager.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.awindyendprod.storage_manager.services.ArchiveStore
 import com.awindyendprod.storage_manager.services.StorageTrackerPersistenceService
 import com.awindyendprod.storage_manager.services.TombstoneStore
 
@@ -16,7 +17,8 @@ class StorageTrackerViewModelFactory(
             return StorageTrackerViewModel(
                 context.applicationContext,
                 persistenceService,
-                TombstoneStore(context.applicationContext)
+                TombstoneStore(context.applicationContext),
+                ArchiveStore(context.applicationContext)
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

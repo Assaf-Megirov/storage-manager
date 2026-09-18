@@ -3,6 +3,7 @@ package com.awindyendprod.storage_manager.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.awindyendprod.storage_manager.services.ArchiveStore
 import com.awindyendprod.storage_manager.services.DriveSyncService
 import com.awindyendprod.storage_manager.services.GoogleAuthService
 import com.awindyendprod.storage_manager.services.ProfilePersistenceService
@@ -34,6 +35,10 @@ class AppViewModelFactory(
         TombstoneStore(appContext)
     }
 
+    private val archiveStore: ArchiveStore by lazy {
+        ArchiveStore(appContext)
+    }
+
     private val syncPreferencesStore: SyncPreferencesStore by lazy {
         SyncPreferencesStore(appContext)
     }
@@ -60,11 +65,20 @@ class AppViewModelFactory(
     }
 
     private val storageTrackerViewModel: StorageTrackerViewModel by lazy {
-        StorageTrackerViewModel(appContext, persistenceService, tombstoneStore)
+        StorageTrackerViewModel(appContext, persistenceService, tombstoneStore, archiveStore).also { vm ->
+            // Read lazily: the settings view model is built on top of this one.
+            vm.archivePreferences = {
+                val settings = settingsViewModel.settings.value
+                ArchivePreferences(
+                    archiveStructuralDeletes = settings.archiveStructuralDeletes,
+                    retentionDays = settings.archiveRetentionDays
+                )
+            }
+        }
     }
 
     private val settingsViewModel: SettingsViewModel by lazy {
-        SettingsViewModel(appContext, persistenceService, storageTrackerViewModel, profileSettingsStore)
+        SettingsViewModel(appContext, persistenceService, storageTrackerViewModel, profileSettingsStore, archiveStore)
     }
 
     private val profileViewModel: ProfileViewModel by lazy {
@@ -74,6 +88,7 @@ class AppViewModelFactory(
             profileSettingsStore,
             persistenceService,
             tombstoneStore,
+            archiveStore,
             storageTrackerViewModel,
             settingsViewModel
         )

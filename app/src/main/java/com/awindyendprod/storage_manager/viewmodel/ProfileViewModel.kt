@@ -7,6 +7,7 @@ import com.awindyendprod.storage_manager.model.Settings
 import com.awindyendprod.storage_manager.model.Shelf
 import com.awindyendprod.storage_manager.model.Tombstone
 import com.awindyendprod.storage_manager.model.TombstoneEntityType
+import com.awindyendprod.storage_manager.services.ArchiveStore
 import com.awindyendprod.storage_manager.services.ProfilePersistenceService
 import com.awindyendprod.storage_manager.services.ProfileSettingsStore
 import com.awindyendprod.storage_manager.services.SettingsPartition
@@ -23,6 +24,7 @@ class ProfileViewModel(
     private val profileSettingsStore: ProfileSettingsStore,
     private val storageTrackerPersistenceService: StorageTrackerPersistenceService,
     private val tombstoneStore: TombstoneStore,
+    private val archiveStore: ArchiveStore,
     private val storageTrackerViewModel: StorageTrackerViewModel,
     private val settingsViewModel: SettingsViewModel,
 ) : ViewModel() {
@@ -50,7 +52,12 @@ class ProfileViewModel(
 
     fun reloadAfterSync() {
         loadProfiles()
-        _currentProfileId.value?.let { storageTrackerViewModel.reloadDataForProfile(it) }
+        _currentProfileId.value?.let { profileId ->
+            // A merge can change which profile is current, and the archive prune reads the active
+            // profile's retention, so settings have to follow before any data is loaded.
+            settingsViewModel.switchToProfile(profileId)
+            storageTrackerViewModel.reloadDataForProfile(profileId)
+        }
     }
 
     fun createProfile(name: String) {
@@ -109,6 +116,7 @@ class ProfileViewModel(
         val success = profilePersistenceService.deleteProfile(profileId)
         if (success) {
             profileSettingsStore.remove(profileId)
+            archiveStore.remove(profileId)
             tombstoneStore.append(
                 Tombstone(id = profileId, entityType = TombstoneEntityType.PROFILE, profileId = profileId, deletedAt = Date())
             )
@@ -146,6 +154,9 @@ class ProfileViewModel(
 
         profiles.forEach { profileData ->
             profileSettingsStore.save(profileData.profile.id, profileData.settings)
+            // Null means the backup carries no archive (an older export, or a pre-sync safety
+            // backup). Treating that as an empty archive would wipe the local one.
+            profileData.archivedItems?.let { archiveStore.save(profileData.profile.id, it) }
         }
 
         val withSettings = profileSettingsStore.attachSettingsToProfiles(profiles)

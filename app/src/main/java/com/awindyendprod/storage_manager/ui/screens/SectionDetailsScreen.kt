@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -362,6 +363,8 @@ fun SectionDetailsScreen(
             }
 
             if (showDeleteConfirmation && itemToDelete != null) { //regular delete dialog
+                // Re-seeded whenever a different item is up for deletion; dismissing drops the edit.
+                var deleteNote by remember(itemToDelete) { mutableStateOf(itemToDelete?.note ?: "") }
                 AlertDialog(
                     onDismissRequest = { 
                         showDeleteConfirmation = false
@@ -377,13 +380,24 @@ fun SectionDetailsScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
                             )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            // Recording who actually collected the item, without adding a step to
+                            // the delete flow. It is kept on the archived copy only.
+                            OutlinedTextField(
+                                value = deleteNote,
+                                onValueChange = { deleteNote = it },
+                                label = { Text(stringResource(R.string.note)) },
+                                supportingText = { Text(stringResource(R.string.delete_note_hint)) },
+                                minLines = 2,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     },
                     confirmButton = {
                         TextButton(
                             onClick = {
                                 itemToDelete?.let { item ->
-                                    viewModel.removeItemFromSection(shelfId, sectionId, item.id)
+                                    viewModel.removeItemFromSection(shelfId, sectionId, item.id, deleteNote)
                                 }
                                 showDeleteConfirmation = false
                                 itemToDelete = null
@@ -422,9 +436,11 @@ fun SectionDetailsScreen(
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                selectedItems.forEach { item ->
-                                    viewModel.removeItemFromSection(shelfId, sectionId, item.id)
-                                }
+                                viewModel.removeItemsFromSection(
+                                    shelfId,
+                                    sectionId,
+                                    selectedItems.map { it.id }
+                                )
                                 showDeleteConfirmation = false
                                 selectedItems = emptyList()
                             },

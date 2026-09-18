@@ -205,4 +205,21 @@
     <string name="preset_message_hint">Подставляется, когда вы пишете клиенту в WhatsApp. Сохраняется только для текущего профиля.</string>
     <string name="preset_message_label">Сообщение</string>
     <string name="send_preset_message">Отправить готовое сообщение</string>
+
+    <!-- Archive -->
+    <string name="more_options">Ещё</string>
+    <string name="archive">Архив</string>
+    <string name="archive_search_hint">Поиск по клиенту или товару</string>
+    <string name="archive_empty">Удалённых позиций пока нет.</string>
+    <string name="archive_no_matches">Ничего не найдено.</string>
+    <string name="archived_on">В архиве с %1$s</string>
+    <string name="archived_on_from">В архиве с %1$s · %2$s</string>
+    <string name="archive_delete_permanently">Удалить навсегда</string>
+    <string name="archive_confirm_delete">Удалить эту позицию из архива? Это действие нельзя отменить.</string>
+    <string name="delete_note_hint">Сохранится вместе с архивной записью, например кто забрал.</string>
+    <string name="archive_settings">Архив</string>
+    <string name="archive_structural_deletes">Архивировать удаление полок и секций</string>
+    <string name="archive_structural_deletes_hint">При удалении полки или секции сохранять и находившиеся в ней позиции. По умолчанию выключено: архивируются только позиции, удалённые по одной.</string>
+    <string name="archive_retention_days">Хранить архив (дней)</string>
+    <string name="archive_retention_hint">Записи старше указанного срока удаляются автоматически. 0 — хранить всегда.</string>
 </resources> 

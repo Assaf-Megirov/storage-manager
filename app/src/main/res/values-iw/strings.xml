@@ -206,4 +206,21 @@
     <string name="preset_message_hint">ההודעה תתמלא אוטומטית כששולחים הודעת וואטסאפ ללקוח. היא נשמרת לפרופיל הנוכחי בלבד.</string>
     <string name="preset_message_label">הודעה</string>
     <string name="send_preset_message">שליחת הודעה מוכנה מראש</string>
+
+    <!-- Archive -->
+    <string name="more_options">אפשרויות נוספות</string>
+    <string name="archive">ארכיון</string>
+    <string name="archive_search_hint">חיפוש לפי לקוח או פריט</string>
+    <string name="archive_empty">אין עדיין פריטים שנמחקו.</string>
+    <string name="archive_no_matches">אין פריטים שתואמים לחיפוש.</string>
+    <string name="archived_on">הועבר לארכיון ב-%1$s</string>
+    <string name="archived_on_from">הועבר לארכיון ב-%1$s · %2$s</string>
+    <string name="archive_delete_permanently">מחיקה לצמיתות</string>
+    <string name="archive_confirm_delete">להסיר את הפריט מהארכיון? לא ניתן לבטל פעולה זו.</string>
+    <string name="delete_note_hint">יישמר יחד עם הפריט בארכיון, למשל מי אסף אותו.</string>
+    <string name="archive_settings">ארכיון</string>
+    <string name="archive_structural_deletes">העברת מחיקות של מדף ומדור לארכיון</string>
+    <string name="archive_structural_deletes_hint">כשמוחקים מדף או מדור, לשמור גם את הפריטים שהיו בו. כבוי כברירת מחדל: רק פריטים שנמחקים אחד אחד מועברים לארכיון.</string>
+    <string name="archive_retention_days">משך שמירת פריטים בארכיון (ימים)</string>
+    <string name="archive_retention_hint">פריטים שהועברו לארכיון לפני יותר מכך יימחקו אוטומטית. הזן 0 לשמירה לתמיד.</string>
 </resources>

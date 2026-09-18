@@ -51,5 +51,7 @@ data class Settings(
     @SerializedName("dailyNotificationsEnabled") val dailyNotificationsEnabled: Boolean = true,
     @SerializedName("currentProfileId") val currentProfileId: String? = null,
     @SerializedName("showProfilesButton") val showProfilesButton: Boolean = true,
-    @SerializedName("presetMessage") val presetMessage: String = ""
+    @SerializedName("presetMessage") val presetMessage: String = "",
+    @SerializedName("archiveStructuralDeletes") val archiveStructuralDeletes: Boolean = false,
+    @SerializedName("archiveRetentionDays") val archiveRetentionDays: Int = 180
 ) 

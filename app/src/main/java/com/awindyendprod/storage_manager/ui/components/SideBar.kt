@@ -53,6 +53,7 @@ fun SideBar(
     onEditModeToggle: () -> Unit,
     onHelpClick: () -> Unit,
     onAllDueClick: () -> Unit,
+    onArchiveClick: () -> Unit,
     profiles: List<ProfileData>,
     currentProfileId: String?,
     onProfileSelected: (String) -> Unit,
@@ -88,6 +89,9 @@ fun SideBar(
         }
         IconButton(onClick = onAllDueClick) {
             Icon(Icons.Default.Today, contentDescription = stringResource(R.string.items_due))
+        }
+        IconButton(onClick = onArchiveClick) {
+            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.archive))
         }
         IconButton(onClick = onSettingsClick) {
             Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
