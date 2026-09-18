@@ -165,6 +165,8 @@ fun SettingsScreen(
     var showDangerZone by remember { mutableStateOf(false) }
     var showCleanSlateDialog by remember { mutableStateOf(false) }
     var cleanSlateConfirmationText by remember { mutableStateOf("") }
+    var showMainTakeoverDialog by remember { mutableStateOf(false) }
+    var mainTakeoverConfirmationText by remember { mutableStateOf("") }
     val resetInProgress by syncViewModel.resetInProgress.collectAsState()
 
     Scaffold(
@@ -777,7 +779,15 @@ fun SettingsScreen(
                             )
                             Switch(
                                 checked = syncUiState.mainDeviceStatus == MainDeviceStatus.THIS_DEVICE,
-                                onCheckedChange = { syncViewModel.setMainDevice(it) }
+                                onCheckedChange = { checked ->
+                                    // Claiming the role while another device holds it takes it away
+                                    // from that device, so it needs confirming.
+                                    if (checked && syncUiState.mainDeviceStatus == MainDeviceStatus.OTHER_DEVICE) {
+                                        showMainTakeoverDialog = true
+                                    } else {
+                                        syncViewModel.setMainDevice(checked)
+                                    }
+                                }
                             )
                         }
                         Text(
@@ -904,6 +914,49 @@ fun SettingsScreen(
                 savePresetDraft()
                 saveRetentionDraft()
                 profileViewModel.createProfile(profileName)
+            }
+        )
+    }
+
+    if (showMainTakeoverDialog) {
+        val confirmationWord = stringResource(R.string.main_takeover_confirmation_word)
+        AlertDialog(
+            onDismissRequest = {
+                showMainTakeoverDialog = false
+                mainTakeoverConfirmationText = ""
+            },
+            title = { Text(stringResource(R.string.main_takeover_dialog_title)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.main_takeover_dialog_message, confirmationWord))
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = mainTakeoverConfirmationText,
+                        onValueChange = { mainTakeoverConfirmationText = it },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showMainTakeoverDialog = false
+                        mainTakeoverConfirmationText = ""
+                        syncViewModel.takeOverAsMainDevice()
+                    },
+                    enabled = mainTakeoverConfirmationText == confirmationWord
+                ) {
+                    Text(stringResource(R.string.main_takeover_confirm_button))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showMainTakeoverDialog = false
+                    mainTakeoverConfirmationText = ""
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
         )
     }

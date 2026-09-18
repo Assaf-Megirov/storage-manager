@@ -224,4 +224,10 @@
     <string name="archive_structural_deletes_hint">When a shelf or section is deleted, keep the items it held too. Off by default: only items deleted one by one are archived.</string>
     <string name="archive_retention_days">Keep archived items for (days)</string>
     <string name="archive_retention_hint">Items archived longer ago than this are removed automatically. Use 0 to keep them forever.</string>
+
+    <!-- Main device takeover -->
+    <string name="main_takeover_dialog_title">Take over as main device?</string>
+    <string name="main_takeover_dialog_message">Another device is already marked as the main device. Only take over if that device was lost, reset, or reinstalled - if you still have it, unmarking it there is safer; otherwise type %1$s below to confirm you have read this. Taking over moves the role to this device, and the other device, if it still exists, stops being main the next time it syncs and can no longer delete the synced backup on Google Drive.</string>
+    <string name="main_takeover_confirmation_word">DELETE</string>
+    <string name="main_takeover_confirm_button">Take over</string>
 </resources>

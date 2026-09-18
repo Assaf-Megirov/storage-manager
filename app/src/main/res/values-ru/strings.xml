@@ -222,4 +222,10 @@
     <string name="archive_structural_deletes_hint">При удалении полки или секции сохранять и находившиеся в ней позиции. По умолчанию выключено: архивируются только позиции, удалённые по одной.</string>
     <string name="archive_retention_days">Хранить архив (дней)</string>
     <string name="archive_retention_hint">Записи старше указанного срока удаляются автоматически. 0 — хранить всегда.</string>
+
+    <!-- Main device takeover -->
+    <string name="main_takeover_dialog_title">Сделать это устройство основным?</string>
+    <string name="main_takeover_dialog_message">Другое устройство уже отмечено как основное. Делайте это, только если то устройство потеряно, сброшено или переустановлено - если оно у вас есть, безопаснее снять отметку на нём; иначе введите %1$s ниже, чтобы подтвердить, что вы это прочитали. Роль перейдёт к этому устройству, а другое устройство, если оно существует, перестанет быть основным при следующей синхронизации и больше не сможет удалить синхронизированную копию на Google Диске.</string>
+    <string name="main_takeover_confirmation_word">УДАЛИТЬ</string>
+    <string name="main_takeover_confirm_button">Перенести</string>
 </resources> 

@@ -95,17 +95,25 @@ class SyncManager(
         val wantsMain = syncPreferencesStore.isMarkedAsMainLocally()
         val remoteMainId = remote?.mainDeviceId
 
-        val claimRejected = remoteMainId != null && remoteMainId != thisDeviceId && wantsMain
+        // A device that is lost, reset or reinstalled leaves its claim behind forever: its id can
+        // never come back, so without this no device could ever become main again.
+        val takeoverPending = syncPreferencesStore.isMainTakeoverPending()
+        val claimRejected = remoteMainId != null && remoteMainId != thisDeviceId &&
+            wantsMain && !takeoverPending
         if (claimRejected) {
             syncPreferencesStore.setMarkedAsMainLocally(false)
         }
         val resolvedMainDeviceId = when {
+            takeoverPending && wantsMain -> thisDeviceId
             claimRejected -> remoteMainId
             remoteMainId == thisDeviceId && !wantsMain -> null
             remoteMainId == null && wantsMain -> thisDeviceId
             else -> remoteMainId
         }
         syncPreferencesStore.setCachedMainDeviceId(resolvedMainDeviceId)
+        if (takeoverPending && resolvedMainDeviceId == thisDeviceId) {
+            syncPreferencesStore.setMainTakeoverPending(false)
+        }
 
         val isFirstSyncEver = syncPreferencesStore.getLastSyncedAtMillis() == null
         val shouldOfferWholesaleAdopt = !wantsMain && !claimRejected && isFirstSyncEver &&

@@ -39,6 +39,16 @@ class SyncPreferencesStore(context: Context) {
         prefs.edit().putBoolean(KEY_MARKED_AS_MAIN, marked).commit()
     }
 
+    /**
+     * Set when the user has confirmed taking the main role from another device, cleared once a sync
+     * has actually written the claim. Persisted so a failed sync retries rather than dropping it.
+     */
+    fun isMainTakeoverPending(): Boolean = prefs.getBoolean(KEY_MAIN_TAKEOVER_PENDING, false)
+
+    fun setMainTakeoverPending(pending: Boolean) {
+        prefs.edit().putBoolean(KEY_MAIN_TAKEOVER_PENDING, pending).commit()
+    }
+
     fun getCachedMainDeviceId(): String? = prefs.getString(KEY_CACHED_MAIN_DEVICE_ID, null)
 
     fun setCachedMainDeviceId(mainDeviceId: String?) {
@@ -53,5 +63,6 @@ class SyncPreferencesStore(context: Context) {
         private const val KEY_DEVICE_ID = "device_id"
         private const val KEY_MARKED_AS_MAIN = "marked_as_main_locally"
         private const val KEY_CACHED_MAIN_DEVICE_ID = "cached_main_device_id"
+        private const val KEY_MAIN_TAKEOVER_PENDING = "main_takeover_pending"
     }
 }

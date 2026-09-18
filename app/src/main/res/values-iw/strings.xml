@@ -223,4 +223,10 @@
     <string name="archive_structural_deletes_hint">כשמוחקים מדף או מדור, לשמור גם את הפריטים שהיו בו. כבוי כברירת מחדל: רק פריטים שנמחקים אחד אחד מועברים לארכיון.</string>
     <string name="archive_retention_days">משך שמירת פריטים בארכיון (ימים)</string>
     <string name="archive_retention_hint">פריטים שהועברו לארכיון לפני יותר מכך יימחקו אוטומטית. הזן 0 לשמירה לתמיד.</string>
+
+    <!-- Main device takeover -->
+    <string name="main_takeover_dialog_title">להפוך מכשיר זה למכשיר הראשי?</string>
+    <string name="main_takeover_dialog_message">מכשיר אחר כבר מסומן כמכשיר הראשי. בצע/י פעולה זו רק אם אותו מכשיר אבד, אופס או הותקן מחדש - אם הוא עדיין ברשותך, עדיף לבטל שם את הסימון; אחרת הקלד/י %1$s למטה כדי לאשר שקראת זאת. התפקיד יעבור למכשיר זה, והמכשיר האחר, אם הוא עדיין קיים, יפסיק להיות הראשי בסנכרון הבא שלו ולא יוכל עוד למחוק את הגיבוי המסונכרן ב-Google Drive.</string>
+    <string name="main_takeover_confirmation_word">מחק</string>
+    <string name="main_takeover_confirm_button">העבר לכאן</string>
 </resources>
