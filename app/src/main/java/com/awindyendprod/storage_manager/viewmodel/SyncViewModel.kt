@@ -155,6 +155,15 @@ class SyncViewModel(
         syncNow(interactive = true)
     }
 
+    /**
+     * Claims the main role even though another device holds it, for when that device is gone. The
+     * other device, if it still exists, sees its claim rejected on its next sync and steps down.
+     */
+    fun takeOverAsMainDevice() {
+        syncPreferencesStore.setMainTakeoverPending(true)
+        setMainDevice(markAsMain = true)
+    }
+
     fun confirmAdopt(accepted: Boolean) {
         _showAdoptConfirmation.value = false
         adoptConfirmationDeferred?.complete(accepted)
