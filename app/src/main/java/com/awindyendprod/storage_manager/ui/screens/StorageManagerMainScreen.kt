@@ -84,7 +84,8 @@ fun StorageManagerMainScreen(
     onSectionClick: (String, String) -> Unit,
     onSearchClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onAllDueClick: () -> Unit
+    onAllDueClick: () -> Unit,
+    onArchiveClick: () -> Unit
 ) {
     var showNewProfileDialog by remember { mutableStateOf(false) }
     var isEditMode by remember { mutableStateOf(false) }
@@ -93,6 +94,7 @@ fun StorageManagerMainScreen(
     var selectedSectionId by remember { mutableStateOf<String?>(null) }
     var isAddItemDialogVisible by remember { mutableStateOf(false) }
     var showHelpDialog by remember { mutableStateOf(false) }
+    var showOverflowMenu by remember { mutableStateOf(false) }
     var newItemName by remember { mutableStateOf("") }
     var newItemClientName by remember { mutableStateOf("") }
     var newItemNote by remember { mutableStateOf("") }
@@ -132,6 +134,7 @@ fun StorageManagerMainScreen(
                 onEditModeToggle = { isEditMode = !isEditMode },
                 onHelpClick = { showHelpDialog = true },
                 onAllDueClick = onAllDueClick,
+                onArchiveClick = onArchiveClick,
                 profiles = profiles,
                 currentProfileId = currentProfileId,
                 onProfileSelected = { profileId ->
@@ -179,6 +182,8 @@ fun StorageManagerMainScreen(
                             }
                         },
                         actions = {
+                            // The frequent actions stay inline; settings and help move into the
+                            // overflow menu so the bar still fits beside the profile dropdown.
                             IconButton(onClick = onSearchClick) {
                                 Icon(
                                     Icons.Default.Search,
@@ -191,16 +196,10 @@ fun StorageManagerMainScreen(
                                     contentDescription = stringResource(R.string.items_due)
                                 )
                             }
-                            IconButton(onClick = onSettingsClick) {
+                            IconButton(onClick = onArchiveClick) {
                                 Icon(
-                                    Icons.Default.Settings,
-                                    contentDescription = stringResource(R.string.settings)
-                                )
-                            }
-                            IconButton(onClick = { showHelpDialog = true }) {
-                                Icon(
-                                    Icons.Default.Info,
-                                    contentDescription = stringResource(R.string.help)
+                                    Icons.Default.Delete,
+                                    contentDescription = stringResource(R.string.archive)
                                 )
                             }
                             IconButton(onClick = { isEditMode = !isEditMode }) {
@@ -208,6 +207,39 @@ fun StorageManagerMainScreen(
                                     imageVector = if (isEditMode) Icons.Default.Done else Icons.Default.Edit,
                                     contentDescription = stringResource(R.string.edit_mode)
                                 )
+                            }
+                            Box {
+                                IconButton(onClick = { showOverflowMenu = true }) {
+                                    Icon(
+                                        Icons.Default.MoreVert,
+                                        contentDescription = stringResource(R.string.more_options)
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = showOverflowMenu,
+                                    onDismissRequest = { showOverflowMenu = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.settings)) },
+                                        leadingIcon = {
+                                            Icon(Icons.Default.Settings, contentDescription = null)
+                                        },
+                                        onClick = {
+                                            showOverflowMenu = false
+                                            onSettingsClick()
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.help)) },
+                                        leadingIcon = {
+                                            Icon(Icons.Default.Info, contentDescription = null)
+                                        },
+                                        onClick = {
+                                            showOverflowMenu = false
+                                            showHelpDialog = true
+                                        }
+                                    )
+                                }
                             }
                         }
                     )
@@ -1264,6 +1296,9 @@ fun StorageManagerApp(
                     },
                     onAllDueClick = {
                         navController.navigate("calendar")
+                    },
+                    onArchiveClick = {
+                        navController.navigate("archive")
                     }
                 )
             }
@@ -1340,6 +1375,14 @@ fun StorageManagerApp(
                         navController.navigate("section_details/$shelfId/$sectionId")
                     },
                     dateIso = dateArg
+                )
+            }
+
+            composable("archive") {
+                ArchiveScreen(
+                    viewModel = viewModel,
+                    settingsViewModel = settingsViewModel,
+                    onBack = { navController.popBackStack() }
                 )
             }
 

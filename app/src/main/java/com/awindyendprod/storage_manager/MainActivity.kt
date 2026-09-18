@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import com.awindyendprod.storage_manager.ui.theme.StorageManagerTheme
+import com.awindyendprod.storage_manager.services.ArchiveStore
 import com.awindyendprod.storage_manager.services.ProfileMigrationService
 import com.awindyendprod.storage_manager.services.TombstoneStore
 import com.awindyendprod.storage_manager.ui.components.DueItemsAlertDialog
@@ -67,9 +68,11 @@ class MainActivity : ComponentActivity() {
             StorageTrackerViewModel(
                 newBase.applicationContext,
                 factory.persistenceServiceInstance,
-                TombstoneStore(newBase.applicationContext)
+                TombstoneStore(newBase.applicationContext),
+                ArchiveStore(newBase.applicationContext)
             ),
-            factory.profileSettingsStoreInstance
+            factory.profileSettingsStoreInstance,
+            ArchiveStore(newBase.applicationContext)
         ).settings.value
         val locale = when (settings.language) {
             AppLanguage.SYSTEM -> Resources.getSystem().configuration.locales[0]

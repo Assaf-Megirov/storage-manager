@@ -192,7 +192,9 @@ class ProfileMigrationService(
             notificationMaxItems = prefs.getInt("notificationMaxItems", 10),
             dailyNotificationsEnabled = prefs.getBoolean("dailyNotificationsEnabled", true),
             showProfilesButton = prefs.getBoolean("showProfilesButton", true),
-            presetMessage = prefs.getString("presetMessage", "") ?: ""
+            presetMessage = prefs.getString("presetMessage", "") ?: "",
+            archiveStructuralDeletes = prefs.getBoolean("archiveStructuralDeletes", false),
+            archiveRetentionDays = prefs.getInt("archiveRetentionDays", 180)
         )
     }
 }

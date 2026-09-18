@@ -27,6 +27,8 @@ object SyncMerger {
                 updatedAtOf = { it.profile.updatedAt }
             ) { winnerBase ->
                 winnerBase.copy(
+                    // The archive is device-local and never travels through sync; see ArchiveStore.
+                    archivedItems = null,
                     shelves = mergeShelves(l?.shelves.orEmpty(), r?.shelves.orEmpty(), tombstoneIndex)
                 )
             }

@@ -207,4 +207,21 @@
     <string name="preset_message_hint">Filled in for you when you send a client a WhatsApp message. Saved for the current profile only.</string>
     <string name="preset_message_label">Message</string>
     <string name="send_preset_message">Send preset message</string>
+
+    <!-- Archive -->
+    <string name="more_options">More options</string>
+    <string name="archive">Archive</string>
+    <string name="archive_search_hint">Search client or item</string>
+    <string name="archive_empty">No deleted items yet.</string>
+    <string name="archive_no_matches">No items match your search.</string>
+    <string name="archived_on">Archived %1$s</string>
+    <string name="archived_on_from">Archived %1$s · %2$s</string>
+    <string name="archive_delete_permanently">Delete permanently</string>
+    <string name="archive_confirm_delete">Remove this item from the archive? This cannot be undone.</string>
+    <string name="delete_note_hint">Saved with the archived item, for example who collected it.</string>
+    <string name="archive_settings">Archive</string>
+    <string name="archive_structural_deletes">Archive shelf and section deletions</string>
+    <string name="archive_structural_deletes_hint">When a shelf or section is deleted, keep the items it held too. Off by default: only items deleted one by one are archived.</string>
+    <string name="archive_retention_days">Keep archived items for (days)</string>
+    <string name="archive_retention_hint">Items archived longer ago than this are removed automatically. Use 0 to keep them forever.</string>
 </resources>

@@ -24,6 +24,7 @@
 -keep class * implements com.google.gson.TypeAdapterFactory
 -keep class com.google.gson.reflect.TypeToken
 -keep class com.awindyendprod.storage_manager.model.Item {*;}
+-keep class com.awindyendprod.storage_manager.model.ArchivedItem {*;}
 -keep class com.awindyendprod.storage_manager.model.ExportData {*;}
 -keep class com.awindyendprod.storage_manager.model.Profile {*;}
 -keep class com.awindyendprod.storage_manager.model.ProfileData {*;}

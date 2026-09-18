@@ -203,7 +203,14 @@ fun AllDueScreen(
                         DueItemCard(
                             dueItemInfo = dueItemInfo,
                             onItemClick = onItemClick,
-                            onDeleteItem = { viewModel.removeItemFromSection(dueItemInfo.shelfId, dueItemInfo.sectionId, dueItemInfo.item.id) },
+                            onDeleteItem = { note ->
+                                viewModel.removeItemFromSection(
+                                    dueItemInfo.shelfId,
+                                    dueItemInfo.sectionId,
+                                    dueItemInfo.item.id,
+                                    note
+                                )
+                            },
                             settings = settings
                         )
                     }
@@ -218,19 +225,34 @@ fun AllDueScreen(
 fun DueItemCard(
     dueItemInfo: DueItemInfo,
     onItemClick: (String, String) -> Unit,
-    onDeleteItem: () -> Unit,
+    onDeleteItem: (String) -> Unit,
     settings: com.awindyendprod.storage_manager.model.Settings
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
-    
+    // Seeded from the item each time the dialog opens, so cancelling reverts the edit.
+    var deleteNote by remember(showDeleteDialog) { mutableStateOf(dueItemInfo.item.note) }
+
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = { Text(stringResource(R.string.confirm_delete)) },
-            text = { Text(stringResource(R.string.confirm_delete_item)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.confirm_delete_item))
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = deleteNote,
+                        onValueChange = { deleteNote = it },
+                        label = { Text(stringResource(R.string.note)) },
+                        supportingText = { Text(stringResource(R.string.delete_note_hint)) },
+                        minLines = 2,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
             confirmButton = {
                 TextButton(onClick = {
-                    onDeleteItem()
+                    onDeleteItem(deleteNote)
                     showDeleteDialog = false
                 }) {
                     Text(stringResource(R.string.delete))

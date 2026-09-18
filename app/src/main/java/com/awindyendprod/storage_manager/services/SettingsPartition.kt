@@ -27,7 +27,9 @@ object SettingsPartition {
             settings.notificationMaxItems == defaults.notificationMaxItems &&
             settings.dailyNotificationsEnabled == defaults.dailyNotificationsEnabled &&
             settings.showProfilesButton == defaults.showProfilesButton &&
-            settings.presetMessage == defaults.presetMessage
+            settings.presetMessage == defaults.presetMessage &&
+            settings.archiveStructuralDeletes == defaults.archiveStructuralDeletes &&
+            settings.archiveRetentionDays == defaults.archiveRetentionDays
     }
 
     fun fillDefaultsFromGlobal(stored: Settings, global: Settings): Settings {
@@ -60,6 +62,16 @@ object SettingsPartition {
                 global.presetMessage
             } else {
                 stored.presetMessage
+            },
+            archiveStructuralDeletes = if (stored.archiveStructuralDeletes == defaults.archiveStructuralDeletes) {
+                global.archiveStructuralDeletes
+            } else {
+                stored.archiveStructuralDeletes
+            },
+            archiveRetentionDays = if (stored.archiveRetentionDays == defaults.archiveRetentionDays) {
+                global.archiveRetentionDays
+            } else {
+                stored.archiveRetentionDays
             }
         )
     }

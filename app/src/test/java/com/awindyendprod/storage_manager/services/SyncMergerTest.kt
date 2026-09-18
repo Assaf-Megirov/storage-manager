@@ -1,5 +1,6 @@
 package com.awindyendprod.storage_manager.services
 
+import com.awindyendprod.storage_manager.model.ArchivedItem
 import com.awindyendprod.storage_manager.model.ExportData
 import com.awindyendprod.storage_manager.model.Item
 import com.awindyendprod.storage_manager.model.Profile
@@ -10,6 +11,7 @@ import com.awindyendprod.storage_manager.model.ShelfSection
 import com.awindyendprod.storage_manager.model.Tombstone
 import com.awindyendprod.storage_manager.model.TombstoneEntityType
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Date
@@ -22,11 +24,22 @@ class SyncMergerTest {
 
     private fun date(offsetMillis: Long): Date = Date(BASE_TIME + offsetMillis)
 
+    private fun archived(id: String, archivedAtOffset: Long) = ArchivedItem(
+        item = Item(id = id, name = "Archived $id"),
+        shelfName = "Shelf",
+        sectionName = "Section",
+        archivedAt = date(archivedAtOffset)
+    )
+
+    private fun archivedOf(merged: ExportData): List<ArchivedItem> =
+        merged.profiles.first { it.profile.id == profileId }.archivedItems.orEmpty()
+
     private fun exportData(
         items: List<Item> = emptyList(),
         tombstones: List<Tombstone> = emptyList(),
         currentProfileId: String? = profileId,
-        profiles: List<ProfileData>? = null
+        profiles: List<ProfileData>? = null,
+        archivedItems: List<ArchivedItem>? = emptyList()
     ): ExportData {
         val resolvedProfiles = profiles ?: listOf(
             ProfileData(
@@ -41,7 +54,8 @@ class SyncMergerTest {
                         updatedAt = date(0)
                     )
                 ),
-                settings = Settings()
+                settings = Settings(),
+                archivedItems = archivedItems
             )
         )
         return ExportData(
@@ -172,6 +186,17 @@ class SyncMergerTest {
 
         assertEquals(1, merged.tombstones.count { it.id == itemId })
         assertEquals(date(500), merged.tombstones.first { it.id == itemId }.deletedAt)
+    }
+
+    @Test
+    fun `the archive is left out of the merge entirely`() {
+        // It is device-local: sync must neither carry it nor clear the local copy.
+        val local = exportData(archivedItems = listOf(archived("a-1", 0)))
+        val remote = exportData(archivedItems = listOf(archived("a-2", 0)))
+
+        val merged = SyncMerger.merge(local, remote)
+
+        assertNull(merged.profiles.first().archivedItems)
     }
 
     companion object {

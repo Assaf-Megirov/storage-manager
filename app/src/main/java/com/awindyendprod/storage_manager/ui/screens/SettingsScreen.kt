@@ -20,7 +20,9 @@ import androidx.compose.material3.TopAppBarDefaults.smallTopAppBarColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -140,6 +142,24 @@ fun SettingsScreen(
         if (latestPresetDraft != savedPresetMessage) viewModel.updatePresetMessage(latestPresetDraft)
     }
     DisposableEffect(Unit) { onDispose { savePresetDraft() } }
+
+    // Same draft treatment, and here it is not just about write volume: every intermediate value is
+    // a retention window, and the next archive load prunes by it. Editing 180 down to 30 passes
+    // through 18 and 1, and committing those would delete the archive before the user finished.
+    var retentionDraft by remember(currentProfileId, settings.archiveRetentionDays) {
+        mutableStateOf(settings.archiveRetentionDays.toString())
+    }
+    val latestRetentionDraft by rememberUpdatedState(retentionDraft)
+    val savedRetentionDays by rememberUpdatedState(settings.archiveRetentionDays)
+    val saveRetentionDraft = {
+        val parsed = latestRetentionDraft.toIntOrNull()?.takeIf { it >= 0 }
+        if (parsed == null) {
+            retentionDraft = savedRetentionDays.toString()
+        } else if (parsed != savedRetentionDays) {
+            viewModel.updateArchiveRetentionDays(parsed)
+        }
+    }
+    DisposableEffect(Unit) { onDispose { saveRetentionDraft() } }
 
     var aboutTapCount by remember { mutableStateOf(0) }
     var showDangerZone by remember { mutableStateOf(false) }
@@ -351,6 +371,55 @@ fun SettingsScreen(
                 )
             }
 
+            // Archive
+            Column {
+                Text(
+                    text = stringResource(R.string.archive_settings),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.archive_structural_deletes),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.weight(1f).padding(end = 8.dp)
+                    )
+                    Switch(
+                        checked = settings.archiveStructuralDeletes,
+                        onCheckedChange = { viewModel.updateArchiveStructuralDeletes(it) }
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.archive_structural_deletes_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                OutlinedTextField(
+                    value = retentionDraft,
+                    onValueChange = { retentionDraft = it.filter { char -> char.isDigit() } },
+                    label = { Text(stringResource(R.string.archive_retention_days)) },
+                    supportingText = { Text(stringResource(R.string.archive_retention_hint)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { if (!it.isFocused) saveRetentionDraft() },
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedTextColor     = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor   = MaterialTheme.colorScheme.onSurfaceVariant,
+                        cursorColor           = MaterialTheme.colorScheme.primary,
+                        focusedBorderColor    = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor  = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                )
+            }
+
             // Profile Management
             Column {
                 Text(
@@ -378,8 +447,9 @@ fun SettingsScreen(
                     profiles = profiles,
                     currentProfileId = currentProfileId,
                     onProfileSelected = { profileId ->
-                        // Belongs to the profile being left, so write it before the switch.
+                        // Belong to the profile being left, so write them before the switch.
                         savePresetDraft()
+                        saveRetentionDraft()
                         profileViewModel.switchProfile(profileId)
                     },
                     onAddProfile = {
@@ -832,6 +902,7 @@ fun SettingsScreen(
             onDismiss = { showNewProfileDialog = false },
             onConfirm = { profileName ->
                 savePresetDraft()
+                saveRetentionDraft()
                 profileViewModel.createProfile(profileName)
             }
         )

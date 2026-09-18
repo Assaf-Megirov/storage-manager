@@ -39,6 +39,8 @@ class ProfileSettingsStore(private val context: Context) {
             putBoolean("dailyNotificationsEnabled", settings.dailyNotificationsEnabled)
             putBoolean("showProfilesButton", settings.showProfilesButton)
             putString("presetMessage", settings.presetMessage)
+            putBoolean("archiveStructuralDeletes", settings.archiveStructuralDeletes)
+            putInt("archiveRetentionDays", settings.archiveRetentionDays)
             commit()
         }
     }

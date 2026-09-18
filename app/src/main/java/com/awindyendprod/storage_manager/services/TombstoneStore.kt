@@ -10,7 +10,13 @@ class TombstoneStore(context: Context) {
     private val gson = Gson()
 
     fun append(tombstone: Tombstone) {
-        val merged = (loadAll() + tombstone)
+        appendAll(listOf(tombstone))
+    }
+
+    /** One read and one commit for the whole batch, rather than per tombstone. */
+    fun appendAll(tombstones: List<Tombstone>) {
+        if (tombstones.isEmpty()) return
+        val merged = (loadAll() + tombstones)
             .groupBy { it.entityType to it.id }
             .map { (_, group) -> group.maxBy { it.deletedAt?.time ?: 0L } }
         replaceAll(merged)
